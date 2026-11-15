@@ -504,14 +504,14 @@
                     {{ $isAr ? 'أظهر رمز QR للكاشير عند الدفع لإضافة ختم.' : 'Present this QR code to the cashier at checkout.' }}
                 </div>
                 <div class="wallet-grid">
-                    <button type="button" class="wallet-btn" onclick="openWalletGuide('ios')">
-                        <span></span>
-                        <span>{{ $isAr ? 'أضف لـ iPhone' : 'Add to iPhone' }}</span>
-                    </button>
-                    <button type="button" class="wallet-btn" onclick="openWalletGuide('android')">
-                        <span>🤖</span>
-                        <span>{{ $isAr ? 'أضف لـ Android' : 'Add to Android' }}</span>
-                    </button>
+                    <a href="{{ route('loyalty-card.apple-pass', $card->token) }}" class="wallet-btn" style="text-decoration: none;">
+                        <span style="font-size: 1.05rem; line-height: 1;"></span>
+                        <span>{{ $isAr ? 'أضف إلى Apple Wallet' : 'Add to Apple Wallet' }}</span>
+                    </a>
+                    <a href="{{ route('loyalty-card.google-pass', $card->token) }}" class="wallet-btn" style="text-decoration: none;">
+                        <span style="font-size: 0.95rem; line-height: 1;">💳</span>
+                        <span>{{ $isAr ? 'أضف إلى Google Wallet' : 'Add to Google Wallet' }}</span>
+                    </a>
                 </div>
 
                 <div class="actions-row">
@@ -519,54 +519,16 @@
                         <span>{{ $isAr ? 'نسخ رابط البطاقة' : 'Copy Pass Link' }}</span>
                     </button>
                 </div>
-
-                <div id="wallet-guide-ios" class="wallet-modal">
-                    <strong style="color: #0f172a; display: block; margin-bottom: 0.35rem;">
-                         {{ $isAr ? 'حفظ البطاقة على iPhone (Safari):' : 'Save Pass on iPhone (Safari):' }}
-                    </strong>
-                    1. {{ $isAr ? 'اضغط على زر المشاركة (Share ⬆️) أسفل المتصفح.' : 'Tap the Share button (⬆️) at the bottom of Safari.' }}<br>
-                    2. {{ $isAr ? 'اختر "إضافة إلى الشاشة الرئيسية" (Add to Home Screen).' : 'Select "Add to Home Screen" to install this pass as an icon.' }}
-                </div>
-
-                <div id="wallet-guide-android" class="wallet-modal">
-                    <strong style="color: #0f172a; display: block; margin-bottom: 0.35rem;">
-                        🤖 {{ $isAr ? 'حفظ البطاقة على Android (Chrome):' : 'Save Pass on Android (Chrome):' }}
-                    </strong>
-                    1. {{ $isAr ? 'اضغط على القائمة (⋮) أعلى المتصفح.' : 'Tap the menu icon (⋮) in the top-right corner of Chrome.' }}<br>
-                    2. {{ $isAr ? 'اختر "تثبيت التطبيق" أو "الإضافة إلى الشاشة الرئيسية".' : 'Tap "Install app" or "Add to Home screen".' }}
-                </div>
             </div>
         </div>
     </div>
 
     <div class="pass-footer">
-        {{ $isAr ? 'أضف هذه الصفحة إلى الشاشة الرئيسية للوصول السريع.' : 'Tip: Add this page to your Home Screen for instant checkout access.' }}
+        {{ $isAr ? 'اضغط على Apple Wallet أو Google Wallet لإضافة البطاقة مباشرة إلى محفظة هاتفك.' : 'Tap Apple Wallet or Google Wallet above to save this card directly to your phone wallet.' }}
     </div>
 </div>
 
 <script>
-    let deferredInstallPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredInstallPrompt = e;
-    });
-
-    function openWalletGuide(platform) {
-        if (platform === 'android' && deferredInstallPrompt) {
-            deferredInstallPrompt.prompt();
-            return;
-        }
-        const iosEl = document.getElementById('wallet-guide-ios');
-        const androidEl = document.getElementById('wallet-guide-android');
-        if (platform === 'ios') {
-            iosEl.classList.toggle('active');
-            androidEl.classList.remove('active');
-        } else {
-            androidEl.classList.toggle('active');
-            iosEl.classList.remove('active');
-        }
-    }
-
     function copyCardUrl(btn) {
         if (!navigator.clipboard) return;
         navigator.clipboard.writeText(window.location.href).then(function () {

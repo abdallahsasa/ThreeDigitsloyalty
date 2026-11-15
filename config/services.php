@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'wallet' => [
+        'apple_pass_type_id' => env('APPLE_PASS_TYPE_ID', 'pass.com.threedigits.loyalty'),
+        'apple_team_id' => env('APPLE_TEAM_ID', 'THREEDIGIT'),
+        'apple_cert_path' => env('APPLE_PASS_CERT_PATH', storage_path('app/wallet/apple-pass.p12')),
+        'apple_cert_password' => env('APPLE_PASS_CERT_PASSWORD', ''),
+        'apple_wwdr_path' => env('APPLE_WWDR_CERT_PATH', storage_path('app/wallet/AppleWWDRCAG4.pem')),
+
+        'google_issuer_id' => env('GOOGLE_WALLET_ISSUER_ID', ''),
+        'google_class_suffix' => env('GOOGLE_WALLET_CLASS_SUFFIX', 'threedigits_loyalty_pass'),
+        'google_service_account_json' => env('GOOGLE_WALLET_SERVICE_ACCOUNT_JSON', storage_path('app/wallet/google-service-account.json')),
+    ],
+
 ];

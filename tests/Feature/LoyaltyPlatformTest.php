@@ -63,6 +63,28 @@ class LoyaltyPlatformTest extends TestCase
         $this->get(route('loyalty-card.apple-payload', $card->token))
             ->assertStatus(200)
             ->assertJsonPath('serialNumber', $card->token);
+
+        $pkpassResponse = $this->get(route('loyalty-card.apple-pass', $card->token))
+            ->assertStatus(200)
+            ->assertHeader('Content-Type', 'application/vnd.apple.pkpass');
+
+        $tmpZip = tempnam(sys_get_temp_dir(), 'pkpass_test_');
+        file_put_contents($tmpZip, $pkpassResponse->getContent());
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open($tmpZip) === true);
+        foreach (['pass.json', 'manifest.json', 'signature', 'icon.png', 'icon@2x.png', 'icon@3x.png', 'logo.png', 'logo@2x.png', 'logo@3x.png'] as $entry) {
+            $this->assertNotFalse($zip->locateName($entry), "Missing {$entry} in .pkpass archive");
+        }
+        $this->assertNotEmpty($zip->getFromName('signature'));
+        $zip->close();
+        @unlink($tmpZip);
+
+        $googleResponse = $this->get(route('loyalty-card.google-pass', $card->token))
+            ->assertStatus(302);
+        $redirectLocation = $googleResponse->headers->get('Location');
+        $this->assertStringStartsWith('https://pay.google.com/gp/v/save/', $redirectLocation);
+        $jwt = substr($redirectLocation, strlen('https://pay.google.com/gp/v/save/'));
+        $this->assertCount(3, explode('.', $jwt));
     }
 
     public function test_language_switcher_updates_session_locale(): void

@@ -46,7 +46,39 @@ class LoyaltyCardController extends Controller
 
     public function applePassPayload(string $token, WalletPassService $walletService)
     {
-        $card = LoyaltyCard::withoutGlobalScopes()
+        $card = $this->findCardByToken($token);
+        $qrUrl = route('loyalty-card.show', $token);
+
+        return response()->json($walletService->buildApplePassPayload($card, $qrUrl));
+    }
+
+    public function downloadApplePass(string $token, WalletPassService $walletService)
+    {
+        $card = $this->findCardByToken($token);
+        $qrUrl = route('loyalty-card.show', $token);
+        $pkpassBinary = $walletService->generateApplePkpass($card, $qrUrl);
+
+        return response($pkpassBinary, 200, [
+            'Content-Type' => 'application/vnd.apple.pkpass',
+            'Content-Disposition' => 'attachment; filename="threedigits-' . $card->token . '.pkpass"',
+            'Content-Length' => strlen($pkpassBinary),
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+        ]);
+    }
+
+    public function redirectToGoogleWallet(string $token, WalletPassService $walletService)
+    {
+        $card = $this->findCardByToken($token);
+        $qrUrl = route('loyalty-card.show', $token);
+        $saveUrl = $walletService->generateGoogleWalletSaveUrl($card, $qrUrl);
+
+        return redirect()->away($saveUrl);
+    }
+
+    protected function findCardByToken(string $token): LoyaltyCard
+    {
+        return LoyaltyCard::withoutGlobalScopes()
             ->with([
                 'customer',
                 'shop',
@@ -54,9 +86,5 @@ class LoyaltyCardController extends Controller
             ])
             ->where('token', $token)
             ->firstOrFail();
-
-        $qrUrl = route('loyalty-card.show', $token);
-
-        return response()->json($walletService->buildApplePassPayload($card, $qrUrl));
     }
 }

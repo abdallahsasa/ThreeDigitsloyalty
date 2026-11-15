@@ -50,24 +50,35 @@
                     </div>
                 </div>
 
-                {{-- Primary CTA --}}
-                <div style="text-align: center; margin: 28px 0;">
+                {{-- Primary CTA & Direct Wallet Buttons --}}
+                <div style="text-align: center; margin: 28px 0 18px;">
                     <a href="{{ $cardUrl }}"
                        style="display: inline-block; background: linear-gradient(135deg, #743EE2 0%, #6145E8 50%, #3B42D5 100%); color: #ffffff; text-decoration: none; font-weight: 800; font-size: 16px; padding: 14px 32px; border-radius: 999px;">
                         افتح بطاقة الولاء الخاصة بك
                     </a>
                 </div>
 
+                <div style="text-align: center; margin: 0 0 24px;">
+                    <a href="{{ route('loyalty-card.apple-pass', $card->token) }}"
+                       style="display: inline-block; background-color: #0f172a; border: 1px solid #334155; color: #f8fafc; text-decoration: none; font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: 12px; margin: 4px;">
+                         أضف إلى Apple Wallet (.pkpass)
+                    </a>
+                    <a href="{{ route('loyalty-card.google-pass', $card->token) }}"
+                       style="display: inline-block; background-color: #0f172a; border: 1px solid #334155; color: #f8fafc; text-decoration: none; font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: 12px; margin: 4px;">
+                        💳 أضف إلى Google Wallet
+                    </a>
+                </div>
+
                 {{-- Instructions --}}
                 <div style="background-color: #050C2A; border: 1px solid rgba(116, 62, 226, 0.25); border-radius: 16px; padding: 20px; margin-top: 20px;">
                     <h3 style="margin: 0 0 12px; font-size: 16px; font-weight: 800; color: #A78BFA;">
-                        📱 تعليمات الاستخدام وإضافة البطاقة إلى هاتفك:
+                        📱 تعليمات الاستخدام وإضافة البطاقة إلى المحفظة (Wallet):
                     </h3>
                     <ol style="margin: 0; padding: 0 20px 0 0; color: #cbd5e1; font-size: 14px; line-height: 1.9;">
-                        <li>اضغط على زر <strong>"افتح بطاقة الولاء الخاصة بك"</strong> أعلاه لعرض رمز الـ QR الخاص بك.</li>
-                        <li><strong>لمستخدمي iPhone (آيفون):</strong> افتح رابط البطاقة في متصفح Safari، ثم اضغط على زر <strong>"أضف لـ iPhone"</strong> (أو مشاركة ⬆️ ← <strong>إضافة إلى الشاشة الرئيسية</strong>).</li>
-                        <li><strong>لمستخدمي Android (أندرويد):</strong> افتح رابط البطاقة في متصفح Chrome، ثم اضغط على زر <strong>"أضف لـ Android"</strong> (أو القائمة ⋮ ← <strong>تثبيت التطبيق / الإضافة إلى الشاشة الرئيسية</strong>).</li>
-                        <li><strong>عند كل عملية شراء:</strong> اعرض رمز الـ QR للكاشير ليتم إضافة ختم جديد إلى رصيدك واستبدال مكافأتك فور اكتمال الأختام.</li>
+                        <li>اضغط على زر <strong>"افتح بطاقة الولاء الخاصة بك"</strong> أعلاه لعرض بطاقتك ورمز الـ QR الخاص بك.</li>
+                        <li><strong>لمستخدمي iPhone (آيفون):</strong> اضغط على زر <strong>"أضف إلى Apple Wallet"</strong> لتحميل بطاقة المحفظة (<code>.pkpass</code>) وإضافتها مباشرة إلى تطبيق Apple Wallet.</li>
+                        <li><strong>لمستخدمي Android (أندرويد):</strong> اضغط على زر <strong>"أضف إلى Google Wallet"</strong> لحفظ البطاقة مباشرة داخل تطبيق Google Wallet.</li>
+                        <li><strong>عند كل عملية شراء:</strong> اعرض البطاقة من محفظة هاتفك للكاشير ليتم مسح رمز الـ QR وإضافة ختم جديد إلى رصيدك.</li>
                     </ol>
                 </div>
 
