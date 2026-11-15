@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\CustomerWelcomeMail;
+use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\LoyaltyCampaign;
 use App\Models\LoyaltyCard;
@@ -188,6 +189,11 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('Roast & Co Coffee')
             ->assertSee('Free Signature Latte');
 
+        $this->get(route('shop.join.poster', $shop->id))
+            ->assertStatus(200)
+            ->assertSee('Roast & Co Coffee')
+            ->assertSee('Free Signature Latte');
+
         $response = $this->post(route('shop.join.store', $shop->id), [
             'name' => 'Fahad Al-Saud',
             'email' => 'fahad@example.test',
@@ -211,5 +217,58 @@ class LoyaltyPlatformTest extends TestCase
                 && str_contains($html, e($shop->name))
                 && str_contains($html, e($customer->name));
         });
+    }
+
+    public function test_branch_creation_persists_manager_and_status_and_shop_logo_url_resolves_uploads(): void
+    {
+        $shop = Shop::create([
+            'name' => 'Emerald Roasters',
+            'logo' => 'shops/shop-emerald.png',
+            'status' => 'active',
+        ]);
+
+        $this->assertStringEndsWith('/uploads/shops/shop-emerald.png', $shop->logo_url);
+
+        $manager = User::factory()->create(['shop_id' => $shop->id]);
+        $manager->assignRole('Branch Manager');
+
+        $branch = Branch::create([
+            'shop_id' => $shop->id,
+            'name' => 'Olaya Branch',
+            'address' => 'Olaya St, Riyadh',
+            'phone' => '+966500001122',
+            'manager_id' => $manager->id,
+            'status' => 'inactive',
+        ]);
+
+        $this->assertSame($manager->id, $branch->fresh()->manager_id);
+        $this->assertSame('inactive', $branch->fresh()->status);
+        $this->assertTrue($branch->manager->is($manager));
+    }
+
+    public function test_admin_and_shop_filament_resources_render_successfully_in_arabic(): void
+    {
+        $superAdmin = User::factory()->create();
+        $superAdmin->assignRole('Super Admin');
+
+        $shop = Shop::create(['name' => 'QA Test Shop', 'status' => 'active']);
+        $owner = User::factory()->create(['shop_id' => $shop->id]);
+        $owner->assignRole('Shop Owner');
+
+        foreach (['/admin', '/admin/plans', '/admin/shops', '/admin/subscriptions', '/admin/users'] as $adminUrl) {
+            $this->actingAs($superAdmin)->get($adminUrl)->assertStatus(200);
+        }
+
+        foreach ([
+            "/shop/{$shop->id}",
+            "/shop/{$shop->id}/branches",
+            "/shop/{$shop->id}/customers",
+            "/shop/{$shop->id}/loyalty-campaigns",
+            "/shop/{$shop->id}/loyalty-cards",
+            "/shop/{$shop->id}/loyalty-transactions",
+            "/shop/{$shop->id}/users",
+        ] as $shopUrl) {
+            $this->actingAs($owner)->get($shopUrl)->assertStatus(200);
+        }
     }
 }

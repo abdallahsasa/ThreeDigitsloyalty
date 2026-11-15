@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Shops\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -48,6 +49,12 @@ class ShopsTable
                 //
             ])
             ->recordActions([
+                Action::make('join_page')
+                    ->label(fn () => __('Open Customer Join Page'))
+                    ->icon('heroicon-o-qr-code')
+                    ->color('info')
+                    ->url(fn ($record): string => route('shop.join', $record->id))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([

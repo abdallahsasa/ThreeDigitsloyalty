@@ -2,10 +2,13 @@
 
 namespace App\Filament\Shop\Resources\Branches\Schemas;
 
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class BranchForm
 {
@@ -13,8 +16,8 @@ class BranchForm
     {
         return $schema
             ->components([
-                Select::make('shop_id')
-                    ->relationship('shop', 'name')
+                Hidden::make('shop_id')
+                    ->default(fn () => Filament::getTenant()?->id)
                     ->required(),
                 TextInput::make('name')
                     ->required(),
@@ -30,9 +33,20 @@ class BranchForm
                 TextInput::make('address'),
                 TextInput::make('phone')
                     ->tel(),
-                TextInput::make('manager_id')
-                    ->numeric(),
-                TextInput::make('status')
+                Select::make('manager_id')
+                    ->label('Branch Manager')
+                    ->relationship(
+                        'manager',
+                        'name',
+                        fn (Builder $query) => $query->where('shop_id', Filament::getTenant()?->id)
+                    )
+                    ->searchable()
+                    ->preload(),
+                Select::make('status')
+                    ->options([
+                        'active' => __('Active'),
+                        'inactive' => __('Inactive'),
+                    ])
                     ->required()
                     ->default('active'),
             ]);

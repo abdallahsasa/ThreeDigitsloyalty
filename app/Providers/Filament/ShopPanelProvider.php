@@ -42,7 +42,7 @@ class ShopPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 'panels::head.end',
-                fn(): string => '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>body, .fi-body { font-family: ' . (app()->getLocale() === 'ar' ? "'Cairo', 'Montserrat', sans-serif" : "'Montserrat', 'Cairo', sans-serif") . ' !important; }</style>'
+                fn(): string => '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>*, body, .fi-body, button, input, select, textarea { font-family: \'Montserrat\', \'Cairo\', sans-serif !important; }</style>'
             )
             ->renderHook(
                 'panels::user-menu.before',

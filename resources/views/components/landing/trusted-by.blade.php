@@ -10,8 +10,8 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 1rem;">
                 @foreach($clients as $client)
                     <a href="{{ route('shop.join', $client->id) }}" class="dl-card" style="padding: 0.9rem 1rem; display: flex; align-items: center; gap: 0.85rem; text-align: start; text-decoration: none;">
-                        @if($client->logo)
-                            <img src="{{ asset($client->logo) }}" alt="{{ $client->name }}" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.12);">
+                        @if($client->logo_url)
+                            <img src="{{ $client->logo_url }}" alt="{{ $client->name }}" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.12);">
                         @else
                             <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(116,62,226,0.14); border: 1px solid rgba(116,62,226,0.3); color: #A78BFA; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; flex-shrink: 0;">
                                 {{ mb_substr($client->name, 0, 1) }}

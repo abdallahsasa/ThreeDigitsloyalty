@@ -12,6 +12,7 @@ Route::get('/', function () {
 
 Route::get('/join/{shop}', [ShopJoinController::class, 'show'])->name('shop.join');
 Route::post('/join/{shop}', [ShopJoinController::class, 'store'])->name('shop.join.store');
+Route::get('/join/{shop}/poster', [ShopJoinController::class, 'poster'])->name('shop.join.poster');
 
 Route::get('/card/{token}', [LoyaltyCardController::class, 'show'])->name('loyalty-card.show');
 Route::get('/card/{token}/manifest.json', [LoyaltyCardController::class, 'manifest'])->name('loyalty-card.manifest');

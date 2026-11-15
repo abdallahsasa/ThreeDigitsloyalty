@@ -23,8 +23,8 @@ class WalletPassService
             'description' => $card->campaign->name,
             'logoText' => $card->shop->name,
             'foregroundColor' => 'rgb(248, 250, 252)',
-            'backgroundColor' => 'rgb(15, 23, 42)',
-            'labelColor' => 'rgb(212, 175, 55)',
+            'backgroundColor' => 'rgb(1, 10, 41)',
+            'labelColor' => 'rgb(167, 139, 250)',
             'barcode' => [
                 'message' => $card->token,
                 'format' => 'PKBarcodeFormatQR',
@@ -111,8 +111,8 @@ class WalletPassService
             'scope' => $cardUrl,
             'display' => 'standalone',
             'orientation' => 'portrait',
-            'background_color' => '#0b1120',
-            'theme_color' => '#4f46e5',
+            'background_color' => '#010A29',
+            'theme_color' => '#743EE2',
             'icons' => [
                 [
                     'src' => asset('images/logo-icon.png'),

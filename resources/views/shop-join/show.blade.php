@@ -638,8 +638,8 @@
                 <div class="pass-top">
                     <div class="pass-shop">
                         <div class="pass-avatar">
-                            @if($shop->logo)
-                                <img src="{{ asset($shop->logo) }}" alt="{{ $shop->name }}">
+                            @if($shop->logo_url)
+                                <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}">
                             @else
                                 {{ mb_substr($shop->name, 0, 1) }}
                             @endif

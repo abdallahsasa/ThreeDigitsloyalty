@@ -81,5 +81,12 @@
     "Add Purchase (Stamp)": "إضافة عملية شراء (+1 ختم)",
     "Redeem Reward": "استبدال المكافأة",
     "Scan Another": "مسح بطاقة أخرى",
-    "Date": "التاريخ"
+    "Date": "التاريخ",
+    "Branch Manager": "مدير الفرع",
+    "Role": "الدور",
+    "Purchase": "عملية شراء",
+    "Reward Unlocked": "فتح مكافأة",
+    "Reward Redeemed": "استبدال مكافأة",
+    "Manual Adjustment": "تعديل يدوي",
+    "Open Customer Join Page": "فتح صفحة تسجيل العملاء"
 }

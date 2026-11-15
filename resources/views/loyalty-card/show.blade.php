@@ -447,8 +447,8 @@
     <div class="pass-card">
         <div class="pass-header">
             <div class="shop-identity">
-                @if($card->shop->logo)
-                    <img src="{{ asset($card->shop->logo) }}" alt="{{ $card->shop->name }}" class="shop-avatar">
+                @if($card->shop->logo_url)
+                    <img src="{{ $card->shop->logo_url }}" alt="{{ $card->shop->name }}" class="shop-avatar">
                 @else
                     <div class="shop-avatar">{{ mb_substr($card->shop->name, 0, 1) }}</div>
                 @endif

@@ -16,7 +16,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['name', 'email', 'password', 'shop_id', 'branch_id'])]
+#[Fillable(['name', 'email', 'password', 'shop_id', 'branch_id', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasTenants
 {
@@ -38,17 +38,22 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         if ($panel->getId() === 'admin') {
             return $this->hasRole('Super Admin');
         }
-        return true;
+
+        return $this->hasRole('Super Admin') || $this->shop_id !== null;
     }
 
     public function getTenants(Panel $panel): array|\Illuminate\Support\Collection
     {
+        if ($this->hasRole('Super Admin')) {
+            return Shop::all();
+        }
+
         return $this->shop ? [$this->shop] : [];
     }
 
     public function canAccessTenant(Model $tenant): bool
     {
-        return $this->shop_id === $tenant->id;
+        return $this->hasRole('Super Admin') || $this->shop_id === $tenant->id;
     }
 
     /**

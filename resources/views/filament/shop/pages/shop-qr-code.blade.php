@@ -165,6 +165,26 @@
         .dark .td-step-text {
             color: #cbd5e1;
         }
+        @media print {
+            .fi-sidebar, .fi-topbar, .fi-header, .td-steps-card, .td-btn-row {
+                display: none !important;
+            }
+            .fi-main, .fi-page, body {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #ffffff !important;
+            }
+            .td-qr-grid {
+                display: block !important;
+            }
+            .td-poster-card {
+                max-width: 480px !important;
+                margin: 0 auto !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
     </style>
 
     @if($shop)
@@ -192,10 +212,10 @@
                             <span>{{ $isAr ? 'فتح صفحة التسجيل' : 'Open Customer Join Page' }}</span>
                         </a>
 
-                        <button type="button" onclick="window.print()" class="td-btn-ghost">
+                        <a href="{{ route('shop.join.poster', ['shop' => $shop->id, 'print' => 1]) }}" target="_blank" class="td-btn-ghost" style="text-decoration: none;">
                             <span>🖨️</span>
-                            <span>{{ $isAr ? 'طباعة الرمز' : 'Print QR Poster' }}</span>
-                        </button>
+                            <span>{{ $isAr ? 'تحميل / طباعة PDF' : 'Print / Save PDF Poster' }}</span>
+                        </a>
                     </div>
                 </div>
             </div>

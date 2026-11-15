@@ -28,6 +28,21 @@ class ShopJoinController extends Controller
         return view('shop-join.show', compact('shop', 'campaign', 'joinUrl'));
     }
 
+    public function poster(Shop $shop)
+    {
+        abort_if($shop->status !== 'active', 404);
+
+        $campaign = LoyaltyCampaign::withoutGlobalScopes()
+            ->where('shop_id', $shop->id)
+            ->where('status', 'active')
+            ->latest()
+            ->first();
+
+        $joinUrl = route('shop.join', $shop->id);
+
+        return view('shop-join.poster', compact('shop', 'campaign', 'joinUrl'));
+    }
+
     public function store(Request $request, Shop $shop)
     {
         abort_if($shop->status !== 'active', 404);

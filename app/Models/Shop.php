@@ -38,4 +38,23 @@ class Shop extends Model
     {
         return $this->hasMany(LoyaltyCard::class);
     }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (empty($this->logo)) {
+            return null;
+        }
+
+        if (str_starts_with($this->logo, 'http://') || str_starts_with($this->logo, 'https://')) {
+            return $this->logo;
+        }
+
+        $cleanPath = ltrim($this->logo, '/');
+
+        if (str_starts_with($cleanPath, 'uploads/') || file_exists(public_path($cleanPath))) {
+            return asset($cleanPath);
+        }
+
+        return asset('uploads/' . $cleanPath);
+    }
 }

@@ -11,7 +11,11 @@ class LoyaltyCardController extends Controller
     public function show($token, WalletPassService $walletService)
     {
         $card = LoyaltyCard::withoutGlobalScopes()
-            ->with(['customer', 'shop', 'campaign'])
+            ->with([
+                'customer',
+                'shop',
+                'campaign' => fn ($query) => $query->withoutGlobalScopes(),
+            ])
             ->where('token', $token)
             ->firstOrFail();
 
@@ -25,7 +29,11 @@ class LoyaltyCardController extends Controller
     public function manifest(string $token, WalletPassService $walletService)
     {
         $card = LoyaltyCard::withoutGlobalScopes()
-            ->with(['customer', 'shop', 'campaign'])
+            ->with([
+                'customer',
+                'shop',
+                'campaign' => fn ($query) => $query->withoutGlobalScopes(),
+            ])
             ->where('token', $token)
             ->firstOrFail();
 
@@ -39,7 +47,11 @@ class LoyaltyCardController extends Controller
     public function applePassPayload(string $token, WalletPassService $walletService)
     {
         $card = LoyaltyCard::withoutGlobalScopes()
-            ->with(['customer', 'shop', 'campaign'])
+            ->with([
+                'customer',
+                'shop',
+                'campaign' => fn ($query) => $query->withoutGlobalScopes(),
+            ])
             ->where('token', $token)
             ->firstOrFail();
 

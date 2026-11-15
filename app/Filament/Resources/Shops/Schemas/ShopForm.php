@@ -32,14 +32,22 @@ class ShopForm
                 TextInput::make('address'),
                 TextInput::make('country'),
                 TextInput::make('city'),
-                TextInput::make('status')
+                Select::make('status')
+                    ->options([
+                        'active' => __('Active'),
+                        'inactive' => __('Inactive'),
+                    ])
                     ->required()
                     ->default('active'),
                 Select::make('plan_id')
                     ->relationship('plan', 'name'),
-                TextInput::make('default_language')
+                Select::make('default_language')
+                    ->options([
+                        'ar' => 'العربية (ar)',
+                        'en' => 'English (en)',
+                    ])
                     ->required()
-                    ->default('en'),
+                    ->default('ar'),
             ]);
     }
 }

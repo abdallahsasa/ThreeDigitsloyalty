@@ -22,9 +22,9 @@ class BranchesTable
                     ->searchable(),
                 TextColumn::make('phone')
                     ->searchable(),
-                TextColumn::make('manager_id')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('manager.name')
+                    ->label('Branch Manager')
+                    ->searchable(),
                 TextColumn::make('status')
                     ->searchable(),
                 TextColumn::make('created_at')
