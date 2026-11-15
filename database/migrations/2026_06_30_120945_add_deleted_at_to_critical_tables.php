@@ -1,0 +1,46 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('shops', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+
+        Schema::table('customers', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+
+        Schema::table('loyalty_cards', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+
+        Schema::table('branches', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('shops', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+
+        Schema::table('customers', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+
+        Schema::table('loyalty_cards', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+
+        Schema::table('branches', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+    }
+};

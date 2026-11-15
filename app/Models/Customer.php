@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Customer extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = ['name', 'phone', 'email', 'birthday', 'gender', 'language', 'status', 'avatar'];
+
+    public function loyaltyCards(): HasMany
+    {
+        return $this->hasMany(LoyaltyCard::class);
+    }
+
+    public function loyaltyTransactions(): HasMany
+    {
+        return $this->hasMany(LoyaltyTransaction::class);
+    }
+}
