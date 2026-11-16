@@ -23,7 +23,7 @@ class ShopJoinController extends Controller
             ->latest()
             ->first();
 
-        $joinUrl = route('shop.join', $shop->slug);
+        $joinUrl = route('shop.join', $shop->slug ?: $shop->id);
 
         return view('shop-join.show', compact('shop', 'campaign', 'joinUrl'));
     }
@@ -38,7 +38,7 @@ class ShopJoinController extends Controller
             ->latest()
             ->first();
 
-        $joinUrl = route('shop.join', $shop->slug);
+        $joinUrl = route('shop.join', $shop->slug ?: $shop->id);
 
         return view('shop-join.poster', compact('shop', 'campaign', 'joinUrl'));
     }

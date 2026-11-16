@@ -212,7 +212,7 @@
                             <span>{{ $isAr ? 'فتح صفحة التسجيل' : 'Open Customer Join Page' }}</span>
                         </a>
 
-                        <a href="{{ route('shop.join.poster', ['shop' => $shop->slug, 'print' => 1]) }}" target="_blank" class="td-btn-ghost" style="text-decoration: none;">
+                        <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1]) }}" target="_blank" class="td-btn-ghost" style="text-decoration: none;">
                             <span>🖨️</span>
                             <span>{{ $isAr ? 'تحميل / طباعة PDF' : 'Print / Save PDF Poster' }}</span>
                         </a>

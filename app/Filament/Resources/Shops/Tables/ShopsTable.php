@@ -55,7 +55,7 @@ class ShopsTable
                     ->label(fn () => __('Open Customer Join Page'))
                     ->icon('heroicon-o-qr-code')
                     ->color('info')
-                    ->url(fn ($record): string => route('shop.join', $record->slug))
+                    ->url(fn ($record): string => route('shop.join', $record->slug ?: $record->id))
                     ->openUrlInNewTab(),
                 EditAction::make(),
             ])

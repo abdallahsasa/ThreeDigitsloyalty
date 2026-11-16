@@ -24,7 +24,7 @@ class ShopQrCode extends Page
     protected function getViewData(): array
     {
         $tenant = Filament::getTenant();
-        $joinUrl = $tenant ? route('shop.join', $tenant->slug) : url('/');
+        $joinUrl = $tenant ? route('shop.join', $tenant->slug ?: $tenant->id) : url('/');
 
         return [
             'shop' => $tenant,
