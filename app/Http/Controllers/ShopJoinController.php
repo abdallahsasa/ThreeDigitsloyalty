@@ -15,7 +15,13 @@ class ShopJoinController extends Controller
 {
     public function show(string $shop)
     {
-        $shop = $this->resolveActiveShop($shop);
+        $resolved = $this->resolveActiveShop($shop);
+
+        if (!empty($resolved->slug) && $shop !== $resolved->slug) {
+            return redirect()->route('shop.join', $resolved->slug, 301);
+        }
+
+        $shop = $resolved;
 
         $campaign = LoyaltyCampaign::withoutGlobalScopes()
             ->where('shop_id', $shop->id)
@@ -30,7 +36,13 @@ class ShopJoinController extends Controller
 
     public function poster(string $shop)
     {
-        $shop = $this->resolveActiveShop($shop);
+        $resolved = $this->resolveActiveShop($shop);
+
+        if (!empty($resolved->slug) && $shop !== $resolved->slug) {
+            return redirect()->route('shop.join.poster', array_merge(request()->query(), ['shop' => $resolved->slug]), 301);
+        }
+
+        $shop = $resolved;
 
         $campaign = LoyaltyCampaign::withoutGlobalScopes()
             ->where('shop_id', $shop->id)

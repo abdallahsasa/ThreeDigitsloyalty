@@ -208,6 +208,10 @@ class LoyaltyPlatformTest extends TestCase
 
         $this->assertSame('roast-co-coffee', $shop->slug);
 
+        $this->get("/join/{$shop->id}")
+            ->assertStatus(301)
+            ->assertRedirect(route('shop.join', $shop->slug));
+
         $this->get(route('shop.join', $shop->slug))
             ->assertStatus(200)
             ->assertSee('Roast & Co Coffee')
