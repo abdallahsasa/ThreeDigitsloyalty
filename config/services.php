@@ -36,7 +36,7 @@ return [
     ],
 
     'wallet' => [
-        'apple_pass_type_id' => env('APPLE_PASS_TYPE_ID', 'pass.com.threedigits.loyalty'),
+        'apple_pass_type_id' => env('APPLE_PASS_TYPE_ID', 'pass.com.threedigitsoftware.loyalty'),
         'apple_team_id' => env('APPLE_TEAM_ID', 'THREEDIGIT'),
         'apple_cert_path' => env('APPLE_PASS_CERT_PATH', storage_path('app/wallet/apple-pass.p12')),
         'apple_cert_password' => env('APPLE_PASS_CERT_PASSWORD', ''),

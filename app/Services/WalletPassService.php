@@ -25,7 +25,7 @@ class WalletPassService
 
         return [
             'formatVersion' => 1,
-            'passTypeIdentifier' => config('services.wallet.apple_pass_type_id', 'pass.com.threedigits.loyalty'),
+            'passTypeIdentifier' => config('services.wallet.apple_pass_type_id', 'pass.com.threedigitsoftware.loyalty'),
             'serialNumber' => $card->token,
             'teamIdentifier' => config('services.wallet.apple_team_id', 'THREEDIGIT'),
             'organizationName' => $card->shop->name,
@@ -220,7 +220,7 @@ class WalletPassService
             'aud' => 'google',
             'typ' => 'savetowallet',
             'iat' => time(),
-            'origins' => [config('app.url', 'http://localhost')],
+            'origins' => [rtrim((string) config('app.url', 'https://loylty.threedigitsoftware.com'), '/')],
             'payload' => [
                 'loyaltyClasses' => [
                     [
