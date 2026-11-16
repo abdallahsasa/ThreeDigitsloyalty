@@ -99,13 +99,20 @@ class WalletPassService
     }
 
     /**
-     * Check whether official Apple Wallet signing certificates are configured on disk.
+     * Check whether official Apple Wallet signing certificates are configured on disk or via base64 env.
      */
     public function isAppleWalletConfigured(): bool
     {
-        $certPath = config('services.wallet.apple_cert_path');
+        if (!empty(config('services.wallet.apple_cert_base64'))) {
+            return true;
+        }
 
-        return !empty($certPath) && is_file($certPath);
+        $certPath = $this->resolveExistingFilePath(
+            config('services.wallet.apple_cert_path'),
+            storage_path('app/wallet/apple-pass.p12')
+        );
+
+        return $certPath !== null;
     }
 
     /**
@@ -120,7 +127,7 @@ class WalletPassService
             return false;
         }
 
-        if (is_file($saConfig)) {
+        if ($this->resolveExistingFilePath($saConfig, storage_path('app/wallet/google-service-account.json')) !== null) {
             return true;
         }
 
@@ -427,11 +434,38 @@ class WalletPassService
      */
     protected function resolveAppleSigningCredentials(): array
     {
-        $certPath = config('services.wallet.apple_cert_path');
         $certPassword = (string) config('services.wallet.apple_cert_password', '');
-        $wwdrPath = config('services.wallet.apple_wwdr_path');
+        $wwdrPath = $this->resolveExistingFilePath(
+            config('services.wallet.apple_wwdr_path'),
+            storage_path('app/wallet/AppleWWDRCAG4.pem')
+        );
 
-        if (!empty($certPath) && is_file($certPath)) {
+        $wwdrBase64 = (string) config('services.wallet.apple_wwdr_base64', '');
+        if (!$wwdrPath && $wwdrBase64 !== '') {
+            $decodedWwdr = base64_decode($wwdrBase64, true);
+            if ($decodedWwdr !== false) {
+                $tmpWwdr = storage_path('app/wallet/tmp-wwdr.pem');
+                File::ensureDirectoryExists(dirname($tmpWwdr));
+                file_put_contents($tmpWwdr, $decodedWwdr);
+                $wwdrPath = $tmpWwdr;
+            }
+        }
+
+        $certBase64 = (string) config('services.wallet.apple_cert_base64', '');
+        if ($certBase64 !== '') {
+            $raw = base64_decode($certBase64, true);
+            $certs = [];
+            if ($raw !== false && openssl_pkcs12_read($raw, $certs, $certPassword)) {
+                return [$certs['cert'], $certs['pkey'], $wwdrPath];
+            }
+        }
+
+        $certPath = $this->resolveExistingFilePath(
+            config('services.wallet.apple_cert_path'),
+            storage_path('app/wallet/apple-pass.p12')
+        );
+
+        if ($certPath !== null) {
             $raw = file_get_contents($certPath);
             $certs = [];
             if (str_ends_with(strtolower($certPath), '.p12') || str_ends_with(strtolower($certPath), '.pfx')) {
@@ -447,6 +481,23 @@ class WalletPassService
         return $this->ensureFallbackKeypair();
     }
 
+    protected function resolveExistingFilePath(?string $configuredPath, string $defaultPath): ?string
+    {
+        $candidates = array_filter([
+            $configuredPath,
+            $configuredPath && !str_starts_with($configuredPath, '/') ? base_path($configuredPath) : null,
+            $defaultPath,
+        ]);
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Resolve Google Cloud Service Account email & private key PEM.
      *
@@ -455,9 +506,17 @@ class WalletPassService
     protected function resolveGoogleServiceAccountCredentials(): array
     {
         $saConfig = config('services.wallet.google_service_account_json');
+        $saFile = $this->resolveExistingFilePath($saConfig, storage_path('app/wallet/google-service-account.json'));
 
-        if (!empty($saConfig)) {
-            $json = is_file($saConfig) ? file_get_contents($saConfig) : $saConfig;
+        if ($saFile !== null) {
+            $json = file_get_contents($saFile);
+        } elseif (!empty($saConfig)) {
+            $json = $saConfig;
+        } else {
+            $json = '';
+        }
+
+        if ($json !== '') {
             $data = json_decode($json, true);
             if (is_array($data) && !empty($data['client_email']) && !empty($data['private_key'])) {
                 return [$data['client_email'], $data['private_key']];
