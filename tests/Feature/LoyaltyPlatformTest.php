@@ -72,7 +72,7 @@ class LoyaltyPlatformTest extends TestCase
         file_put_contents($tmpZip, $pkpassResponse->getContent());
         $zip = new \ZipArchive();
         $this->assertTrue($zip->open($tmpZip) === true);
-        foreach (['pass.json', 'manifest.json', 'signature', 'icon.png', 'icon@2x.png', 'icon@3x.png', 'logo.png', 'logo@2x.png', 'logo@3x.png'] as $entry) {
+        foreach (['pass.json', 'manifest.json', 'signature', 'icon.png', 'icon@2x.png', 'icon@3x.png', 'logo.png', 'logo@2x.png', 'logo@3x.png', 'strip.png', 'strip@2x.png', 'strip@3x.png'] as $entry) {
             $this->assertNotFalse($zip->locateName($entry), "Missing {$entry} in .pkpass archive");
         }
         $this->assertNotEmpty($zip->getFromName('signature'));
@@ -206,17 +206,19 @@ class LoyaltyPlatformTest extends TestCase
             'status' => 'active',
         ]);
 
-        $this->get(route('shop.join', $shop->id))
+        $this->assertSame('roast-co-coffee', $shop->slug);
+
+        $this->get(route('shop.join', $shop->slug))
             ->assertStatus(200)
             ->assertSee('Roast & Co Coffee')
             ->assertSee('Free Signature Latte');
 
-        $this->get(route('shop.join.poster', $shop->id))
+        $this->get(route('shop.join.poster', $shop->slug))
             ->assertStatus(200)
             ->assertSee('Roast & Co Coffee')
             ->assertSee('Free Signature Latte');
 
-        $response = $this->post(route('shop.join.store', $shop->id), [
+        $response = $this->post(route('shop.join.store', $shop->slug), [
             'name' => 'Fahad Al-Saud',
             'email' => 'fahad@example.test',
             'phone' => '+966559998877',

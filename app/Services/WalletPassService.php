@@ -32,8 +32,8 @@ class WalletPassService
             'description' => $card->campaign->name ?? ($card->shop->name . ' Loyalty Card'),
             'logoText' => $card->shop->name,
             'foregroundColor' => 'rgb(248, 250, 252)',
-            'backgroundColor' => 'rgb(1, 10, 41)',
-            'labelColor' => 'rgb(167, 139, 250)',
+            'backgroundColor' => 'rgb(10, 15, 44)',
+            'labelColor' => 'rgb(196, 181, 253)',
             'barcode' => [
                 'message' => $card->token,
                 'format' => 'PKBarcodeFormatQR',
@@ -56,13 +56,7 @@ class WalletPassService
                         'value' => "{$card->current_stamps_count} / {$required}",
                     ],
                 ],
-                'primaryFields' => [
-                    [
-                        'key' => 'campaign',
-                        'label' => $card->campaign->name ?? 'LOYALTY PASS',
-                        'value' => "{$card->current_stamps_count} of {$required}",
-                    ],
-                ],
+                'primaryFields' => [],
                 'secondaryFields' => [
                     [
                         'key' => 'customer',
@@ -70,12 +64,17 @@ class WalletPassService
                         'value' => $card->customer->name,
                     ],
                     [
+                        'key' => 'campaign',
+                        'label' => 'PROGRAM',
+                        'value' => $card->campaign->name ?? 'VIP Stamp Card',
+                    ],
+                ],
+                'auxiliaryFields' => [
+                    [
                         'key' => 'reward',
                         'label' => 'REWARD',
                         'value' => $card->campaign->reward_name ?? 'Free Reward',
                     ],
-                ],
-                'auxiliaryFields' => [
                     [
                         'key' => 'status',
                         'label' => 'STATUS',
@@ -152,14 +151,17 @@ class WalletPassService
             );
             file_put_contents("{$workDir}/pass.json", $passJson);
 
-            // 2. Write required icon and logo PNG assets
+            // 2. Write required icon, logo, and visual stamp-card strip PNG assets
             $sourceImage = $this->resolveShopLogoFilePath($card);
             $this->writeResizedPng($sourceImage, "{$workDir}/icon.png", 29, 29);
             $this->writeResizedPng($sourceImage, "{$workDir}/icon@2x.png", 58, 58);
             $this->writeResizedPng($sourceImage, "{$workDir}/icon@3x.png", 87, 87);
-            $this->writeResizedPng($sourceImage, "{$workDir}/logo.png", 160, 50);
-            $this->writeResizedPng($sourceImage, "{$workDir}/logo@2x.png", 320, 100);
-            $this->writeResizedPng($sourceImage, "{$workDir}/logo@3x.png", 480, 150);
+            $this->writeResizedPng($sourceImage, "{$workDir}/logo.png", 50, 50);
+            $this->writeResizedPng($sourceImage, "{$workDir}/logo@2x.png", 100, 100);
+            $this->writeResizedPng($sourceImage, "{$workDir}/logo@3x.png", 150, 150);
+            $this->writeStampStripPng($card, "{$workDir}/strip.png", 375, 123);
+            $this->writeStampStripPng($card, "{$workDir}/strip@2x.png", 750, 246);
+            $this->writeStampStripPng($card, "{$workDir}/strip@3x.png", 1125, 369);
 
             // 3. Build manifest.json with SHA-1 hashes of all bundle files
             $bundleFiles = [
@@ -170,6 +172,9 @@ class WalletPassService
                 'logo.png',
                 'logo@2x.png',
                 'logo@3x.png',
+                'strip.png',
+                'strip@2x.png',
+                'strip@3x.png',
             ];
 
             $manifest = [];
@@ -378,6 +383,105 @@ class WalletPassService
 
         imagepng($dstImg, $destPath);
         imagedestroy($dstImg);
+    }
+
+    /**
+     * Render a high-contrast visual stamp-progress strip banner for Apple Wallet storeCard passes.
+     */
+    protected function writeStampStripPng(LoyaltyCard $card, string $destPath, int $width, int $height): void
+    {
+        $img = imagecreatetruecolor($width, $height);
+        imagealphablending($img, true);
+
+        // Smooth vertical-diagonal ThreeDigits Midnight Navy -> Indigo -> Electric Violet gradient
+        for ($y = 0; $y < $height; $y++) {
+            $t = $y / max(1, $height - 1);
+            $r = (int) round(11 + (76 - 11) * $t);
+            $g = (int) round(18 + (29 - 18) * $t);
+            $b = (int) round(56 + (149 - 56) * $t);
+            $lineColor = imagecolorallocate($img, $r, $g, $b);
+            imageline($img, 0, $y, $width, $y, $lineColor);
+        }
+
+        // Subtle decorative glow orbs
+        $glow1 = imagecolorallocatealpha($img, 116, 62, 226, 98);
+        $glow2 = imagecolorallocatealpha($img, 59, 66, 213, 102);
+        imagefilledellipse($img, (int) round($width * 0.14), (int) round($height * 0.18), (int) round($width * 0.42), (int) round($width * 0.42), $glow1);
+        imagefilledellipse($img, (int) round($width * 0.88), (int) round($height * 0.82), (int) round($width * 0.36), (int) round($width * 0.36), $glow2);
+
+        $required = max(1, min(12, (int) ($card->campaign->required_purchases_count ?? 8)));
+        $current = max(0, min($required, (int) $card->current_stamps_count));
+        $isReady = $card->reward_status === 'ready' || $current >= $required;
+
+        // Arrange stamp circles in 1 row (<= 6) or 2 balanced rows (> 6)
+        $cols = $required <= 6 ? $required : (int) ceil($required / 2);
+        $rows = $required <= 6 ? 1 : 2;
+
+        $padX = (int) round($width * 0.09);
+        $padY = (int) round($height * 0.16);
+        $usableW = $width - ($padX * 2);
+        $usableH = $height - ($padY * 2) - (int) round($height * 0.06);
+
+        $cellW = $usableW / max(1, $cols);
+        $cellH = $usableH / max(1, $rows);
+        $diameter = (int) round(min($cellW, $cellH) * 0.72);
+        $radius = max(4, (int) floor($diameter / 2));
+
+        $filledBg = $isReady
+            ? imagecolorallocate($img, 16, 185, 129)   // Emerald when reward ready
+            : imagecolorallocate($img, 116, 62, 226);  // Electric Violet for earned stamps
+        $filledRing = imagecolorallocatealpha($img, 255, 255, 255, 45);
+        $emptyBg = imagecolorallocatealpha($img, 10, 15, 44, 55);
+        $emptyRing = imagecolorallocatealpha($img, 196, 181, 253, 65);
+        $white = imagecolorallocate($img, 255, 255, 255);
+
+        $scale = $width / 375.0;
+        $strokeWidth = max(2, (int) round(2.2 * $scale));
+
+        for ($i = 0; $i < $required; $i++) {
+            $row = intdiv($i, $cols);
+            $col = $i % $cols;
+            $itemsInThisRow = ($row === $rows - 1 && $required % $cols !== 0) ? ($required % $cols) : $cols;
+            $rowOffsetX = ($usableW - ($itemsInThisRow * $cellW)) / 2;
+
+            $cx = (int) round($padX + $rowOffsetX + ($col + 0.5) * $cellW);
+            $cy = (int) round($padY + ($row + 0.5) * $cellH);
+            $earned = $i < $current;
+
+            if ($earned) {
+                imagefilledellipse($img, $cx, $cy, $diameter, $diameter, $filledBg);
+                imagesetthickness($img, max(1, (int) round(1.5 * $scale)));
+                imageellipse($img, $cx, $cy, $diameter, $diameter, $filledRing);
+
+                // Crisp checkmark inside earned stamp
+                imagesetthickness($img, $strokeWidth);
+                $x1 = (int) round($cx - $radius * 0.36);
+                $y1 = (int) round($cy + $radius * 0.02);
+                $x2 = (int) round($cx - $radius * 0.08);
+                $y2 = (int) round($cy + $radius * 0.30);
+                $x3 = (int) round($cx + $radius * 0.38);
+                $y3 = (int) round($cy - $radius * 0.28);
+                imageline($img, $x1, $y1, $x2, $y2, $white);
+                imageline($img, $x2, $y2, $x3, $y3, $white);
+            } else {
+                imagefilledellipse($img, $cx, $cy, $diameter, $diameter, $emptyBg);
+                imagesetthickness($img, max(1, (int) round(1.5 * $scale)));
+                imageellipse($img, $cx, $cy, $diameter, $diameter, $emptyRing);
+            }
+        }
+
+        // Sleek bottom progress bar
+        $barH = max(3, (int) round(4 * $scale));
+        $barBg = imagecolorallocatealpha($img, 255, 255, 255, 100);
+        imagefilledrectangle($img, 0, $height - $barH, $width, $height, $barBg);
+        $progressW = (int) round($width * ($current / max(1, $required)));
+        if ($progressW > 0) {
+            imagefilledrectangle($img, 0, $height - $barH, $progressW, $height, $filledBg);
+        }
+
+        imagesetthickness($img, 1);
+        imagepng($img, $destPath);
+        imagedestroy($img);
     }
 
     protected function signManifest(string $manifestPath, string $signaturePath): void

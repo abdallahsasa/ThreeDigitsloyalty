@@ -17,6 +17,8 @@ class ShopsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('slug')
+                    ->searchable(),
                 TextColumn::make('logo')
                     ->searchable(),
                 TextColumn::make('phone')
@@ -53,7 +55,7 @@ class ShopsTable
                     ->label(fn () => __('Open Customer Join Page'))
                     ->icon('heroicon-o-qr-code')
                     ->color('info')
-                    ->url(fn ($record): string => route('shop.join', $record->id))
+                    ->url(fn ($record): string => route('shop.join', $record->slug))
                     ->openUrlInNewTab(),
                 EditAction::make(),
             ])

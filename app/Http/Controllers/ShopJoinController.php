@@ -13,9 +13,9 @@ use Illuminate\Support\Str;
 
 class ShopJoinController extends Controller
 {
-    public function show(Shop $shop)
+    public function show(string $shop)
     {
-        abort_if($shop->status !== 'active', 404);
+        $shop = $this->resolveActiveShop($shop);
 
         $campaign = LoyaltyCampaign::withoutGlobalScopes()
             ->where('shop_id', $shop->id)
@@ -23,14 +23,14 @@ class ShopJoinController extends Controller
             ->latest()
             ->first();
 
-        $joinUrl = route('shop.join', $shop->id);
+        $joinUrl = route('shop.join', $shop->slug);
 
         return view('shop-join.show', compact('shop', 'campaign', 'joinUrl'));
     }
 
-    public function poster(Shop $shop)
+    public function poster(string $shop)
     {
-        abort_if($shop->status !== 'active', 404);
+        $shop = $this->resolveActiveShop($shop);
 
         $campaign = LoyaltyCampaign::withoutGlobalScopes()
             ->where('shop_id', $shop->id)
@@ -38,14 +38,14 @@ class ShopJoinController extends Controller
             ->latest()
             ->first();
 
-        $joinUrl = route('shop.join', $shop->id);
+        $joinUrl = route('shop.join', $shop->slug);
 
         return view('shop-join.poster', compact('shop', 'campaign', 'joinUrl'));
     }
 
-    public function store(Request $request, Shop $shop)
+    public function store(Request $request, string $shop)
     {
-        abort_if($shop->status !== 'active', 404);
+        $shop = $this->resolveActiveShop($shop);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -103,5 +103,17 @@ class ShopJoinController extends Controller
 
         return redirect()
             ->route('loyalty-card.show', ['token' => $card->token, 'joined' => 1]);
+    }
+
+    protected function resolveActiveShop(string $identifier): Shop
+    {
+        $shop = Shop::query()
+            ->where('slug', $identifier)
+            ->when(ctype_digit($identifier), fn ($q) => $q->orWhere('id', (int) $identifier))
+            ->firstOrFail();
+
+        abort_if($shop->status !== 'active', 404);
+
+        return $shop;
     }
 }

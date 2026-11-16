@@ -15,6 +15,9 @@ class ShopForm
             ->components([
                 TextInput::make('name')
                     ->required(),
+                TextInput::make('slug')
+                    ->helperText('Leave blank to auto-generate from shop name (used in /join/{slug}).')
+                    ->unique(ignoreRecord: true),
                 FileUpload::make('logo')
                     ->disk('uploads')
                     ->directory('shops')

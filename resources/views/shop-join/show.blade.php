@@ -560,7 +560,7 @@
                     : 'Enter your basic details below to unlock your digital pass and save it straight to your iPhone or Android.' }}
             </p>
 
-            <form method="POST" action="{{ route('shop.join.store', $shop->id) }}">
+            <form method="POST" action="{{ route('shop.join.store', $shop->slug) }}">
                 @csrf
 
                 <div class="input-group">
