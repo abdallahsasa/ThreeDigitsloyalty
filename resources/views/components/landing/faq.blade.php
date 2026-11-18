@@ -1,30 +1,38 @@
-<section class="dl-section" style="background: #040D30;">
+@php
+    $isAr = app()->getLocale() === 'ar';
+    $faqs = $isAr ? [
+        ['q' => 'هل يحتاج العميل إلى تحميل تطبيق؟', 'a' => 'لا. يفتح العميل بطاقته الرقمية ورمز QR الخاص به مباشرة في متصفح الهاتف بدون تحميل أي تطبيق.'],
+        ['q' => 'هل يلزم إدخال بطاقة دفع للاستفادة من العرض المجاني؟', 'a' => 'لا، التسجيل مجاني بالكامل حتى 31 كانون الأول 2026 بدون بطاقة دفع، ولا يتم أي خصم تلقائي بعد انتهاء الفترة المجانية.'],
+        ['q' => 'هل يمكنني إدارة أكثر من فرع وموظف؟', 'a' => 'نعم، يدعم النظام تعدد الفروع وتعيين مدراء فروع وكاشير بصلاحيات محددة لكل فرع.'],
+        ['q' => 'كيف يضيف الكاشير الأختام للعميل؟', 'a' => 'من خلال صفحة ماسح QR داخل لوحة المتجر، أو عبر البحث برقم هاتف العميل.'],
+        ['q' => 'هل بيانات متجري مفصولة عن المتاجر الأخرى؟', 'a' => 'نعم، بيانات متجرك منفصلة عن بيانات المتاجر الأخرى، ولا يطّلع أي متجر على عملاء أو معاملات متجر آخر.'],
+    ] : [
+        ['q' => 'Do customers need to download an app?', 'a' => 'No. Customers open their digital stamp card and QR code directly in their phone browser with no app download required.'],
+        ['q' => 'Is a payment card required for the free launch offer?', 'a' => 'No. All plans are free until December 31, 2026 with no payment card required, and billing does not start automatically afterward.'],
+        ['q' => 'Can I manage multiple branches and staff?', 'a' => 'Yes. You can create multiple branches and assign Branch Manager and Cashier permissions per store.'],
+        ['q' => 'How does a cashier stamp or redeem a card?', 'a' => 'Using the built-in QR Scanner inside your merchant dashboard, or by searching the customer’s phone number.'],
+        ['q' => 'Is my store’s data kept private?', 'a' => 'Yes. Your store’s data is kept separate from other stores and cannot be viewed by other merchants.'],
+    ];
+@endphp
+
+<section id="faq" class="dl-section">
     <div class="dl-container" style="max-width: 820px;">
         <div class="dl-section-head">
             <span class="dl-eyebrow">FAQ</span>
             <h2>{{ __('landing.faq_title') }}</h2>
         </div>
 
-        @php
-            $faqs = app()->getLocale() === 'ar' ? [
-                ['q' => 'هل يحتاج العميل إلى تحميل تطبيق؟', 'a' => 'لا، يحصل العميل على رابط بطاقة رقمية يعمل مباشرة عبر المتصفح مع رمز QR.'],
-                ['q' => 'هل يمكنني إدارة أكثر من فرع؟', 'a' => 'نعم، يدعم النظام تعدد الفروع وتعيين مدراء وكاشير لكل فرع بشكل مستقل.'],
-                ['q' => 'كيف يضيف الكاشير الأختام للعميل؟', 'a' => 'من خلال صفحة ماسح QR في لوحة المتجر، أو عبر البحث برقم هاتف العميل.'],
-            ] : [
-                ['q' => 'Do customers need to download an app?', 'a' => 'No. Each customer gets an instant web pass with a unique QR code that works on any smartphone.'],
-                ['q' => 'Can I manage multiple store branches?', 'a' => 'Yes. You can create multiple branches, assign branch managers, and scope cashiers per location.'],
-                ['q' => 'How does a cashier stamp or redeem a card?', 'a' => 'Using the built-in QR Scanner page in the Merchant Portal, or by looking up the customer’s phone number.'],
-            ];
-        @endphp
-
-        <div style="display: grid; gap: 0.9rem;">
+        <div style="display: grid; gap: 0.85rem;">
             @foreach($faqs as $idx => $faq)
-                <div x-data="{ open: {{ $idx === 0 ? 'true' : 'false' }} }" class="dl-card" style="padding: 1.25rem 1.5rem;">
-                    <button type="button" @click="open = !open" style="width: 100%; background: none; border: none; color: #f8fafc; font-family: inherit; font-size: 1rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-align: start;">
+                <div x-data="{ open: {{ $idx === 0 ? 'true' : 'false' }} }" class="dl-card" style="padding: 1.15rem 1.35rem;">
+                    <button type="button"
+                            @click="open = !open"
+                            :aria-expanded="open.toString()"
+                            style="width: 100%; background: none; border: none; color: #f8fafc; font-family: inherit; font-size: 1rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 1rem; cursor: pointer; text-align: start;">
                         <span>{{ $faq['q'] }}</span>
-                        <span x-text="open ? '−' : '+'" style="color: #743EE2; font-size: 1.25rem; font-weight: 700;"></span>
+                        <span x-text="open ? '−' : '+'" style="color: #c4b5fd; font-size: 1.25rem; font-weight: 800; flex-shrink: 0;"></span>
                     </button>
-                    <p x-show="open" x-transition style="margin: 0.85rem 0 0; color: #94a3b8; font-size: 0.92rem; line-height: 1.65;">
+                    <p x-show="open" x-transition style="margin: 0.75rem 0 0; color: #cbd5e1; font-size: 0.92rem; line-height: 1.65;">
                         {{ $faq['a'] }}
                     </p>
                 </div>

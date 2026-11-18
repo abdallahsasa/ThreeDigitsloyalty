@@ -3,12 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="{{ __('landing.meta_description') }}">
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
-    <title>ThreeDigits Loyalty | Luxury Digital Loyalty & Passbook SaaS</title>
+    <title>{{ __('landing.meta_title') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -17,21 +19,24 @@
             --dl-bg: #010A29;
             --dl-surface: #071033;
             --dl-surface-2: #0C1742;
-            --dl-border: rgba(116, 62, 226, 0.2);
-            --dl-border-gold: rgba(116, 62, 226, 0.55);
+            --dl-border: rgba(148, 163, 184, 0.18);
+            --dl-border-purple: rgba(116, 62, 226, 0.55);
             --dl-text: #f8fafc;
-            --dl-muted: #94a3b8;
-            --dl-gold: #743EE2;
-            --dl-gold-bright: #9F7AEA;
-            --dl-emerald: #10b981;
+            --dl-muted: #cbd5e1;
+            --dl-subtle: #94a3b8;
+            --dl-purple: #743EE2;
+            --dl-purple-dark: #5B21B6;
+            --dl-purple-soft: #c4b5fd;
+            --dl-green: #10b981;
+            --dl-green-soft: #6ee7b7;
         }
 
-        *, *::before, *::after, body, button, input, h1, h2, h3, h4, h5, h6, .font-heading {
+        *, *::before, *::after, body, button, input, select, h1, h2, h3, h4, h5, h6 {
             box-sizing: border-box;
-            font-family: 'Montserrat', 'Cairo', sans-serif !important;
+            font-family: 'Cairo', sans-serif !important;
         }
 
-        body {
+        html, body {
             margin: 0;
             background-color: var(--dl-bg);
             color: var(--dl-text);
@@ -39,44 +44,37 @@
             overflow-x: hidden;
         }
 
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid #c4b5fd;
+            outline-offset: 2px;
+        }
+
         .dl-container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1180px;
             margin: 0 auto;
-            padding: 0 1.5rem;
+            padding: 0 1.25rem;
         }
 
-        .dl-grid-bg {
-            background-image:
-                linear-gradient(to right, rgba(116, 62, 226, 0.06) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(116, 62, 226, 0.06) 1px, transparent 1px);
-            background-size: 48px 48px;
-        }
-
-        .dl-gold-text {
-            background: linear-gradient(135deg, #A78BFA 0%, #743EE2 50%, #3B42D5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .dl-btn-gold {
+        .dl-btn-primary {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            background: linear-gradient(135deg, #743EE2 0%, #6145E8 50%, #3B42D5 100%);
+            background: var(--dl-purple);
             color: #ffffff;
             font-weight: 700;
-            padding: 0.85rem 1.75rem;
+            padding: 0.85rem 1.6rem;
             border-radius: 999px;
+            border: 1px solid rgba(196, 181, 253, 0.25);
             text-decoration: none;
-            box-shadow: 0 10px 30px -8px rgba(116, 62, 226, 0.55);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
         }
 
-        .dl-btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 36px -8px rgba(116, 62, 226, 0.75);
+        .dl-btn-primary:hover {
+            background: var(--dl-purple-dark);
+            transform: translateY(-1px);
         }
 
         .dl-btn-ghost {
@@ -84,99 +82,139 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--dl-text);
             border: 1px solid var(--dl-border);
-            font-weight: 600;
-            padding: 0.85rem 1.75rem;
+            font-weight: 700;
+            padding: 0.85rem 1.6rem;
             border-radius: 999px;
             text-decoration: none;
-            transition: background 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
         .dl-btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.09);
-            border-color: rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .dl-card {
             background: var(--dl-surface);
             border: 1px solid var(--dl-border);
-            border-radius: 20px;
-            transition: border-color 0.25s ease, transform 0.25s ease;
-        }
-
-        .dl-card:hover {
-            border-color: var(--dl-border-gold);
-            transform: translateY(-3px);
+            border-radius: 18px;
         }
 
         .dl-section {
-            padding: 5.5rem 0;
+            padding: 4rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .dl-section {
+                padding: 4.75rem 0;
+            }
         }
 
         .dl-eyebrow {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.35rem 0.9rem;
+            gap: 0.45rem;
+            padding: 0.3rem 0.85rem;
             border-radius: 999px;
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid rgba(212, 175, 55, 0.28);
-            color: var(--dl-gold-bright);
-            font-size: 0.78rem;
+            background: rgba(116, 62, 226, 0.16);
+            border: 1px solid rgba(196, 181, 253, 0.28);
+            color: var(--dl-purple-soft);
+            font-size: 0.8rem;
             font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
         }
 
         .dl-section-head {
             text-align: center;
             max-width: 680px;
-            margin: 0 auto 3.5rem;
+            margin: 0 auto 2.5rem;
         }
 
         .dl-section-head h2 {
-            font-size: clamp(1.9rem, 3.5vw, 2.9rem);
+            font-size: clamp(1.65rem, 3.2vw, 2.5rem);
             font-weight: 800;
-            letter-spacing: -0.02em;
-            margin: 0.75rem 0 0.75rem;
-            line-height: 1.15;
+            margin: 0.75rem 0 0.65rem;
+            line-height: 1.25;
+            color: var(--dl-text);
         }
 
         .dl-section-head p {
             color: var(--dl-muted);
-            font-size: 1.05rem;
+            font-size: 1rem;
             line-height: 1.65;
             margin: 0;
         }
 
-        @keyframes floatSlow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .ltr-inline {
+            direction: ltr;
+            unicode-bidi: isolate;
+            display: inline-block;
         }
-        .dl-float { animation: floatSlow 6s ease-in-out infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
 </head>
 <body>
     <x-landing.nav />
 
     <main>
+        {{-- 1. Hero and interactive loyalty card --}}
         <x-landing.hero />
-        <x-landing.trusted-by :clients="$clients" />
+
+        {{-- 2. How it works (Merchant setup & Customer usage) --}}
         <x-landing.how-it-works />
-        <x-landing.features />
+
+        {{-- 3. Examples for cafés, restaurants and salons --}}
+        <x-landing.examples />
+
+        {{-- 4. Merchant dashboard preview --}}
         <x-landing.dashboard-showcase />
-        <x-landing.card-preview />
-        <x-landing.comparison />
-        <x-landing.benefits />
+
+        {{-- 5. Main benefits and features --}}
+        <x-landing.features />
+
+        {{-- 6. Genuine customer proof omitted until verified merchant testimonials are published --}}
+
+        {{-- 7. Pricing and launch offer --}}
         <x-landing.pricing :plans="$plans" />
+
+        {{-- 8. FAQs --}}
         <x-landing.faq />
+
+        {{-- 9. Final activation CTA --}}
         <x-landing.cta />
     </main>
 
+    {{-- 10. Footer with contact and policy links --}}
     <x-landing.footer />
 
+    <script>
+        window.trackFunnelEvent = function (eventName, properties) {
+            try {
+                var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                fetch('{{ route('funnel.track') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token || '',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ event: eventName, properties: properties || {} }),
+                    keepalive: true
+                }).catch(function () {});
+            } catch (e) {}
+        };
+    </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

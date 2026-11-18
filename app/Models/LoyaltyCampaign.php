@@ -16,6 +16,15 @@ class LoyaltyCampaign extends Model
 
     protected $guarded = [];
 
+    protected static function booted(): void
+    {
+        static::created(function (LoyaltyCampaign $campaign): void {
+            if (static::withoutGlobalScopes()->where('shop_id', $campaign->shop_id)->count() === 1) {
+                app(\App\Services\FunnelTracker::class)->track('first_campaign_created', ['shop_id' => $campaign->shop_id]);
+            }
+        });
+    }
+
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class);

@@ -289,6 +289,7 @@ class LoyaltyPlatformTest extends TestCase
 
         foreach ([
             "/shop/{$shop->id}",
+            "/shop/{$shop->id}/getting-started",
             "/shop/{$shop->id}/branches",
             "/shop/{$shop->id}/customers",
             "/shop/{$shop->id}/loyalty-campaigns",
@@ -298,5 +299,61 @@ class LoyaltyPlatformTest extends TestCase
         ] as $shopUrl) {
             $this->actingAs($owner)->get($shopUrl)->assertStatus(200);
         }
+    }
+
+    public function test_homepage_and_merchant_self_registration_and_funnel_tracking(): void
+    {
+        $starter = Plan::create(['name' => 'Starter', 'price' => 9, 'features' => ['1 Branch'], 'status' => 'active']);
+        $business = Plan::create(['name' => 'Business', 'price' => 19, 'features' => ['Up to 5 Branches'], 'status' => 'active']);
+
+        // Homepage in Arabic (default) & English: no /admin link, no Luxury SaaS copy
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertDontSee('href="' . url('/admin') . '"', false)
+            ->assertDontSee('Luxury Digital Loyalty')
+            ->assertSee('خلّي زبائنك يرجعوا')
+            ->assertSee('31 كانون الأول 2026');
+
+        $this->get(route('lang.switch', 'en'));
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('Give your customers a reason to come back.')
+            ->assertSee('December 31, 2026')
+            ->assertSee('A product by Three Digit Software');
+
+        // Funnel tracking endpoint
+        $this->postJson(route('funnel.track'), [
+            'event' => 'demo_completed',
+            'properties' => ['email' => 'should-be-stripped@test.com'],
+        ])->assertStatus(204);
+
+        // Merchant registration retains selected plan and creates Shop + Subscription + Owner
+        $this->get(route('merchant.register', ['plan' => 'business']))
+            ->assertStatus(200)
+            ->assertSee('Business');
+
+        $response = $this->post(route('merchant.register.store'), [
+            'shop_name' => 'Cedar Espresso Bar',
+            'name' => 'Tariq Mansour',
+            'email' => 'tariq@cedarespresso.test',
+            'password' => 'StrongPass123!',
+            'plan' => 'business',
+        ]);
+
+        $shop = Shop::where('slug', 'cedar-espresso-bar')->firstOrFail();
+        $user = User::where('email', 'tariq@cedarespresso.test')->firstOrFail();
+
+        $this->assertSame($business->id, $shop->plan_id);
+        $this->assertSame($shop->id, $user->shop_id);
+        $this->assertTrue($user->hasRole('Shop Owner'));
+        $this->assertDatabaseHas('subscriptions', [
+            'shop_id' => $shop->id,
+            'plan_id' => $business->id,
+            'ends_at' => '2026-12-31',
+            'status' => 'active',
+        ]);
+
+        $response->assertRedirect("/shop/{$shop->id}/getting-started");
+        $this->actingAs($user)->get("/shop/{$shop->id}/getting-started")->assertStatus(200);
     }
 }

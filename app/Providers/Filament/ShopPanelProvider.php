@@ -27,6 +27,7 @@ class ShopPanelProvider extends PanelProvider
             ->id('shop')
             ->path('shop')
             ->login()
+            ->passwordReset()
             ->tenant(\App\Models\Shop::class, ownershipRelationship: 'shop', slugAttribute: 'id')
             ->brandName('ThreeDigits Loyalty')
             ->brandLogo(asset('images/logo.png'))
@@ -47,6 +48,10 @@ class ShopPanelProvider extends PanelProvider
             ->renderHook(
                 'panels::user-menu.before',
                 fn(): string => '<a href="' . route('lang.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') . '" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:rgba(116,62,226,0.12);border:1px solid rgba(116,62,226,0.3);color:#743EE2;font-weight:700;font-size:13px;text-decoration:none;margin-inline-end:8px;">🌐 ' . (app()->getLocale() === 'ar' ? 'English' : 'عربي') . '</a>'
+            )
+            ->renderHook(
+                'panels::auth.login.form.after',
+                fn(): string => '<div style="margin-top:1rem;text-align:center;font-size:0.875rem;">' . (app()->getLocale() === 'ar' ? 'متجر جديد؟ ' : 'New store? ') . '<a href="' . route('merchant.register') . '" style="color:#743EE2;font-weight:700;text-decoration:underline;">' . (app()->getLocale() === 'ar' ? 'أنشئ بطاقة متجرك' : 'Create your store’s card') . '</a></div>'
             )
             ->discoverResources(in: app_path('Filament/Shop/Resources'), for: 'App\Filament\Shop\Resources')
             ->discoverPages(in: app_path('Filament/Shop/Pages'), for: 'App\Filament\Shop\Pages')

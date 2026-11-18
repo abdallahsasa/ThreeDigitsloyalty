@@ -111,6 +111,10 @@ class ShopJoinController extends Controller
         $card->setRelation('shop', $shop);
         $card->setRelation('customer', $customer);
 
+        if ($card->wasRecentlyCreated && LoyaltyCard::withoutGlobalScopes()->where('shop_id', $shop->id)->count() === 1) {
+            app(\App\Services\FunnelTracker::class)->track('first_customer_card_issued', ['shop_id' => $shop->id]);
+        }
+
         Mail::to($customer->email)->send(new CustomerWelcomeMail($customer, $shop, $card));
 
         return redirect()

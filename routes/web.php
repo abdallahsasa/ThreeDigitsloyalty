@@ -1,14 +1,31 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoyaltyCardController;
+use App\Http\Controllers\MerchantRegisterController;
 use App\Http\Controllers\ShopJoinController;
+use App\Services\FunnelTracker;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $plans = \App\Models\Plan::where('status', 'active')->orderBy('price', 'asc')->get();
-    $clients = \App\Models\Shop::where('status', 'active')->orderBy('id', 'asc')->take(12)->get();
-    return view('welcome', compact('plans', 'clients'));
-});
+
+    return view('welcome', compact('plans'));
+})->name('home');
+
+Route::get('/register', [MerchantRegisterController::class, 'show'])->name('merchant.register');
+Route::post('/register', [MerchantRegisterController::class, 'store'])->name('merchant.register.store');
+
+Route::post('/funnel/track', function (Request $request, FunnelTracker $tracker) {
+    $validated = $request->validate([
+        'event' => ['required', 'string', 'in:primary_cta_clicked,demo_started,demo_completed'],
+        'properties' => ['nullable', 'array'],
+    ]);
+
+    $tracker->track($validated['event'], $validated['properties'] ?? []);
+
+    return response()->noContent();
+})->name('funnel.track');
 
 Route::get('/join/{shop}', [ShopJoinController::class, 'show'])->name('shop.join');
 Route::post('/join/{shop}', [ShopJoinController::class, 'store'])->name('shop.join.store');
@@ -24,5 +41,6 @@ Route::get('/lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'ar'])) {
         session(['locale' => $locale]);
     }
+
     return redirect()->back();
 })->name('lang.switch');

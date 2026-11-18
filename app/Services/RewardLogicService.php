@@ -66,6 +66,10 @@ class RewardLogicService
             ]);
         });
 
+        if (LoyaltyTransaction::withoutGlobalScopes()->where('shop_id', $card->shop_id)->count() === 1) {
+            app(FunnelTracker::class)->track('first_stamp_added', ['shop_id' => $card->shop_id]);
+        }
+
         return $card->refresh();
     }
 
@@ -95,6 +99,10 @@ class RewardLogicService
                 'notes' => $notes,
             ]);
         });
+
+        if (LoyaltyTransaction::withoutGlobalScopes()->where('shop_id', $card->shop_id)->count() === 1) {
+            app(FunnelTracker::class)->track('first_stamp_added', ['shop_id' => $card->shop_id]);
+        }
 
         return $card->refresh();
     }

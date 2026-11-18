@@ -88,5 +88,18 @@
     "Reward Unlocked": "فتح مكافأة",
     "Reward Redeemed": "استبدال مكافأة",
     "Manual Adjustment": "تعديل يدوي",
-    "Open Customer Join Page": "فتح صفحة تسجيل العملاء"
+    "Open Customer Join Page": "فتح صفحة تسجيل العملاء",
+    "Getting Started": "دليل البدء",
+    "Store details and logo": "تفاصيل المتجر والشعار",
+    "Add your branch details and upload your store logo.": "أضف بيانات الفرع وارفع شعار متجرك.",
+    "Open Branches": "فتح الفروع",
+    "First reward campaign": "أول حملة ولاء",
+    "Set the number of stamps required and the reward customers earn.": "حدد عدد الأختام المطلوبة والمكافأة التي يحصل عليها العميل.",
+    "Create Campaign": "إنشاء حملة",
+    "Registration QR": "رمز QR للتسجيل",
+    "Print or display your store QR code so customers can open their digital card.": "اطبع أو اعرض رمز QR الخاص بمتجرك ليفتح العملاء بطاقاتهم.",
+    "View Store QR": "عرض رمز المتجر",
+    "First customer card and stamp": "أول بطاقة وختم",
+    "Scan a customer QR card or look up their phone number to issue the first stamp.": "امسح بطاقة عميل أو ابحث برقم هاتفه لإضافة أول ختم.",
+    "Open QR Scanner": "فتح ماسح QR"
 }
