@@ -17,11 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolesAndPermissionsSeeder::class);
 
-        // Seed default plans
+        // Seed default plans (Syrian market pricing)
         \App\Models\Plan::updateOrCreate(
             ['name' => 'Starter'],
             [
-                'price' => 29.00,
+                'price' => 9.00,
                 'features' => ['1 Branch', 'Up to 500 Customers', '1 Active Campaign'],
                 'status' => 'active',
             ]
@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\Plan::updateOrCreate(
             ['name' => 'Business'],
             [
-                'price' => 79.00,
+                'price' => 19.00,
                 'features' => ['Up to 5 Branches', 'Unlimited Customers', 'Unlimited Campaigns', 'Advanced Analytics'],
                 'status' => 'active',
             ]
@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\Plan::updateOrCreate(
             ['name' => 'Enterprise'],
             [
-                'price' => 199.00, // Or custom
+                'price' => 39.00,
                 'features' => ['Unlimited Branches', 'Custom Integrations', 'Dedicated Support'],
                 'status' => 'active',
             ]

@@ -23,7 +23,7 @@ return array (
   'compare_threedigits' => 'ThreeDigits Loyalty',
   'benefits_title' => 'Designed to Grow Your Business',
   'pricing_title' => 'Free for a Limited Time',
-  'pricing_free_banner' => 'Launch Offer: All plans are 100% FREE until the end of this year — no credit card required.',
+  'pricing_free_banner' => 'Launch Offer: All plans are 100% FREE until the end of this year — activate your shop instantly.',
   'pricing_free_label' => 'FREE',
   'pricing_free_until' => 'Free until end of this year',
   'pricing_cta_free' => 'Start Free Now',

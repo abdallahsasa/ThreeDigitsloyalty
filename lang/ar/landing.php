@@ -23,7 +23,7 @@ return array (
   'compare_threedigits' => 'ThreeDigits',
   'benefits_title' => 'مصمم لتنمية أعمالك',
   'pricing_title' => 'مجاني لفترة محدودة',
-  'pricing_free_banner' => 'عرض الإطلاق: جميع الباقات مجانية 100% حتى نهاية هذا العام — بدون الحاجة لبطاقة ائتمان.',
+  'pricing_free_banner' => 'عرض الإطلاق: جميع الباقات مجانية 100% حتى نهاية هذا العام — فعّل متجرك فوراً.',
   'pricing_free_label' => 'مجاني',
   'pricing_free_until' => 'مجاني حتى نهاية هذا العام',
   'pricing_cta_free' => 'ابدأ مجاناً الآن',
