@@ -2,23 +2,25 @@
 
 namespace App\Filament\Shop\Pages;
 
-use Filament\Pages\Page;
+use App\Models\Customer;
 use App\Models\LoyaltyCard;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Components\TextInput;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
 use App\Services\RewardLogicService;
-use Filament\Notifications\Notification;
-use Filament\Facades\Filament;
 use Exception;
+use Filament\Actions\Action;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 
 class QRScanner extends Page implements HasForms
 {
     use InteractsWithForms;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-qr-code';
+
     protected string $view = 'filament.shop.pages.q-r-scanner';
 
     public static function getNavigationLabel(): string
@@ -32,7 +34,9 @@ class QRScanner extends Page implements HasForms
     }
 
     public ?string $token = null;
+
     public ?string $phone = null;
+
     public ?LoyaltyCard $scannedCard = null;
 
     public function mount(): void
@@ -45,17 +49,19 @@ class QRScanner extends Page implements HasForms
         return $schema
             ->components([
                 TextInput::make('token')
-                    ->label('Scan QR Code')
+                    ->label(__('Scan QR Code'))
                     ->autofocus()
-                    ->helperText('Click here and scan the customer QR code.')
+                    ->placeholder('e.g. sKSwXjvQ8M...')
+                    ->helperText(__('Click here and scan the customer QR code.'))
                     ->suffixAction(
                         Action::make('searchByToken')
                             ->icon('heroicon-m-magnifying-glass')
                             ->action(fn () => $this->searchCard())
                     ),
                 TextInput::make('phone')
-                    ->label('Or Search by Phone')
-                    ->helperText('Enter the customer phone number.')
+                    ->label(__('Or Search by Phone'))
+                    ->placeholder('+963 / +966 ...')
+                    ->helperText(__('Enter the customer phone number.'))
                     ->suffixAction(
                         Action::make('searchByPhone')
                             ->icon('heroicon-m-magnifying-glass')
@@ -64,25 +70,53 @@ class QRScanner extends Page implements HasForms
             ]);
     }
 
+    public function lookup(): void
+    {
+        if (filled($this->token)) {
+            $this->searchCard();
+
+            return;
+        }
+
+        if (filled($this->phone)) {
+            $this->searchCardByPhone();
+
+            return;
+        }
+
+        Notification::make()
+            ->title(app()->getLocale() === 'ar' ? 'أدخل رمز البطاقة أو رقم الجوال أولاً' : 'Enter a QR token or phone number first')
+            ->warning()
+            ->send();
+    }
+
     public function searchCard(): void
     {
-        if (!$this->token) return;
+        if (!filled($this->token)) {
+            return;
+        }
+
+        $rawToken = trim((string) $this->token);
+        if (str_contains($rawToken, '/card/')) {
+            $path = parse_url($rawToken, PHP_URL_PATH) ?: $rawToken;
+            $rawToken = trim((string) basename($path));
+        }
 
         $tenant = Filament::getTenant();
 
-        $this->scannedCard = LoyaltyCard::with(['customer', 'campaign', 'transactions' => fn($q) => $q->latest()->take(5)])
-            ->where('token', $this->token)
+        $this->scannedCard = LoyaltyCard::with(['customer', 'campaign', 'transactions' => fn ($q) => $q->with('branch')->latest()->take(5)])
+            ->where('token', $rawToken)
             ->where('shop_id', $tenant->id)
             ->first();
 
         if (!$this->scannedCard) {
             Notification::make()
-                ->title('Card not found')
+                ->title(app()->getLocale() === 'ar' ? 'لم يتم العثور على البطاقة' : 'Card not found')
                 ->danger()
                 ->send();
         } else {
             Notification::make()
-                ->title('Card loaded successfully')
+                ->title(app()->getLocale() === 'ar' ? 'تم تحميل البطاقة بنجاح' : 'Card loaded successfully')
                 ->success()
                 ->send();
         }
@@ -90,17 +124,24 @@ class QRScanner extends Page implements HasForms
 
     public function searchCardByPhone(): void
     {
-        if (!$this->phone) return;
-
-        $tenant = Filament::getTenant();
-        
-        $customer = \App\Models\Customer::where('phone', $this->phone)->first();
-        if (!$customer) {
-            Notification::make()->title('Customer not found')->danger()->send();
+        if (!filled($this->phone)) {
             return;
         }
 
-        $this->scannedCard = LoyaltyCard::with(['customer', 'campaign', 'transactions' => fn($q) => $q->latest()->take(5)])
+        $tenant = Filament::getTenant();
+        $phone = trim((string) $this->phone);
+
+        $customer = Customer::where('phone', $phone)->first();
+        if (!$customer) {
+            Notification::make()
+                ->title(app()->getLocale() === 'ar' ? 'لم يتم العثور على العميل' : 'Customer not found')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        $this->scannedCard = LoyaltyCard::with(['customer', 'campaign', 'transactions' => fn ($q) => $q->with('branch')->latest()->take(5)])
             ->where('customer_id', $customer->id)
             ->where('shop_id', $tenant->id)
             ->latest()
@@ -108,70 +149,74 @@ class QRScanner extends Page implements HasForms
 
         if (!$this->scannedCard) {
             Notification::make()
-                ->title('Customer has no active cards in this shop')
+                ->title(app()->getLocale() === 'ar' ? 'لا توجد بطاقة نشطة لهذا العميل في متجرك' : 'Customer has no active cards in this shop')
                 ->danger()
                 ->send();
         } else {
             Notification::make()
-                ->title('Card loaded successfully')
+                ->title(app()->getLocale() === 'ar' ? 'تم تحميل البطاقة بنجاح' : 'Card loaded successfully')
                 ->success()
                 ->send();
         }
     }
 
-    public function addPurchaseAction(): Action
+    public function addPurchase(RewardLogicService $service): void
     {
-        return Action::make('addPurchase')
-            ->label('Add Purchase (Stamp)')
-            ->color('primary')
-            ->requiresConfirmation()
-            ->action(function (RewardLogicService $service) {
-                try {
-                    $this->scannedCard = $service->addPurchase(
-                        $this->scannedCard,
-                        auth()->user(),
-                        auth()->user()->branch
-                    );
-                    Notification::make()->title('Purchase added')->success()->send();
-                } catch (Exception $e) {
-                    Notification::make()->title($e->getMessage())->danger()->send();
-                }
-            })
-            ->visible(fn () => $this->scannedCard && $this->scannedCard->reward_status !== 'ready');
+        if (!$this->scannedCard) {
+            return;
+        }
+
+        try {
+            $card = $service->addPurchase(
+                $this->scannedCard,
+                auth()->user(),
+                auth()->user()->branch
+            );
+            $this->scannedCard = $card->load(['customer', 'campaign', 'transactions' => fn ($q) => $q->with('branch')->latest()->take(5)]);
+
+            Notification::make()
+                ->title(app()->getLocale() === 'ar' ? 'تمت إضافة الختم بنجاح' : 'Stamp added successfully')
+                ->success()
+                ->send();
+        } catch (Exception $e) {
+            Notification::make()
+                ->title($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
-    public function redeemRewardAction(): Action
+    public function redeemReward(RewardLogicService $service): void
     {
-        return Action::make('redeemReward')
-            ->label('Redeem Reward')
-            ->color('success')
-            ->requiresConfirmation()
-            ->action(function (RewardLogicService $service) {
-                try {
-                    $this->scannedCard = $service->redeemReward(
-                        $this->scannedCard,
-                        auth()->user(),
-                        auth()->user()->branch
-                    );
-                    Notification::make()->title('Reward redeemed successfully')->success()->send();
-                } catch (Exception $e) {
-                    Notification::make()->title($e->getMessage())->danger()->send();
-                }
-            })
-            ->visible(fn () => $this->scannedCard && $this->scannedCard->reward_status === 'ready');
+        if (!$this->scannedCard) {
+            return;
+        }
+
+        try {
+            $card = $service->redeemReward(
+                $this->scannedCard,
+                auth()->user(),
+                auth()->user()->branch
+            );
+            $this->scannedCard = $card->load(['customer', 'campaign', 'transactions' => fn ($q) => $q->with('branch')->latest()->take(5)]);
+
+            Notification::make()
+                ->title(app()->getLocale() === 'ar' ? 'تم استبدال المكافأة بنجاح' : 'Reward redeemed successfully')
+                ->success()
+                ->send();
+        } catch (Exception $e) {
+            Notification::make()
+                ->title($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
-    public function clearAction(): Action
+    public function clearCard(): void
     {
-        return Action::make('clear')
-            ->label('Scan Another')
-            ->color('secondary')
-            ->action(function () {
-                $this->token = null;
-                $this->phone = null;
-                $this->scannedCard = null;
-                $this->form->fill();
-            })
-            ->visible(fn () => $this->scannedCard !== null);
+        $this->token = null;
+        $this->phone = null;
+        $this->scannedCard = null;
+        $this->form->fill();
     }
 }

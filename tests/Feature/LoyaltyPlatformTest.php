@@ -185,7 +185,7 @@ class LoyaltyPlatformTest extends TestCase
         $this->actingAs($owner)
             ->get("/shop/{$shop->id}/q-r-scanner")
             ->assertStatus(200)
-            ->assertSee('POS Customer Lookup');
+            ->assertSee('البحث عن بطاقة العميل');
 
         $this->actingAs($owner)
             ->get("/shop/{$shop->id}/shop-qr-code")
