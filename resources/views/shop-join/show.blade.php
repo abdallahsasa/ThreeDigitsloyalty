@@ -583,16 +583,16 @@
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label" for="email">{{ $isAr ? 'البريد الإلكتروني (لإرسال البطاقة)' : 'Email Address (for your pass link)' }}</label>
+                    <label class="input-label" for="email">{{ $isAr ? 'البريد الإلكتروني (اختياري — لإرسال رابط البطاقة)' : 'Email Address (optional — for your pass link)' }}</label>
                     <div class="input-wrapper">
                         <span class="input-icon">✉️</span>
                         <input
                             id="email"
                             name="email"
                             type="email"
+                            dir="ltr"
                             class="text-field"
                             value="{{ old('email') }}"
-                            required
                             autocomplete="email"
                             placeholder="name@example.com"
                         >

@@ -216,15 +216,15 @@
     </header>
 
     <main class="grid">
-        <section class="card">
-            <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.85rem; border-radius: 999px; background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; font-size: 0.8rem; font-weight: 700; margin-bottom: 1rem;">
-                {{ $isAr ? 'مجاني حتى 31 كانون الأول 2026 — بدون بطاقة دفع' : 'Free until Dec 31, 2026 — no payment card required' }}
+        <section class="card" style="border-color: rgba(196, 181, 253, 0.35);">
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.9rem; border-radius: 999px; background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; font-size: 0.875rem; font-weight: 700; margin-bottom: 1rem;">
+                {{ $isAr ? 'مجاني حتى 31 ديسمبر 2026 — بدون بطاقة دفع' : 'Free until December 31, 2026 — no payment card required' }}
             </div>
 
             <h1 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin: 0 0 0.5rem;">
                 {{ $isAr ? 'أنشئ حساب متجرك' : 'Create your store account' }}
             </h1>
-            <p style="margin: 0 0 1.75rem; color: var(--muted); font-size: 0.95rem; line-height: 1.6;">
+            <p style="margin: 0 0 1.65rem; color: var(--muted); font-size: 1rem; line-height: 1.65;">
                 {{ $isAr ? 'أدخل البيانات الأساسية لفتح لوحة متجرك وإعداد أول بطاقة ولاء.' : 'Enter the essentials to open your merchant dashboard and set up your first loyalty card.' }}
             </p>
 
@@ -233,7 +233,7 @@
 
                 <div class="field">
                     <label for="shop_name">{{ $isAr ? 'اسم المتجر أو المقهى' : 'Store or café name' }}</label>
-                    <input id="shop_name" name="shop_name" type="text" value="{{ old('shop_name') }}" required autocomplete="organization" placeholder="{{ $isAr ? 'مثال: مقهى الياسمين' : 'e.g. Jasmine Coffee' }}">
+                    <input id="shop_name" name="shop_name" type="text" value="{{ old('shop_name') }}" required autocomplete="organization" placeholder="{{ $isAr ? 'مثال: مقهى الياسمين' : 'e.g. Jasmine Café' }}">
                     @error('shop_name') <div class="error-text" role="alert">{{ $message }}</div> @enderror
                 </div>
 
@@ -245,7 +245,7 @@
 
                 <div class="field">
                     <label for="email">{{ $isAr ? 'البريد الإلكتروني' : 'Email address' }}</label>
-                    <input id="email" name="email" type="email" dir="ltr" value="{{ old('email') }}" required autocomplete="email" placeholder="owner@yourstore.com">
+                    <input id="email" name="email" type="email" dir="ltr" style="text-align: start;" value="{{ old('email') }}" required autocomplete="email" placeholder="owner@yourstore.com">
                     @error('email') <div class="error-text" role="alert">{{ $message }}</div> @enderror
                 </div>
 
@@ -262,12 +262,26 @@
 
                 @if($plans->isNotEmpty())
                     <div class="field">
-                        <label for="plan">{{ $isAr ? 'الخطة المختارة (مجانية خلال فترة الإطلاق)' : 'Selected plan (free during launch offer)' }}</label>
+                        <label for="plan">{{ $isAr ? 'الخطة المختارة (مجانية حتى 31 ديسمبر 2026)' : 'Selected plan (free until December 31, 2026)' }}</label>
                         <select id="plan" name="plan">
                             @foreach($plans as $plan)
-                                @php $slug = \Illuminate\Support\Str::slug($plan->name); @endphp
+                                @php
+                                    $slug = \Illuminate\Support\Str::slug($plan->name);
+                                    $intPrice = (int) round((float) $plan->price);
+                                    $arPlanName = match (strtolower(trim($plan->name))) {
+                                        'starter' => 'البداية',
+                                        'business' => 'الأعمال',
+                                        'enterprise' => 'الشركات',
+                                        default => $plan->name,
+                                    };
+                                    $arAfterPrice = $intPrice <= 10 ? "{$intPrice} دولارات شهرياً" : "{$intPrice} دولاراً شهرياً";
+                                @endphp
                                 <option value="{{ $slug }}" {{ old('plan', $selectedPlanSlug) === $slug ? 'selected' : '' }}>
-                                    {{ $plan->name }} — {{ $isAr ? 'مجاني الآن (بعد العرض $' . number_format((float)$plan->price, 0) . '/شهر)' : 'Free now ($' . number_format((float)$plan->price, 0) . '/mo after offer)' }}
+                                    @if($isAr)
+                                        {{ $arPlanName }} — مجاني الآن (بعد العرض: {{ $arAfterPrice }})
+                                    @else
+                                        {{ $plan->name }} — Free now (after offer: ${{ $intPrice }}/month)
+                                    @endif
                                 </option>
                             @endforeach
                         </select>
@@ -279,7 +293,7 @@
                 </button>
             </form>
 
-            <p style="margin: 1.25rem 0 0; text-align: center; font-size: 0.9rem; color: var(--muted);">
+            <p style="margin: 1.25rem 0 0; text-align: center; font-size: 0.92rem; color: var(--muted);">
                 {{ $isAr ? 'لديك حساب متجر بالفعل؟' : 'Already have a store account?' }}
                 <a href="{{ url('/shop/login') }}" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">
                     {{ $isAr ? 'تسجيل الدخول' : 'Merchant login' }}
@@ -287,12 +301,12 @@
             </p>
         </section>
 
-        <aside class="card">
-            <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 0.5rem;">
+        <aside class="card" style="background: #050C2A; border-color: rgba(148, 163, 184, 0.16); padding: 1.5rem;">
+            <h2 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 0.45rem; color: #e2e8f0;">
                 {{ $isAr ? 'الخطوات التالية بعد التسجيل' : 'What happens after you register' }}
             </h2>
-            <p style="margin: 0 0 1rem; color: var(--muted); font-size: 0.9rem; line-height: 1.6;">
-                {{ $isAr ? 'ستنتقل مباشرة إلى دليل البدء السريع لإطلاق برنامجك في دقائق:' : 'You will go straight to a guided setup checklist to launch in minutes:' }}
+            <p style="margin: 0 0 1rem; color: var(--muted); font-size: 0.9rem; line-height: 1.65;">
+                {{ $isAr ? 'ستنتقل مباشرة إلى دليل البدء السريع لإطلاق برنامجك:' : 'You will go straight to a guided setup checklist to launch:' }}
             </p>
 
             <div>

@@ -20,15 +20,15 @@ return [
     'hero_benefit_2' => 'Arabic & English',
     'hero_benefit_3' => 'Multi-branch support',
 
-    'demo_badge' => 'Interactive demo',
-    'demo_shop_name' => 'Roast & Co. Café (Sample)',
+    'demo_badge' => 'Demo',
+    'demo_shop_name' => 'Jasmine Café',
     'demo_program_name' => 'Coffee Stamp Card',
     'demo_stamps_of' => 'of',
-    'demo_reward_label' => 'Reward: Free coffee on stamp 6',
+    'demo_reward_label' => 'Free coffee when you collect 6 stamps',
     'demo_add_stamp' => 'Try adding a stamp',
     'demo_reward_ready' => 'Your reward is ready!',
     'demo_replay' => 'Replay demo',
-    'demo_note' => 'Sample card only — no data is saved.',
+    'demo_note' => 'Interactive sample card — no data is saved.',
 
     // How it works (Merchant vs Customer)
     'how_title' => 'How ThreeDigits Loyalty works',
@@ -47,7 +47,7 @@ return [
     'customer_step_1_title' => 'Scan the store’s registration QR',
     'customer_step_1_desc' => 'Customers scan with their phone camera — no app required.',
     'customer_step_2_title' => 'Open your digital card',
-    'customer_step_2_desc' => 'They enter their name, email, and phone to open their card.',
+    'customer_step_2_desc' => 'They enter their name and mobile number (plus optional email) to open their card.',
     'customer_step_3_title' => 'Collect stamps when purchasing',
     'customer_step_3_desc' => 'Each visit adds a stamp and updates their card progress.',
     'customer_step_4_title' => 'Redeem your reward',
@@ -69,9 +69,9 @@ return [
 
     // Pricing
     'pricing_title' => 'Transparent pricing & launch offer',
-    'pricing_free_banner' => 'Launch Offer: All plans are 100% free until December 31, 2026 — no payment card required.',
-    'pricing_free_label' => 'Free',
-    'pricing_free_until' => 'Free until Dec 31, 2026',
+    'pricing_free_banner' => 'Launch Offer: All plans are free until December 31, 2026 — no payment card required.',
+    'pricing_free_label' => 'Free during launch offer',
+    'pricing_free_until' => 'Until December 31, 2026',
     'pricing_cta_free' => 'Create your store’s card',
     'pricing_multi_branch_badge' => 'For multi-branch businesses',
 

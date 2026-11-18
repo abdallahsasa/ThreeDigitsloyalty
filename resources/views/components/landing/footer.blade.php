@@ -43,18 +43,21 @@
 
             <div>
                 <h4 style="color: #f8fafc; font-weight: 800; margin: 0 0 0.75rem; font-size: 0.95rem;">{{ __('landing.footer_support') }}</h4>
-                <div style="display: grid; gap: 0.5rem; font-size: 0.86rem;">
+                <div style="display: grid; gap: 0.55rem; font-size: 0.88rem;">
                     @if($hasConfiguredEmail)
                         <a href="mailto:{{ $supportEmail }}" class="ltr-inline" style="color: #c4b5fd; text-decoration: underline;">
                             {{ $supportEmail }}
                         </a>
                     @else
                         <a href="{{ config('loyalty.agency.url', 'https://threedigitsoftware.com/') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; text-decoration: underline;">
-                            {{ $isAr ? 'تواصل عبر Three Digit Software' : 'Contact via Three Digit Software' }}
+                            {{ $isAr ? 'الدعم عبر موقع Three Digit Software' : 'Support via Three Digit Software' }}
                         </a>
                     @endif
-                    <span style="color: #94a3b8;">
+                    <span style="color: #cbd5e1;">
                         {{ $isAr ? 'بيانات متجرك منفصلة عن بيانات المتاجر الأخرى.' : 'Your store’s data is kept separate from other stores.' }}
+                    </span>
+                    <span style="color: #94a3b8; font-size: 0.84rem;">
+                        {{ $isAr ? 'سياسة الخصوصية وشروط الاستخدام: قيد النشر قبل الإطلاق الرسمي.' : 'Privacy Policy & Terms of Service: pending publication prior to public launch.' }}
                     </span>
                 </div>
             </div>

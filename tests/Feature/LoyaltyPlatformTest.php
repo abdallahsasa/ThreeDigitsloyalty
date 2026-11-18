@@ -306,20 +306,31 @@ class LoyaltyPlatformTest extends TestCase
         $starter = Plan::create(['name' => 'Starter', 'price' => 9, 'features' => ['1 Branch'], 'status' => 'active']);
         $business = Plan::create(['name' => 'Business', 'price' => 19, 'features' => ['Up to 5 Branches'], 'status' => 'active']);
 
-        // Homepage in Arabic (default) & English: no /admin link, no Luxury SaaS copy
+        // Homepage in Arabic (default) & English: no /admin link, no Luxury SaaS copy, no crossed-out pricing
         $this->get('/')
             ->assertStatus(200)
             ->assertDontSee('href="' . url('/admin') . '"', false)
             ->assertDontSee('Luxury Digital Loyalty')
+            ->assertDontSee('line-through')
             ->assertSee('خلّي زبائنك يرجعوا')
-            ->assertSee('31 كانون الأول 2026');
+            ->assertSee('مقهى الياسمين')
+            ->assertSee('31 ديسمبر 2026');
 
         $this->get(route('lang.switch', 'en'));
         $this->get('/')
             ->assertStatus(200)
             ->assertSee('Give your customers a reason to come back.')
+            ->assertSee('Jasmine Café')
             ->assertSee('December 31, 2026')
             ->assertSee('A product by Three Digit Software');
+
+        // Customer can join a shop with only name + phone (email optional)
+        $phoneOnlyShop = Shop::create(['name' => 'No Email Cafe', 'status' => 'active']);
+        $this->post(route('shop.join.store', $phoneOnlyShop->slug), [
+            'name' => 'Salma Hassan',
+            'phone' => '+963944112233',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('customers', ['phone' => '+963944112233', 'email' => null]);
 
         // Funnel tracking endpoint
         $this->postJson(route('funnel.track'), [

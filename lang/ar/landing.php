@@ -21,14 +21,14 @@ return [
     'hero_benefit_3' => 'يدعم تعدد الفروع',
 
     'demo_badge' => 'مثال توضيحي',
-    'demo_shop_name' => 'مقهى روست آند كو (نموذج)',
+    'demo_shop_name' => 'مقهى الياسمين',
     'demo_program_name' => 'بطاقة أختام القهوة',
     'demo_stamps_of' => 'من',
-    'demo_reward_label' => 'المكافأة: قهوة مجانية عند الختم 6',
+    'demo_reward_label' => 'قهوة مجانية عند اكتمال ٦ أختام',
     'demo_add_stamp' => 'جرّب إضافة ختم',
     'demo_reward_ready' => 'مكافأتك جاهزة!',
     'demo_replay' => 'إعادة التجربة',
-    'demo_note' => 'بطاقة تجريبية فقط — لا يتم حفظ أي بيانات.',
+    'demo_note' => 'بطاقة توضيحية فقط — لا يتم حفظ أي بيانات.',
 
     // How it works (Merchant vs Customer)
     'how_title' => 'كيف يعمل ThreeDigits Loyalty',
@@ -47,7 +47,7 @@ return [
     'customer_step_1_title' => 'امسح رمز QR الخاص بالمتجر',
     'customer_step_1_desc' => 'يمسح العميل الرمز بكاميرا الهاتف بدون تحميل أي تطبيق.',
     'customer_step_2_title' => 'افتح بطاقتك الرقمية',
-    'customer_step_2_desc' => 'يدخل الاسم والبريد ورقم الجوال لتفتح بطاقته فوراً.',
+    'customer_step_2_desc' => 'يدخل الاسم ورقم الجوال (مع البريد الإلكتروني اختيارياً) لتفتح بطاقته فوراً.',
     'customer_step_3_title' => 'اجمع الأختام عند الشراء',
     'customer_step_3_desc' => 'تُضاف الأختام مع كل زيارة ويتحدّث التقدّم تلقائياً.',
     'customer_step_4_title' => 'استبدل مكافأتك',
@@ -69,9 +69,9 @@ return [
 
     // Pricing
     'pricing_title' => 'أسعار واضحة وعرض الإطلاق',
-    'pricing_free_banner' => 'عرض الإطلاق: جميع الباقات مجانية 100% حتى 31 كانون الأول 2026 — بدون بطاقة دفع.',
-    'pricing_free_label' => 'مجاني',
-    'pricing_free_until' => 'مجاني حتى 31 كانون الأول 2026',
+    'pricing_free_banner' => 'عرض الإطلاق: جميع الباقات مجانية حتى 31 ديسمبر 2026 — بدون بطاقة دفع.',
+    'pricing_free_label' => 'مجاني خلال عرض الإطلاق',
+    'pricing_free_until' => 'حتى 31 ديسمبر 2026',
     'pricing_cta_free' => 'أنشئ بطاقة متجرك',
     'pricing_multi_branch_badge' => 'للمتاجر متعددة الفروع',
 

@@ -61,15 +61,22 @@ class ShopJoinController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:40'],
         ]);
 
+        $phone = trim($validated['phone']);
+        $emailInput = isset($validated['email']) && trim((string) $validated['email']) !== ''
+            ? trim((string) $validated['email'])
+            : null;
+
+        $existingCustomer = Customer::withTrashed()->where('phone', $phone)->first();
+
         $customer = Customer::withTrashed()->updateOrCreate(
-            ['phone' => trim($validated['phone'])],
+            ['phone' => $phone],
             [
                 'name' => trim($validated['name']),
-                'email' => trim($validated['email']),
+                'email' => $emailInput ?? $existingCustomer?->email,
                 'language' => 'ar',
                 'status' => 'active',
                 'deleted_at' => null,
@@ -115,7 +122,9 @@ class ShopJoinController extends Controller
             app(\App\Services\FunnelTracker::class)->track('first_customer_card_issued', ['shop_id' => $shop->id]);
         }
 
-        Mail::to($customer->email)->send(new CustomerWelcomeMail($customer, $shop, $card));
+        if (!empty($customer->email)) {
+            Mail::to($customer->email)->send(new CustomerWelcomeMail($customer, $shop, $card));
+        }
 
         return redirect()
             ->route('loyalty-card.show', ['token' => $card->token, 'joined' => 1]);
