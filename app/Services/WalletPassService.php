@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Models\LoyaltyCard;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 use ZipArchive;
@@ -216,15 +219,19 @@ class WalletPassService
         $issuerId = config('services.wallet.google_issuer_id') ?: '3388000000022222222';
         $classSuffix = preg_replace('/[^a-zA-Z0-9_.-]/', '_', config('services.wallet.google_class_suffix', 'threedigits_loyalty_pass'));
         $classId = "{$issuerId}.{$classSuffix}_{$card->shop_id}";
-        $objectId = "{$issuerId}.card_{$card->id}_{$card->token}";
+        $objectId = "{$issuerId}.card_{$card->id}_" . preg_replace('/[^a-zA-Z0-9_.-]/', '', $card->token);
         $required = max(1, (int) ($card->campaign->required_purchases_count ?? 1));
 
         [$clientEmail, $privateKeyPem] = $this->resolveGoogleServiceAccountCredentials();
 
         $logoUrl = $card->shop->logo_url ?: asset('images/logo-icon.png');
         if (!str_starts_with($logoUrl, 'https://')) {
-            // Google Wallet requires a publicly reachable https:// logo URI; provide a fallback if running on local http
-            $logoUrl = 'https://placehold.co/256x256/010A29/743EE2.png?text=3D';
+            $logoUrl = 'https://loylty.threedigitsoftware.com/images/logo-icon.png';
+        }
+
+        // Ensure the LoyaltyClass exists on Google Wallet REST API before generating the Save JWT
+        if ($this->isGoogleWalletConfigured() && !app()->runningUnitTests()) {
+            $this->ensureGoogleLoyaltyClassExists($clientEmail, $privateKeyPem, $classId, $card, $logoUrl);
         }
 
         $claims = [
@@ -232,28 +239,8 @@ class WalletPassService
             'aud' => 'google',
             'typ' => 'savetowallet',
             'iat' => time(),
-            'origins' => [rtrim((string) config('app.url', 'https://loylty.threedigitsoftware.com'), '/')],
+            'origins' => [],
             'payload' => [
-                'loyaltyClasses' => [
-                    [
-                        'id' => $classId,
-                        'issuerName' => 'ThreeDigits Loyalty',
-                        'programName' => $card->campaign->name ?? ($card->shop->name . ' Loyalty'),
-                        'programLogo' => [
-                            'sourceUri' => [
-                                'uri' => $logoUrl,
-                            ],
-                            'contentDescription' => [
-                                'defaultValue' => [
-                                    'language' => 'en-US',
-                                    'value' => $card->shop->name,
-                                ],
-                            ],
-                        ],
-                        'hexBackgroundColor' => '#010A29',
-                        'reviewStatus' => 'UNDER_REVIEW',
-                    ],
-                ],
                 'loyaltyObjects' => [
                     [
                         'id' => $objectId,
@@ -287,7 +274,7 @@ class WalletPassService
                         'linksModuleData' => [
                             'uris' => [
                                 [
-                                    'uri' => $qrUrl,
+                                    'uri' => str_starts_with($qrUrl, 'https://') ? $qrUrl : 'https://loylty.threedigitsoftware.com/card/' . $card->token,
                                     'description' => 'Open Live Pass',
                                     'id' => 'pass_url',
                                 ],
@@ -301,6 +288,100 @@ class WalletPassService
         $jwt = $this->signJwtRs256($claims, $privateKeyPem);
 
         return "https://pay.google.com/gp/v/save/{$jwt}";
+    }
+
+    /**
+     * Ensure the shop's LoyaltyClass exists in Google Wallet API (creates it via REST API if missing).
+     */
+    protected function ensureGoogleLoyaltyClassExists(
+        string $clientEmail,
+        string $privateKeyPem,
+        string $classId,
+        LoyaltyCard $card,
+        string $logoUrl
+    ): void {
+        $cacheKey = 'google_wallet_class_ready_' . md5($classId);
+        if (Cache::has($cacheKey)) {
+            return;
+        }
+
+        try {
+            $accessToken = $this->getGoogleOAuthAccessToken($clientEmail, $privateKeyPem);
+            if (!$accessToken) {
+                return;
+            }
+
+            $baseUrl = 'https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass';
+            $check = Http::withToken($accessToken)->timeout(8)->get("{$baseUrl}/{$classId}");
+
+            if ($check->successful()) {
+                Cache::put($cacheKey, true, now()->addHours(12));
+
+                return;
+            }
+
+            if ($check->status() === 404) {
+                $classPayload = [
+                    'id' => $classId,
+                    'issuerName' => $card->shop->name ?: 'ThreeDigits Loyalty',
+                    'programName' => $card->campaign->name ?? ($card->shop->name . ' Rewards'),
+                    'programLogo' => [
+                        'sourceUri' => [
+                            'uri' => $logoUrl,
+                        ],
+                        'contentDescription' => [
+                            'defaultValue' => [
+                                'language' => 'en-US',
+                                'value' => $card->shop->name,
+                            ],
+                        ],
+                    ],
+                    'hexBackgroundColor' => '#0A0F2C',
+                    'reviewStatus' => 'UNDER_REVIEW',
+                ];
+
+                $create = Http::withToken($accessToken)->timeout(8)->post($baseUrl, $classPayload);
+
+                if ($create->successful() || $create->status() === 409) {
+                    Cache::put($cacheKey, true, now()->addHours(12));
+                } else {
+                    Log::warning('Google Wallet LoyaltyClass creation failed', [
+                        'classId' => $classId,
+                        'status' => $create->status(),
+                        'body' => $create->body(),
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Google Wallet class sync error', ['error' => $e->getMessage()]);
+        }
+    }
+
+    protected function getGoogleOAuthAccessToken(string $clientEmail, string $privateKeyPem): ?string
+    {
+        return Cache::remember('google_wallet_oauth_token_' . md5($clientEmail), now()->addMinutes(50), function () use ($clientEmail, $privateKeyPem) {
+            $now = time();
+            $assertion = $this->signJwtRs256([
+                'iss' => $clientEmail,
+                'scope' => 'https://www.googleapis.com/auth/wallet_object.issuer',
+                'aud' => 'https://oauth2.googleapis.com/token',
+                'iat' => $now,
+                'exp' => $now + 3600,
+            ], $privateKeyPem);
+
+            $response = Http::asForm()->timeout(8)->post('https://oauth2.googleapis.com/token', [
+                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion' => $assertion,
+            ]);
+
+            if ($response->successful()) {
+                return $response->json('access_token');
+            }
+
+            Log::warning('Google Wallet OAuth token request failed', ['status' => $response->status(), 'body' => $response->body()]);
+
+            return null;
+        });
     }
 
     /**
