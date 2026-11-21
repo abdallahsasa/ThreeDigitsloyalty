@@ -123,9 +123,20 @@ class WalletPassService
     public function isGoogleWalletConfigured(): bool
     {
         $issuerId = config('services.wallet.google_issuer_id');
-        $saConfig = config('services.wallet.google_service_account_json');
+        if (empty($issuerId)) {
+            return false;
+        }
 
-        if (empty($issuerId) || empty($saConfig)) {
+        $saBase64 = (string) config('services.wallet.google_service_account_base64', '');
+        if ($saBase64 !== '') {
+            $decoded = json_decode((string) base64_decode($saBase64, true), true);
+            if (is_array($decoded) && !empty($decoded['client_email']) && !empty($decoded['private_key'])) {
+                return true;
+            }
+        }
+
+        $saConfig = config('services.wallet.google_service_account_json');
+        if (empty($saConfig)) {
             return false;
         }
 
@@ -690,6 +701,14 @@ class WalletPassService
      */
     protected function resolveGoogleServiceAccountCredentials(): array
     {
+        $saBase64 = (string) config('services.wallet.google_service_account_base64', '');
+        if ($saBase64 !== '') {
+            $decoded = json_decode((string) base64_decode($saBase64, true), true);
+            if (is_array($decoded) && !empty($decoded['client_email']) && !empty($decoded['private_key'])) {
+                return [$decoded['client_email'], $decoded['private_key']];
+            }
+        }
+
         $saConfig = config('services.wallet.google_service_account_json');
         $saFile = $this->resolveExistingFilePath($saConfig, storage_path('app/wallet/google-service-account.json'));
 

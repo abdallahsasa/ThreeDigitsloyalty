@@ -47,6 +47,7 @@ return [
         'google_issuer_id' => env('GOOGLE_WALLET_ISSUER_ID', ''),
         'google_class_suffix' => env('GOOGLE_WALLET_CLASS_SUFFIX', 'threedigits_loyalty_pass'),
         'google_service_account_json' => env('GOOGLE_WALLET_SERVICE_ACCOUNT_JSON') ?: storage_path('app/wallet/google-service-account.json'),
+        'google_service_account_base64' => env('GOOGLE_WALLET_SERVICE_ACCOUNT_BASE64', ''),
     ],
 
 ];
