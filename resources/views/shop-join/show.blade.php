@@ -249,6 +249,60 @@
             margin-top: 0.35rem;
         }
 
+        .phone-combo {
+            display: flex;
+            align-items: stretch;
+            direction: ltr;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .phone-combo:focus-within {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 0 4px rgba(116, 62, 226, 0.18);
+        }
+
+        .country-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 0.9rem 0.65rem 0.9rem 0.85rem;
+            outline: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .country-select option {
+            background: #071033;
+            color: #ffffff;
+        }
+
+        .phone-digits-input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.9rem 1rem;
+            outline: none;
+            letter-spacing: 0.02em;
+        }
+
+        .phone-digits-input::placeholder {
+            color: #64748b;
+        }
+
         .cta-btn {
             width: 100%;
             margin-top: 0.5rem;
@@ -602,19 +656,50 @@
 
                 <div class="input-group">
                     <label class="input-label" for="phone">{{ $isAr ? 'رقم الجوال' : 'Phone Number' }}</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">📱</span>
+                    @php
+                        $countries = [
+                            ['code' => '+963', 'label' => '🇸🇾 +963'],
+                            ['code' => '+90',  'label' => '🇹🇷 +90'],
+                            ['code' => '+961', 'label' => '🇱🇧 +961'],
+                            ['code' => '+962', 'label' => '🇯🇴 +962'],
+                            ['code' => '+966', 'label' => '🇸🇦 +966'],
+                            ['code' => '+971', 'label' => '🇦🇪 +971'],
+                            ['code' => '+964', 'label' => '🇮🇶 +964'],
+                            ['code' => '+20',  'label' => '🇪🇬 +20'],
+                            ['code' => '+965', 'label' => '🇰🇼 +965'],
+                            ['code' => '+974', 'label' => '🇶🇦 +974'],
+                            ['code' => '+968', 'label' => '🇴🇲 +968'],
+                            ['code' => '+973', 'label' => '🇧🇭 +973'],
+                            ['code' => '+49',  'label' => '🇩🇪 +49'],
+                            ['code' => '+44',  'label' => '🇬🇧 +44'],
+                            ['code' => '+1',   'label' => '🇺🇸 +1'],
+                        ];
+                        $selectedCode = old('country_code', '+963');
+                    @endphp
+                    <div class="phone-combo">
+                        <select id="country_code" name="country_code" class="country-select" aria-label="{{ $isAr ? 'رمز الدولة' : 'Country code' }}" onchange="updateLivePass()">
+                            @foreach($countries as $country)
+                                <option value="{{ $country['code'] }}" {{ $selectedCode === $country['code'] ? 'selected' : '' }}>
+                                    {{ $country['label'] }}
+                                </option>
+                            @endforeach
+                        </select>
                         <input
                             id="phone"
                             name="phone"
                             type="tel"
-                            class="text-field"
+                            inputmode="numeric"
+                            pattern="[0-9]{7,15}"
+                            class="phone-digits-input"
                             value="{{ old('phone') }}"
                             required
-                            autocomplete="tel"
-                            placeholder="+966 5X XXX XXXX"
-                            oninput="updateLivePass()"
+                            autocomplete="tel-national"
+                            placeholder="9XX XXX XXX"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateLivePass();"
                         >
+                    </div>
+                    <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 0.35rem;">
+                        {{ $isAr ? 'أدخل أرقام الجوال فقط بدون صفر في البداية (الافتراضي سوريا 963+).' : 'Enter digits only without a leading zero (Syria +963 selected by default).' }}
                     </div>
                     @error('phone') <div class="error-msg">{{ $message }}</div> @enderror
                 </div>
@@ -718,19 +803,21 @@
 <script>
     function updateLivePass() {
         const nameInput = document.getElementById('name');
+        const codeSelect = document.getElementById('country_code');
         const phoneInput = document.getElementById('phone');
         const target = document.getElementById('live-member-line');
         const fallback = @json($isAr ? 'اسم العضو يظهر هنا' : 'Your Name Appears Here');
 
         const nameVal = nameInput.value.trim();
-        const phoneVal = phoneInput.value.trim();
+        const digitsVal = phoneInput.value.replace(/[^0-9]/g, '').replace(/^0+/, '');
+        const fullPhone = digitsVal ? ((codeSelect ? codeSelect.value : '+963') + ' ' + digitsVal) : '';
 
-        if (nameVal && phoneVal) {
-            target.textContent = nameVal + ' · ' + phoneVal;
+        if (nameVal && fullPhone) {
+            target.textContent = nameVal + ' · ' + fullPhone;
         } else if (nameVal) {
             target.textContent = nameVal;
-        } else if (phoneVal) {
-            target.textContent = phoneVal;
+        } else if (fullPhone) {
+            target.textContent = fullPhone;
         } else {
             target.textContent = fallback;
         }

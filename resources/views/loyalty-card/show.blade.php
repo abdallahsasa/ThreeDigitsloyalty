@@ -337,50 +337,92 @@
             justify-content: center;
         }
 
-        .wallet-grid {
-            margin-top: 1rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.6rem;
+        .wallet-panel {
+            margin-top: 1.15rem;
+            padding: 1rem;
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(116, 62, 226, 0.08), rgba(59, 66, 213, 0.05));
+            border: 1.5px solid rgba(116, 62, 226, 0.25);
         }
 
-        .wallet-btn {
+        .wallet-panel-title {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .wallet-stack {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.65rem;
+        }
+
+        .wallet-cta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.85rem 1.05rem;
+            border-radius: 14px;
+            text-decoration: none;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+            box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.32);
+        }
+
+        .wallet-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.42);
+        }
+
+        .wallet-cta-apple {
+            background: #000000;
+            color: #ffffff;
+            border: 1.5px solid #27272a;
+        }
+
+        .wallet-cta-google {
+            background: #111827;
+            color: #ffffff;
+            border: 1.5px solid #374151;
+        }
+
+        .wallet-cta-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .wallet-cta-sub {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            line-height: 1.1;
+        }
+
+        .wallet-cta-main {
+            font-size: 0.96rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.25;
+        }
+
+        .wallet-cta-arrow {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.45rem;
-            background: #0f172a;
-            color: #f8fafc;
-            border: 1px solid #1e293b;
-            padding: 0.65rem 0.75rem;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 0.76rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.15s ease;
-        }
-
-        .wallet-btn:hover {
-            background: #1e293b;
-            transform: translateY(-1px);
-        }
-
-        .wallet-modal {
-            display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 14px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            text-align: start;
-            font-size: 0.8rem;
-            color: #334155;
-            line-height: 1.55;
-        }
-
-        .wallet-modal.active {
-            display: block;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
         }
 
         .copy-btn {
@@ -494,6 +536,48 @@
                 @endif
             </div>
 
+            {{-- Prominent Wallet CTA Panel right above QR --}}
+            <div class="wallet-panel">
+                <div class="wallet-panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#743EE2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="14" rx="3"></rect>
+                        <line x1="2" y1="10" x2="22" y2="10"></line>
+                    </svg>
+                    <span>{{ $isAr ? 'احفظ بطاقتك الآن في محفظة هاتفك' : 'Save Your Card to Phone Wallet' }}</span>
+                </div>
+
+                <div class="wallet-stack">
+                    <a href="{{ route('loyalty-card.apple-pass', $card->token) }}" class="wallet-cta wallet-cta-apple">
+                        <div class="wallet-cta-left">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink: 0;">
+                                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.33c.64-.78 1.08-1.86.96-2.94-.93.04-2.06.62-2.72 1.4-.58.68-1.1 1.79-.96 2.84 1.04.08 2.09-.52 2.72-1.3z"/>
+                            </svg>
+                            <div style="text-align: start;">
+                                <div class="wallet-cta-sub">{{ $isAr ? 'لمستخدمي iPhone' : 'For iPhone' }}</div>
+                                <div class="wallet-cta-main">{{ $isAr ? 'أضف إلى Apple Wallet' : 'Add to Apple Wallet' }}</div>
+                            </div>
+                        </div>
+                        <span class="wallet-cta-arrow" aria-hidden="true">{{ $isAr ? '←' : '→' }}</span>
+                    </a>
+
+                    <a href="{{ route('loyalty-card.google-pass', $card->token) }}" class="wallet-cta wallet-cta-google">
+                        <div class="wallet-cta-left">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="flex-shrink: 0;">
+                                <rect x="2" y="4" width="20" height="16" rx="4" fill="#1f2937" stroke="#60a5fa" stroke-width="1.5"/>
+                                <path d="M2 9h20" stroke="#34d399" stroke-width="2"/>
+                                <path d="M2 12h20" stroke="#fbbf24" stroke-width="2"/>
+                                <path d="M2 15h20" stroke="#f87171" stroke-width="2"/>
+                            </svg>
+                            <div style="text-align: start;">
+                                <div class="wallet-cta-sub">{{ $isAr ? 'لمستخدمي Android' : 'For Android' }}</div>
+                                <div class="wallet-cta-main">{{ $isAr ? 'أضف إلى Google Wallet' : 'Add to Google Wallet' }}</div>
+                            </div>
+                        </div>
+                        <span class="wallet-cta-arrow" aria-hidden="true">{{ $isAr ? '←' : '→' }}</span>
+                    </a>
+                </div>
+            </div>
+
             <div class="ticket-divider"></div>
 
             <div class="qr-section">
@@ -502,16 +586,6 @@
                 </div>
                 <div class="qr-hint">
                     {{ $isAr ? 'أظهر رمز QR للكاشير عند الدفع لإضافة ختم.' : 'Present this QR code to the cashier at checkout.' }}
-                </div>
-                <div class="wallet-grid">
-                    <a href="{{ route('loyalty-card.apple-pass', $card->token) }}" class="wallet-btn" style="text-decoration: none;">
-                        <span style="font-size: 1.05rem; line-height: 1;"></span>
-                        <span>{{ $isAr ? 'أضف إلى Apple Wallet' : 'Add to Apple Wallet' }}</span>
-                    </a>
-                    <a href="{{ route('loyalty-card.google-pass', $card->token) }}" class="wallet-btn" style="text-decoration: none;">
-                        <span style="font-size: 0.95rem; line-height: 1;">💳</span>
-                        <span>{{ $isAr ? 'أضف إلى Google Wallet' : 'Add to Google Wallet' }}</span>
-                    </a>
                 </div>
 
                 <div class="actions-row">

@@ -324,11 +324,22 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('December 31, 2026')
             ->assertSee('A product by Three Digit Software');
 
-        // Customer can join a shop with only name + phone (email optional)
+        // Customer can join a shop with country code (+963 Syria default) + local digits (email optional)
         $phoneOnlyShop = Shop::create(['name' => 'No Email Cafe', 'status' => 'active']);
+        $this->get(route('shop.join', $phoneOnlyShop->slug))
+            ->assertStatus(200)
+            ->assertSee('value="+963" selected', false);
+
+        $this->post(route('shop.join.store', $phoneOnlyShop->slug), [
+            'name' => 'Invalid Phone User',
+            'country_code' => '+963',
+            'phone' => 'not-a-phone',
+        ])->assertSessionHasErrors('phone');
+
         $this->post(route('shop.join.store', $phoneOnlyShop->slug), [
             'name' => 'Salma Hassan',
-            'phone' => '+963944112233',
+            'country_code' => '+963',
+            'phone' => '0944112233',
         ])->assertRedirect();
         $this->assertDatabaseHas('customers', ['phone' => '+963944112233', 'email' => null]);
 

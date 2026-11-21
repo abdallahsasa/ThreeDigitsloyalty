@@ -62,10 +62,31 @@ class ShopJoinController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
+            'country_code' => ['nullable', 'string', 'regex:/^\+\d{1,4}$/'],
             'phone' => ['required', 'string', 'max:40'],
         ]);
 
-        $phone = trim($validated['phone']);
+        $rawPhone = trim((string) $validated['phone']);
+        $countryCode = isset($validated['country_code']) ? trim((string) $validated['country_code']) : '';
+
+        // Normalize to strict E.164 phone format (digits only with leading +)
+        if ($countryCode !== '' && !str_starts_with($rawPhone, '+')) {
+            $localDigits = preg_replace('/\D+/', '', $rawPhone);
+            $localDigits = ltrim((string) $localDigits, '0');
+            $phone = $countryCode . $localDigits;
+        } else {
+            $digitsOnly = preg_replace('/\D+/', '', $rawPhone);
+            $phone = ($digitsOnly !== '' ? '+' . $digitsOnly : '');
+        }
+
+        if (!preg_match('/^\+[1-9]\d{6,14}$/', $phone)) {
+            return back()
+                ->withErrors(['phone' => app()->getLocale() === 'ar'
+                    ? 'يرجى إدخال رقم هاتف صحيح بالأرقام فقط.'
+                    : 'Please enter a valid phone number using digits only.'])
+                ->withInput();
+        }
+
         $emailInput = isset($validated['email']) && trim((string) $validated['email']) !== ''
             ? trim((string) $validated['email'])
             : null;
