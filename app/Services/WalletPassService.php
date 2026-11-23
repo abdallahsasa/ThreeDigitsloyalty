@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Branch;
 use App\Models\LoyaltyCard;
+use App\Models\Shop;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -50,7 +52,7 @@ class WalletPassService
             ]);
         }
 
-        return [
+        $payload = [
             'formatVersion' => 1,
             'passTypeIdentifier' => config('services.wallet.apple_pass_type_id', 'pass.com.threedigitsoftware.loyalty'),
             'serialNumber' => $card->token,
@@ -83,7 +85,6 @@ class WalletPassService
                         'key' => 'stamps',
                         'label' => 'STAMPS',
                         'value' => "{$card->current_stamps_count} / {$required}",
-                        'changeMessage' => 'Stamps updated: %@',
                     ],
                 ],
                 'primaryFields' => [],
@@ -109,12 +110,19 @@ class WalletPassService
                         'key' => 'status',
                         'label' => 'STATUS',
                         'value' => $statusText,
-                        'changeMessage' => 'Card status: %@',
                     ],
                 ],
                 'backFields' => $backFields,
             ],
         ];
+
+        $locations = $this->resolveShopLocations($card);
+        if (!empty($locations)) {
+            $payload['locations'] = $locations;
+            $payload['maxDistance'] = 150;
+        }
+
+        return $payload;
     }
 
     /**
@@ -262,6 +270,51 @@ class WalletPassService
             $this->ensureGoogleLoyaltyClassExists($clientEmail, $privateKeyPem, $classId, $card, $logoUrl);
         }
 
+        $loyaltyObject = [
+            'id' => $objectId,
+            'classId' => $classId,
+            'state' => 'ACTIVE',
+            'accountId' => $card->customer->phone,
+            'accountName' => $card->customer->name,
+            'loyaltyPoints' => [
+                'label' => 'Stamps',
+                'balance' => [
+                    'string' => "{$card->current_stamps_count} / {$required}",
+                ],
+            ],
+            'barcode' => [
+                'type' => 'QR_CODE',
+                'value' => $card->token,
+                'alternateText' => $card->customer->phone,
+            ],
+            'textModulesData' => [
+                [
+                    'header' => 'SHOP',
+                    'body' => $card->shop->name,
+                    'id' => 'shop_name',
+                ],
+                [
+                    'header' => 'REWARD',
+                    'body' => $card->campaign->reward_name ?? 'Free Reward',
+                    'id' => 'reward_name',
+                ],
+            ],
+            'linksModuleData' => [
+                'uris' => [
+                    [
+                        'uri' => str_starts_with($qrUrl, 'https://') ? $qrUrl : 'https://loylty.threedigitsoftware.com/card/' . $card->token,
+                        'description' => 'Open Live Pass',
+                        'id' => 'pass_url',
+                    ],
+                ],
+            ],
+        ];
+
+        $geoLocations = $this->resolveGoogleLocations($card);
+        if (!empty($geoLocations)) {
+            $loyaltyObject['locations'] = $geoLocations;
+        }
+
         $claims = [
             'iss' => $clientEmail,
             'aud' => 'google',
@@ -269,47 +322,7 @@ class WalletPassService
             'iat' => time(),
             'origins' => [],
             'payload' => [
-                'loyaltyObjects' => [
-                    [
-                        'id' => $objectId,
-                        'classId' => $classId,
-                        'state' => 'ACTIVE',
-                        'accountId' => $card->customer->phone,
-                        'accountName' => $card->customer->name,
-                        'loyaltyPoints' => [
-                            'label' => 'Stamps',
-                            'balance' => [
-                                'string' => "{$card->current_stamps_count} / {$required}",
-                            ],
-                        ],
-                        'barcode' => [
-                            'type' => 'QR_CODE',
-                            'value' => $card->token,
-                            'alternateText' => $card->customer->phone,
-                        ],
-                        'textModulesData' => [
-                            [
-                                'header' => 'SHOP',
-                                'body' => $card->shop->name,
-                                'id' => 'shop_name',
-                            ],
-                            [
-                                'header' => 'REWARD',
-                                'body' => $card->campaign->reward_name ?? 'Free Reward',
-                                'id' => 'reward_name',
-                            ],
-                        ],
-                        'linksModuleData' => [
-                            'uris' => [
-                                [
-                                    'uri' => str_starts_with($qrUrl, 'https://') ? $qrUrl : 'https://loylty.threedigitsoftware.com/card/' . $card->token,
-                                    'description' => 'Open Live Pass',
-                                    'id' => 'pass_url',
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
+                'loyaltyObjects' => [$loyaltyObject],
             ],
         ];
 
@@ -369,6 +382,116 @@ class WalletPassService
             'apple_failed' => $appleFailed,
             'google_sent' => $googleSent,
         ];
+    }
+
+    /**
+     * Build a localized progress notification message for a stamp update or reminder.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function buildStampProgressMessage(LoyaltyCard $card, bool $isReminder = false): array
+    {
+        $required = max(1, (int) ($card->campaign->required_purchases_count ?? 1));
+        $current = max(0, (int) $card->current_stamps_count);
+        $remaining = max(0, $required - $current);
+        $rewardName = $card->campaign->reward_name ?? 'Free Reward';
+        $shopName = $card->shop->name ?? 'ThreeDigits Loyalty';
+        $isEnglish = ($card->shop->default_language ?? $card->customer->language ?? 'ar') === 'en';
+
+        if ($card->reward_status === 'ready' || $remaining === 0) {
+            $title = "{$shopName} 🎉";
+            $message = $isEnglish
+                ? "Your {$rewardName} is ready! Visit {$shopName} to redeem it now."
+                : "مكافأتك ({$rewardName}) جاهزة الآن! تفضل بزيارة {$shopName} لاستبدالها.";
+
+            return [$title, $message];
+        }
+
+        if ($isReminder) {
+            $title = $isEnglish ? "{$shopName} Reminder" : "تذكير من {$shopName}";
+            $message = $isEnglish
+                ? "Only {$remaining} " . ($remaining === 1 ? 'stamp' : 'stamps') . " left for your next {$rewardName}! Come complete your card."
+                : "متبقي لك {$remaining} " . ($remaining === 1 ? 'ختم واحد' : ($remaining === 2 ? 'ختمان' : 'أختام')) . " للحصول على {$rewardName}! تعال وأكمل بطاقتك.";
+
+            return [$title, $message];
+        }
+
+        $title = $shopName;
+        $message = $isEnglish
+            ? "Stamp added ({$current}/{$required})! {$remaining} left for your next {$rewardName}."
+            : "تمت إضافة ختم جديد ({$current}/{$required})! متبقي لك {$remaining} " . ($remaining === 1 ? 'ختم واحد' : ($remaining === 2 ? 'ختمان' : 'أختام')) . " للحصول على {$rewardName}.";
+
+        return [$title, $message];
+    }
+
+    /**
+     * Send personalized stamp-completion reminders to all incomplete cards in a shop.
+     *
+     * @return array{cards: int, apple_sent: int, google_sent: int}
+     */
+    public function sendStampCompletionReminders(Shop $shop): array
+    {
+        $cards = LoyaltyCard::withoutGlobalScopes()
+            ->with(['customer', 'shop', 'campaign' => fn ($q) => $q->withoutGlobalScopes()])
+            ->where('shop_id', $shop->id)
+            ->where('reward_status', 'not_ready')
+            ->get();
+
+        $appleSent = 0;
+        $googleSent = 0;
+
+        foreach ($cards as $card) {
+            [$title, $message] = $this->buildStampProgressMessage($card, true);
+            $res = $this->sendPassNotification($card, $title, $message);
+            $appleSent += $res['apple_sent'];
+            if ($res['google_sent']) {
+                $googleSent++;
+            }
+        }
+
+        return [
+            'cards' => $cards->count(),
+            'apple_sent' => $appleSent,
+            'google_sent' => $googleSent,
+        ];
+    }
+
+    protected function resolveShopLocations(LoyaltyCard $card): array
+    {
+        $branches = Branch::withoutGlobalScopes()
+            ->where('shop_id', $card->shop_id)
+            ->where('status', 'active')
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->limit(10)
+            ->get();
+
+        $defaultText = ($card->shop->default_language ?? 'ar') === 'en'
+            ? "You're near {$card->shop->name}! Come complete your stamps and claim your reward."
+            : "أنت بالقرب من {$card->shop->name}! تعال وأكمل أختامك واحصل على مكافأتك.";
+
+        return $branches->map(fn (Branch $branch) => [
+            'latitude' => (float) $branch->latitude,
+            'longitude' => (float) $branch->longitude,
+            'relevantText' => $branch->nearby_message ?: $defaultText,
+        ])->values()->all();
+    }
+
+    protected function resolveGoogleLocations(LoyaltyCard $card): array
+    {
+        return Branch::withoutGlobalScopes()
+            ->where('shop_id', $card->shop_id)
+            ->where('status', 'active')
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->limit(10)
+            ->get()
+            ->map(fn (Branch $branch) => [
+                'latitude' => (float) $branch->latitude,
+                'longitude' => (float) $branch->longitude,
+            ])
+            ->values()
+            ->all();
     }
 
     protected function sendAppleApnsPush(string $pushToken, string $passTypeId, string $certPem, string $keyPem): int

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Shop\Pages;
 
+use App\Models\Branch;
 use App\Models\LoyaltyCard;
 use App\Models\WalletRegistration;
 use App\Services\WalletPassService;
@@ -33,6 +34,20 @@ class WalletNotifications extends Page
     {
         $tenant = Filament::getTenant();
         $this->titleText = $tenant ? $tenant->name : 'ThreeDigits Loyalty';
+    }
+
+    public function sendStampReminders(WalletPassService $walletService): void
+    {
+        $tenant = Filament::getTenant();
+        $result = $walletService->sendStampCompletionReminders($tenant);
+
+        $isAr = app()->getLocale() === 'ar';
+        Notification::make()
+            ->title($isAr
+                ? "تم إرسال تذكير إكمال الأختام لـ {$result['cards']} بطاقة (Apple: {$result['apple_sent']}، Google: {$result['google_sent']})"
+                : "Sent stamp reminders for {$result['cards']} cards (Apple: {$result['apple_sent']}, Google: {$result['google_sent']})")
+            ->success()
+            ->send();
     }
 
     public function sendBroadcast(WalletPassService $walletService): void
@@ -73,15 +88,22 @@ class WalletNotifications extends Page
     {
         $tenant = Filament::getTenant();
         $totalCards = $tenant ? LoyaltyCard::where('shop_id', $tenant->id)->count() : 0;
+        $incompleteCards = $tenant
+            ? LoyaltyCard::where('shop_id', $tenant->id)->where('reward_status', 'not_ready')->count()
+            : 0;
         $appleDevices = $tenant
             ? WalletRegistration::whereHas('loyaltyCard', fn ($q) => $q->withoutGlobalScopes()->where('shop_id', $tenant->id))->count()
             : 0;
+        $geoBranches = $tenant
+            ? Branch::where('shop_id', $tenant->id)->whereNotNull('latitude')->whereNotNull('longitude')->count()
+            : 0;
 
         return [
+            'shop' => $tenant,
             'totalCards' => $totalCards,
+            'incompleteCards' => $incompleteCards,
             'appleDevices' => $appleDevices,
-            'appleReady' => app(WalletPassService::class)->isAppleWalletConfigured(),
-            'googleReady' => app(WalletPassService::class)->isGoogleWalletConfigured(),
+            'geoBranches' => $geoBranches,
         ];
     }
 }

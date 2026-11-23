@@ -72,7 +72,9 @@ class RewardLogicService
 
         $refreshed = $card->refresh()->loadMissing(['customer', 'shop', 'campaign']);
         if (!app()->runningUnitTests()) {
-            app(WalletPassService::class)->sendPassNotification($refreshed);
+            $walletService = app(WalletPassService::class);
+            [$title, $message] = $walletService->buildStampProgressMessage($refreshed, false);
+            $walletService->sendPassNotification($refreshed, $title, $message);
         }
 
         return $refreshed;
