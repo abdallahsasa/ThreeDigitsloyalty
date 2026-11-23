@@ -290,6 +290,7 @@ class LoyaltyPlatformTest extends TestCase
         foreach ([
             "/shop/{$shop->id}",
             "/shop/{$shop->id}/getting-started",
+            "/shop/{$shop->id}/wallet-notifications",
             "/shop/{$shop->id}/branches",
             "/shop/{$shop->id}/customers",
             "/shop/{$shop->id}/loyalty-campaigns",
@@ -377,5 +378,67 @@ class LoyaltyPlatformTest extends TestCase
 
         $response->assertRedirect("/shop/{$shop->id}/getting-started");
         $this->actingAs($user)->get("/shop/{$shop->id}/getting-started")->assertStatus(200);
+    }
+
+    public function test_apple_wallet_web_service_registers_lists_and_serves_updated_passes(): void
+    {
+        $shop = Shop::create(['name' => 'Push Cafe', 'status' => 'active']);
+        $customer = Customer::create(['name' => 'Zaid Ali', 'phone' => '+963944556677', 'status' => 'active']);
+        $campaign = LoyaltyCampaign::create([
+            'shop_id' => $shop->id,
+            'name' => 'Push Stamps',
+            'required_purchases_count' => 6,
+            'reward_name' => 'Free Latte',
+            'status' => 'active',
+        ]);
+        $card = LoyaltyCard::create([
+            'customer_id' => $customer->id,
+            'shop_id' => $shop->id,
+            'campaign_id' => $campaign->id,
+            'token' => Str::random(32),
+            'current_stamps_count' => 3,
+            'reward_status' => 'not_ready',
+        ]);
+
+        $passType = config('services.wallet.apple_pass_type_id', 'pass.com.threedigitsoftware.loyalty');
+        $deviceId = 'device-lib-12345';
+
+        // Unauthorized without ApplePass token
+        $this->postJson("/api/apple-wallet/v1/devices/{$deviceId}/registrations/{$passType}/{$card->token}", [
+            'pushToken' => 'apns-token-abc',
+        ])->assertStatus(401);
+
+        // Register device pushToken
+        $this->withHeaders(['Authorization' => "ApplePass {$card->token}"])
+            ->postJson("/api/apple-wallet/v1/devices/{$deviceId}/registrations/{$passType}/{$card->token}", [
+                'pushToken' => 'apns-token-abc',
+            ])->assertStatus(201);
+
+        $this->assertDatabaseHas('wallet_registrations', [
+            'loyalty_card_id' => $card->id,
+            'device_library_identifier' => $deviceId,
+            'push_token' => 'apns-token-abc',
+        ]);
+
+        // List updated serialNumbers
+        $this->getJson("/api/apple-wallet/v1/devices/{$deviceId}/registrations/{$passType}")
+            ->assertStatus(200)
+            ->assertJsonPath('serialNumbers.0', $card->token);
+
+        // Fetch updated .pkpass
+        $this->withHeaders(['Authorization' => "ApplePass {$card->token}"])
+            ->get("/api/apple-wallet/v1/passes/{$passType}/{$card->token}")
+            ->assertStatus(200)
+            ->assertHeader('Content-Type', 'application/vnd.apple.pkpass');
+
+        // Unregister device
+        $this->withHeaders(['Authorization' => "ApplePass {$card->token}"])
+            ->deleteJson("/api/apple-wallet/v1/devices/{$deviceId}/registrations/{$passType}/{$card->token}")
+            ->assertStatus(200);
+
+        $this->assertDatabaseMissing('wallet_registrations', [
+            'loyalty_card_id' => $card->id,
+            'device_library_identifier' => $deviceId,
+        ]);
     }
 }

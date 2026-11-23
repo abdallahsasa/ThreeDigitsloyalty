@@ -1,9 +1,19 @@
 <?php
 
+use App\Http\Controllers\Api\AppleWalletWebServiceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LoyaltyCardApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// Apple Wallet PassKit Web Service (used by iOS Wallet for live updates & push notifications)
+Route::prefix('apple-wallet/v1')->group(function () {
+    Route::post('/devices/{deviceLibraryIdentifier}/registrations/{passTypeIdentifier}/{serialNumber}', [AppleWalletWebServiceController::class, 'register']);
+    Route::delete('/devices/{deviceLibraryIdentifier}/registrations/{passTypeIdentifier}/{serialNumber}', [AppleWalletWebServiceController::class, 'unregister']);
+    Route::get('/devices/{deviceLibraryIdentifier}/registrations/{passTypeIdentifier}', [AppleWalletWebServiceController::class, 'listUpdates']);
+    Route::get('/passes/{passTypeIdentifier}/{serialNumber}', [AppleWalletWebServiceController::class, 'latestPass']);
+    Route::post('/log', [AppleWalletWebServiceController::class, 'logErrors']);
+});
 
 // Public mobile API
 Route::post('/login', [AuthController::class, 'login']);

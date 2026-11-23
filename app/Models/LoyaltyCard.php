@@ -17,6 +17,14 @@ class LoyaltyCard extends Model
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'last_activity_date' => 'datetime',
+            'wallet_message_updated_at' => 'datetime',
+        ];
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
@@ -35,5 +43,10 @@ class LoyaltyCard extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(LoyaltyTransaction::class);
+    }
+
+    public function walletRegistrations(): HasMany
+    {
+        return $this->hasMany(WalletRegistration::class);
     }
 }

@@ -70,7 +70,12 @@ class RewardLogicService
             app(FunnelTracker::class)->track('first_stamp_added', ['shop_id' => $card->shop_id]);
         }
 
-        return $card->refresh();
+        $refreshed = $card->refresh()->loadMissing(['customer', 'shop', 'campaign']);
+        if (!app()->runningUnitTests()) {
+            app(WalletPassService::class)->sendPassNotification($refreshed);
+        }
+
+        return $refreshed;
     }
 
     /**
@@ -104,6 +109,11 @@ class RewardLogicService
             app(FunnelTracker::class)->track('first_stamp_added', ['shop_id' => $card->shop_id]);
         }
 
-        return $card->refresh();
+        $refreshed = $card->refresh()->loadMissing(['customer', 'shop', 'campaign']);
+        if (!app()->runningUnitTests()) {
+            app(WalletPassService::class)->sendPassNotification($refreshed);
+        }
+
+        return $refreshed;
     }
 }

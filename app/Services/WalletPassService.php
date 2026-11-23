@@ -26,11 +26,37 @@ class WalletPassService
             default => 'COLLECTING',
         };
 
+        $webServiceBase = rtrim((string) config('app.url', 'https://loylty.threedigitsoftware.com'), '/');
+
+        $backFields = [
+            [
+                'key' => 'pass_url',
+                'label' => 'Digital Pass URL',
+                'value' => $qrUrl,
+            ],
+            [
+                'key' => 'powered_by',
+                'label' => 'Powered By',
+                'value' => 'ThreeDigits Loyalty',
+            ],
+        ];
+
+        if (!empty($card->wallet_message)) {
+            array_unshift($backFields, [
+                'key' => 'latest_message',
+                'label' => $card->wallet_message_title ?: 'Notification',
+                'value' => $card->wallet_message,
+                'changeMessage' => '%@',
+            ]);
+        }
+
         return [
             'formatVersion' => 1,
             'passTypeIdentifier' => config('services.wallet.apple_pass_type_id', 'pass.com.threedigitsoftware.loyalty'),
             'serialNumber' => $card->token,
             'teamIdentifier' => config('services.wallet.apple_team_id', 'THREEDIGIT'),
+            'webServiceURL' => "{$webServiceBase}/api/apple-wallet",
+            'authenticationToken' => str_pad((string) $card->token, 16, '0'),
             'organizationName' => $card->shop->name,
             'description' => $card->campaign->name ?? ($card->shop->name . ' Loyalty Card'),
             'logoText' => $card->shop->name,
@@ -57,6 +83,7 @@ class WalletPassService
                         'key' => 'stamps',
                         'label' => 'STAMPS',
                         'value' => "{$card->current_stamps_count} / {$required}",
+                        'changeMessage' => 'Stamps updated: %@',
                     ],
                 ],
                 'primaryFields' => [],
@@ -82,20 +109,10 @@ class WalletPassService
                         'key' => 'status',
                         'label' => 'STATUS',
                         'value' => $statusText,
+                        'changeMessage' => 'Card status: %@',
                     ],
                 ],
-                'backFields' => [
-                    [
-                        'key' => 'pass_url',
-                        'label' => 'Digital Pass URL',
-                        'value' => $qrUrl,
-                    ],
-                    [
-                        'key' => 'powered_by',
-                        'label' => 'Powered By',
-                        'value' => 'ThreeDigits Loyalty',
-                    ],
-                ],
+                'backFields' => $backFields,
             ],
         ];
     }
@@ -299,6 +316,148 @@ class WalletPassService
         $jwt = $this->signJwtRs256($claims, $privateKeyPem);
 
         return "https://pay.google.com/gp/v/save/{$jwt}";
+    }
+
+    /**
+     * Send a live Wallet update + push notification to both Apple Wallet (APNs) and Google Wallet (addMessage).
+     *
+     * @return array{apple_sent: int, apple_failed: int, google_sent: bool}
+     */
+    public function sendPassNotification(LoyaltyCard $card, ?string $title = null, ?string $message = null): array
+    {
+        if ($message !== null && trim($message) !== '') {
+            $card->forceFill([
+                'wallet_message_title' => $title ?: $card->shop->name,
+                'wallet_message' => trim($message),
+                'wallet_message_updated_at' => now(),
+                'updated_at' => now(),
+            ])->save();
+        } else {
+            $card->touch();
+        }
+
+        $appleSent = 0;
+        $appleFailed = 0;
+
+        if ($this->isAppleWalletConfigured()) {
+            $registrations = $card->walletRegistrations()->get();
+            if ($registrations->isNotEmpty()) {
+                [$certPem, $keyPem] = $this->resolveAppleSigningCredentials();
+                $passTypeId = config('services.wallet.apple_pass_type_id', 'pass.com.threedigitsoftware.loyalty');
+
+                foreach ($registrations as $reg) {
+                    $status = $this->sendAppleApnsPush($reg->push_token, $passTypeId, $certPem, $keyPem);
+                    if ($status >= 200 && $status < 300) {
+                        $appleSent++;
+                    } else {
+                        $appleFailed++;
+                        if ($status === 410) {
+                            $reg->delete();
+                        }
+                    }
+                }
+            }
+        }
+
+        $googleSent = false;
+        if ($this->isGoogleWalletConfigured() && !app()->runningUnitTests()) {
+            $googleSent = $this->syncAndNotifyGoogleObject($card, $title, $message);
+        }
+
+        return [
+            'apple_sent' => $appleSent,
+            'apple_failed' => $appleFailed,
+            'google_sent' => $googleSent,
+        ];
+    }
+
+    protected function sendAppleApnsPush(string $pushToken, string $passTypeId, string $certPem, string $keyPem): int
+    {
+        $tmpDir = storage_path('app/wallet/tmp/' . Str::uuid());
+        File::ensureDirectoryExists($tmpDir);
+
+        try {
+            $certFile = "{$tmpDir}/apns-cert.pem";
+            $keyFile = "{$tmpDir}/apns-key.pem";
+            file_put_contents($certFile, $certPem);
+            file_put_contents($keyFile, $keyPem);
+
+            $ch = curl_init("https://api.push.apple.com/3/device/{$pushToken}");
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => '{}',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
+                CURLOPT_SSLCERT => $certFile,
+                CURLOPT_SSLKEY => $keyFile,
+                CURLOPT_HTTPHEADER => [
+                    "apns-topic: {$passTypeId}",
+                    'apns-push-type: background',
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_TIMEOUT => 8,
+            ]);
+
+            curl_exec($ch);
+            $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            if ($httpCode < 200 || $httpCode >= 300) {
+                Log::warning('Apple Wallet APNs push failed', ['status' => $httpCode, 'error' => curl_error($ch)]);
+            }
+            curl_close($ch);
+
+            return $httpCode;
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
+    protected function syncAndNotifyGoogleObject(LoyaltyCard $card, ?string $title = null, ?string $message = null): bool
+    {
+        try {
+            [$clientEmail, $privateKeyPem] = $this->resolveGoogleServiceAccountCredentials();
+            $accessToken = $this->getGoogleOAuthAccessToken($clientEmail, $privateKeyPem);
+            if (!$accessToken) {
+                return false;
+            }
+
+            $issuerId = config('services.wallet.google_issuer_id');
+            $objectId = "{$issuerId}.card_{$card->id}_" . preg_replace('/[^a-zA-Z0-9_.-]/', '', $card->token);
+            $required = max(1, (int) ($card->campaign->required_purchases_count ?? 1));
+
+            $objectUrl = "https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject/{$objectId}";
+
+            $patch = Http::withToken($accessToken)->timeout(8)->patch($objectUrl, [
+                'loyaltyPoints' => [
+                    'label' => 'Stamps',
+                    'balance' => [
+                        'string' => "{$card->current_stamps_count} / {$required}",
+                    ],
+                ],
+            ]);
+
+            if ($patch->status() === 404) {
+                // Customer has not added this pass to Google Wallet yet
+                return false;
+            }
+
+            if ($message !== null && trim($message) !== '') {
+                $msgRes = Http::withToken($accessToken)->timeout(8)->post("{$objectUrl}/addMessage", [
+                    'message' => [
+                        'header' => $title ?: $card->shop->name,
+                        'body' => trim($message),
+                        'messageType' => 'TEXT_AND_NOTIFY',
+                    ],
+                ]);
+
+                return $msgRes->successful();
+            }
+
+            return $patch->successful();
+        } catch (\Throwable $e) {
+            Log::warning('Google Wallet sync/notify error', ['error' => $e->getMessage()]);
+
+            return false;
+        }
     }
 
     /**
