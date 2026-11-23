@@ -24,6 +24,7 @@ class ShopPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->default()
             ->id('shop')
             ->path('shop')
             ->login()
@@ -36,7 +37,6 @@ class ShopPanelProvider extends PanelProvider
             ->favicon(asset('images/logo-icon.png'))
             ->font('Montserrat')
             ->sidebarCollapsibleOnDesktop()
-            ->spa()
             ->colors([
                 'primary' => Color::hex('#743EE2'),
                 'success' => Color::Emerald,
