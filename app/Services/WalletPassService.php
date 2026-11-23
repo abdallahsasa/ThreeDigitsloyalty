@@ -30,7 +30,17 @@ class WalletPassService
 
         $webServiceBase = rtrim((string) config('app.url', 'https://loylty.threedigitsoftware.com'), '/');
 
+        $latestMessageValue = !empty($card->wallet_message)
+            ? $card->wallet_message
+            : "Collect {$required} stamps to earn " . ($card->campaign->reward_name ?? 'your reward') . '.';
+
         $backFields = [
+            [
+                'key' => 'latest_message',
+                'label' => $card->wallet_message_title ?: $card->shop->name,
+                'value' => $latestMessageValue,
+                'changeMessage' => '%@',
+            ],
             [
                 'key' => 'pass_url',
                 'label' => 'Digital Pass URL',
@@ -42,15 +52,6 @@ class WalletPassService
                 'value' => 'ThreeDigits Loyalty',
             ],
         ];
-
-        if (!empty($card->wallet_message)) {
-            array_unshift($backFields, [
-                'key' => 'latest_message',
-                'label' => $card->wallet_message_title ?: 'Notification',
-                'value' => $card->wallet_message,
-                'changeMessage' => '%@',
-            ]);
-        }
 
         $payload = [
             'formatVersion' => 1,
@@ -274,6 +275,7 @@ class WalletPassService
             'id' => $objectId,
             'classId' => $classId,
             'state' => 'ACTIVE',
+            'notifyPreference' => 'NOTIFY_ON_UPDATE',
             'accountId' => $card->customer->phone,
             'accountName' => $card->customer->name,
             'loyaltyPoints' => [
@@ -515,16 +517,19 @@ class WalletPassService
                 CURLOPT_SSLKEY => $keyFile,
                 CURLOPT_HTTPHEADER => [
                     "apns-topic: {$passTypeId}",
-                    'apns-push-type: background',
                     'Content-Type: application/json',
                 ],
                 CURLOPT_TIMEOUT => 8,
             ]);
 
-            curl_exec($ch);
+            $responseBody = curl_exec($ch);
             $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($httpCode < 200 || $httpCode >= 300) {
-                Log::warning('Apple Wallet APNs push failed', ['status' => $httpCode, 'error' => curl_error($ch)]);
+                Log::warning('Apple Wallet APNs push failed', [
+                    'status' => $httpCode,
+                    'body' => $responseBody,
+                    'error' => curl_error($ch),
+                ]);
             }
             curl_close($ch);
 
@@ -566,11 +571,20 @@ class WalletPassService
             if ($message !== null && trim($message) !== '') {
                 $msgRes = Http::withToken($accessToken)->timeout(8)->post("{$objectUrl}/addMessage", [
                     'message' => [
+                        'id' => 'msg_' . now()->timestamp . '_' . Str::random(6),
                         'header' => $title ?: $card->shop->name,
                         'body' => trim($message),
                         'messageType' => 'TEXT_AND_NOTIFY',
                     ],
                 ]);
+
+                if (!$msgRes->successful()) {
+                    Log::warning('Google Wallet addMessage failed', [
+                        'objectId' => $objectId,
+                        'status' => $msgRes->status(),
+                        'body' => $msgRes->body(),
+                    ]);
+                }
 
                 return $msgRes->successful();
             }

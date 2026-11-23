@@ -72,9 +72,13 @@ class RewardLogicService
 
         $refreshed = $card->refresh()->loadMissing(['customer', 'shop', 'campaign']);
         if (!app()->runningUnitTests()) {
-            $walletService = app(WalletPassService::class);
-            [$title, $message] = $walletService->buildStampProgressMessage($refreshed, false);
-            $walletService->sendPassNotification($refreshed, $title, $message);
+            try {
+                $walletService = app(WalletPassService::class);
+                [$title, $message] = $walletService->buildStampProgressMessage($refreshed, false);
+                $walletService->sendPassNotification($refreshed, $title, $message);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Wallet stamp notification failed', ['error' => $e->getMessage()]);
+            }
         }
 
         return $refreshed;
@@ -113,7 +117,11 @@ class RewardLogicService
 
         $refreshed = $card->refresh()->loadMissing(['customer', 'shop', 'campaign']);
         if (!app()->runningUnitTests()) {
-            app(WalletPassService::class)->sendPassNotification($refreshed);
+            try {
+                app(WalletPassService::class)->sendPassNotification($refreshed);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Wallet redeem sync failed', ['error' => $e->getMessage()]);
+            }
         }
 
         return $refreshed;

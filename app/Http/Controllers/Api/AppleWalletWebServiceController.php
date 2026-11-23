@@ -22,7 +22,7 @@ class AppleWalletWebServiceController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $pushToken = (string) $request->input('pushToken', '');
+        $pushToken = (string) ($request->input('pushToken') ?: $request->json('pushToken') ?: '');
         if ($pushToken === '') {
             return response()->json(['error' => 'Missing pushToken'], 400);
         }
