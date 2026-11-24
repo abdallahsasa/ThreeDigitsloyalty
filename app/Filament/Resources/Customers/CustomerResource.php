@@ -3,7 +3,14 @@
 namespace App\Filament\Resources\Customers;
 
 use App\Models\Customer;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -35,6 +42,29 @@ class CustomerResource extends Resource
         return __('Customers');
     }
 
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            TextInput::make('name')->required(),
+            TextInput::make('phone')->tel()->required(),
+            TextInput::make('email')->email(),
+            DatePicker::make('birthday'),
+            Select::make('gender')->options([
+                'male' => __('Male'),
+                'female' => __('Female'),
+                'other' => __('Other'),
+            ]),
+            Select::make('language')->options([
+                'ar' => __('Arabic'),
+                'en' => __('English'),
+            ])->default('ar')->required(),
+            Select::make('status')->options([
+                'active' => __('Active'),
+                'inactive' => __('Inactive'),
+            ])->default('active')->required(),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -49,6 +79,14 @@ class CustomerResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => $state === 'active' ? 'success' : 'gray'),
                 TextColumn::make('created_at')->dateTime()->sortable(),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
@@ -56,6 +94,8 @@ class CustomerResource extends Resource
     {
         return [
             'index' => \App\Filament\Resources\Customers\Pages\ListCustomers::route('/'),
+            'create' => \App\Filament\Resources\Customers\Pages\CreateCustomer::route('/create'),
+            'edit' => \App\Filament\Resources\Customers\Pages\EditCustomer::route('/{record}/edit'),
         ];
     }
 }

@@ -4,6 +4,9 @@ namespace App\Filament\Resources\LoyaltyCards;
 
 use App\Models\LoyaltyCard;
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -98,6 +101,12 @@ class LoyaltyCardResource extends Resource
                     ->icon('heroicon-o-qr-code')
                     ->url(fn (LoyaltyCard $record): string => route('loyalty-card.show', $record->token))
                     ->openUrlInNewTab(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
@@ -105,6 +114,8 @@ class LoyaltyCardResource extends Resource
     {
         return [
             'index' => \App\Filament\Resources\LoyaltyCards\Pages\ListLoyaltyCards::route('/'),
+            'create' => \App\Filament\Resources\LoyaltyCards\Pages\CreateLoyaltyCard::route('/create'),
+            'edit' => \App\Filament\Resources\LoyaltyCards\Pages\EditLoyaltyCard::route('/{record}/edit'),
         ];
     }
 }

@@ -3,7 +3,15 @@
 namespace App\Filament\Resources\LoyaltyCampaigns;
 
 use App\Models\LoyaltyCampaign;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -36,6 +44,24 @@ class LoyaltyCampaignResource extends Resource
         return __('Loyalty Campaigns');
     }
 
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            Select::make('shop_id')->relationship('shop', 'name')->searchable()->preload()->required(),
+            TextInput::make('name')->required(),
+            Select::make('type')->options(['stamps' => __('Stamps')])->default('stamps')->required(),
+            TextInput::make('required_purchases_count')->numeric()->minValue(1)->default(8)->required(),
+            TextInput::make('reward_name')->required(),
+            Textarea::make('reward_description')->columnSpanFull(),
+            DatePicker::make('start_date'),
+            DatePicker::make('end_date'),
+            Select::make('status')->options([
+                'active' => __('Active'),
+                'inactive' => __('Inactive'),
+            ])->default('active')->required(),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -57,6 +83,14 @@ class LoyaltyCampaignResource extends Resource
                     'active' => __('Active'),
                     'inactive' => __('Inactive'),
                 ]),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
@@ -64,6 +98,8 @@ class LoyaltyCampaignResource extends Resource
     {
         return [
             'index' => \App\Filament\Resources\LoyaltyCampaigns\Pages\ListLoyaltyCampaigns::route('/'),
+            'create' => \App\Filament\Resources\LoyaltyCampaigns\Pages\CreateLoyaltyCampaign::route('/create'),
+            'edit' => \App\Filament\Resources\LoyaltyCampaigns\Pages\EditLoyaltyCampaign::route('/{record}/edit'),
         ];
     }
 }
