@@ -32,6 +32,6 @@ class LoyaltyCampaign extends Model
 
     public function loyaltyCards(): HasMany
     {
-        return $this->hasMany(LoyaltyCard::class);
+        return $this->hasMany(LoyaltyCard::class, 'campaign_id');
     }
 }
