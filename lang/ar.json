@@ -106,5 +106,8 @@
     "Latitude": "خط العرض (Latitude)",
     "Longitude": "خط الطول (Longitude)",
     "Nearby message": "رسالة القرب من الفرع",
-    "Error Logs": "سجل الأخطاء اليومي"
+    "Error Logs": "سجل الأخطاء اليومي",
+    "Loyalty Operations": "عمليات الولاء",
+    "Wallet Devices": "أجهزة المحفظة",
+    "Wallet Device": "جهاز محفظة"
 }

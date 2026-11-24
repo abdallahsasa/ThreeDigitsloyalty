@@ -7,6 +7,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -31,16 +32,10 @@ class BranchForm
                         fn (\Illuminate\Http\UploadedFile $file): string => 'branch-' . time() . '-' . \Illuminate\Support\Str::random(10) . '.' . $file->extension()
                     ),
                 TextInput::make('address'),
-                TextInput::make('latitude')
-                    ->numeric()
-                    ->step('any')
-                    ->placeholder('33.5138')
-                    ->helperText('Optional GPS latitude for nearby Wallet lock-screen notifications.'),
-                TextInput::make('longitude')
-                    ->numeric()
-                    ->step('any')
-                    ->placeholder('36.2765')
-                    ->helperText('Optional GPS longitude for nearby Wallet lock-screen notifications.'),
+                Hidden::make('latitude'),
+                Hidden::make('longitude'),
+                View::make('filament.shop.components.branch-map-picker')
+                    ->columnSpanFull(),
                 TextInput::make('nearby_message')
                     ->maxLength(160)
                     ->placeholder('أنت بالقرب من فرعنا! تعال وأكمل أختامك واحصل على خصمك.')
