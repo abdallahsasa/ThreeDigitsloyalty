@@ -12,10 +12,10 @@ return [
     'nav_cta' => 'Start free',
 
     // Hero & Interactive Demo
-    'hero_title' => 'Digital loyalty stamp cards for cafés, restaurants, and salons.',
-    'hero_subtitle' => 'Customers join by scanning a QR code. Your team adds stamps at checkout. No app download required.',
+    'hero_title' => 'Browser-based loyalty stamp cards — no app download required.',
+    'hero_subtitle' => 'Place a QR sign at your counter. Customers scan to open your branded stamp card in their phone browser, and your team stamps visits in seconds.',
     'hero_cta_1' => 'Start free',
-    'hero_cta_2' => 'Try a demo card',
+    'hero_cta_2' => 'Try the card',
     'hero_benefit_1' => 'No app download',
     'hero_benefit_2' => 'Arabic & English',
     'hero_benefit_3' => 'Multi-branch support',

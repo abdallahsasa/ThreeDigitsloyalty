@@ -14,6 +14,39 @@
             animation: none !important;
         }
     }
+    .td-stamp-slot {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+    .td-stamp-filled {
+        background: #743EE2;
+        border: 2px solid #c4b5fd;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(116, 62, 226, 0.35);
+    }
+    .td-stamp-empty {
+        background: rgba(1, 10, 41, 0.55);
+        border: 2px dashed rgba(196, 181, 253, 0.45);
+        color: rgba(196, 181, 253, 0.48);
+    }
+    .td-stamp-check {
+        position: absolute;
+        bottom: -2px;
+        inset-inline-end: -2px;
+        width: 19px;
+        height: 19px;
+        border-radius: 999px;
+        background: #ede9fe;
+        border: 2px solid #0C1742;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .td-hero-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -162,8 +195,8 @@
 
                     {{-- Loyalty Card Frame --}}
                     <div style="border-radius: 18px; overflow: hidden; border: 1px solid rgba(148, 163, 184, 0.22); background: #0C1742;">
-                        {{-- Group 2: Business Name --}}
-                        <div style="padding: 1.15rem 1.25rem; background: #5B21B6; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                        {{-- Group 2: Business Name (Refined deep indigo header so saturated purple stays reserved for actions) --}}
+                        <div style="padding: 1.15rem 1.25rem; background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; border-bottom: 1px solid rgba(196, 181, 253, 0.2);">
                             <div>
                                 <div style="font-size: 1.12rem; font-weight: 800; color: #ffffff;">{{ __('landing.demo_shop_name') }}</div>
                                 <div style="font-size: 0.875rem; color: #ede9fe; font-weight: 600;">{{ __('landing.demo_program_name') }}</div>
@@ -185,12 +218,13 @@
                                  role="group"
                                  aria-label="{{ $isAr ? 'أختام البطاقة' : 'Loyalty stamp slots' }}">
                                 <template x-for="slot in total" :key="slot">
-                                    <div style="position: relative; aspect-ratio: 1; border-radius: 999px; display: flex; align-items: center; justify-content: center; transition: background-color 0.25s ease, border-color 0.25s ease;"
-                                         :class="{ 'td-stamp-pop': justStamped && slot === total }"
-                                         :aria-label="slot <= stamps ? '{{ $isAr ? 'ختم مكتمل' : 'Filled stamp' }}' : '{{ $isAr ? 'ختم متبقي' : 'Empty stamp' }}'"
-                                         :style="slot <= stamps
-                                            ? 'background: #743EE2; border: 2px solid #c4b5fd; color: #ffffff; box-shadow: 0 4px 12px rgba(116, 62, 226, 0.35);'
-                                            : 'background: rgba(1, 10, 41, 0.55); border: 2px dashed rgba(196, 181, 253, 0.45); color: rgba(196, 181, 253, 0.48);'">
+                                    <div class="td-stamp-slot"
+                                         :class="{
+                                             'td-stamp-filled': slot <= stamps,
+                                             'td-stamp-empty': slot > stamps,
+                                             'td-stamp-pop': justStamped && slot === total
+                                         }"
+                                         :aria-label="slot <= stamps ? '{{ $isAr ? 'ختم مكتمل' : 'Filled stamp' }}' : '{{ $isAr ? 'ختم متبقي' : 'Empty stamp' }}'">
                                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: block;">
                                             <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
                                             <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
@@ -200,8 +234,8 @@
                                         </svg>
                                         <span x-show="slot <= stamps"
                                               aria-hidden="true"
-                                              style="position: absolute; bottom: -2px; inset-inline-end: -2px; width: 18px; height: 18px; border-radius: 999px; background: #10b981; border: 2px solid #0C1742; display: flex; align-items: center; justify-content: center;">
-                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                                              class="td-stamp-check">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#5B21B6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <polyline points="20 6 9 17 4 12"></polyline>
                                             </svg>
                                         </span>

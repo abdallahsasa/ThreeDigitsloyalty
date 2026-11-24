@@ -1,160 +1,161 @@
 @php
     $isAr = app()->getLocale() === 'ar';
-    $sampleCustomers = $isAr ? [
-        ['name' => 'سارة أحمد', 'stamps' => '٥ من ٦', 'status' => 'قيد التجميع'],
-        ['name' => 'خالد محمود', 'stamps' => '٦ من ٦', 'status' => 'مكافأة جاهزة'],
-        ['name' => 'نور الهدى', 'stamps' => '٢ من ٦', 'status' => 'قيد التجميع'],
-    ] : [
-        ['name' => 'Sara Ahmad', 'stamps' => '5 of 6', 'status' => 'Collecting'],
-        ['name' => 'Khaled Mahmoud', 'stamps' => '6 of 6', 'status' => 'Reward ready'],
-        ['name' => 'Nour Al-Huda', 'stamps' => '2 of 6', 'status' => 'Collecting'],
-    ];
-
-    $sampleTransactions = $isAr ? [
-        ['customer' => 'خالد محمود', 'action' => 'فتح مكافأة (+1 ختم)', 'time' => 'اليوم'],
-        ['customer' => 'سارة أحمد', 'action' => 'إضافة عملية شراء (+1 ختم)', 'time' => 'اليوم'],
-    ] : [
-        ['customer' => 'Khaled Mahmoud', 'action' => 'Reward unlocked (+1 stamp)', 'time' => 'Today'],
-        ['customer' => 'Sara Ahmad', 'action' => 'Purchase added (+1 stamp)', 'time' => 'Today'],
-    ];
+    $langSuffix = $isAr ? 'ar' : 'en';
 @endphp
 
-<section class="dl-section" style="background: #040D30; border-top: 1px solid rgba(148, 163, 184, 0.14);">
+<style>
+    .td-split-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2.25rem;
+        align-items: center;
+    }
+    @media (min-width: 920px) {
+        .td-split-row {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+            gap: 3.25rem;
+        }
+        .td-split-row.td-reverse > :first-child {
+            order: 2;
+        }
+        .td-split-row.td-reverse > :last-child {
+            order: 1;
+        }
+    }
+    .td-collage-img {
+        width: 100%;
+        max-width: 520px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+
+<section id="merchant-tools" class="dl-section" style="background: #010A29;">
+    <span id="features" aria-hidden="true"></span>
     <div class="dl-container">
-        <div class="dl-section-head">
-            <span class="dl-eyebrow">{{ $isAr ? 'شاشات حقيقية من النظام' : 'Real Product Screens' }}</span>
-            <h2>{{ __('landing.dashboard_title') }}</h2>
-            <p>{{ __('landing.dashboard_subtitle') }}</p>
+        <div class="dl-section-head" style="margin-bottom: 3.5rem;">
+            <span class="dl-eyebrow">{{ $isAr ? 'أدوات المتجر وتجربة العميل' : 'Merchant Tools & Platform' }}</span>
+            <h2>{{ $isAr ? 'صمّم بطاقة متجرك، أضف الأختام في ثوانٍ، وتابع عودة عملائك' : 'Create your branded card, stamp visits in seconds, and track repeat guests' }}</h2>
+            <p>{{ $isAr ? 'شاشات حقيقية ونماذج توضيحية من منصة ThreeDigits Loyalty لإدارة الولاء في فرع واحد أو عدة فروع.' : 'Real product screens and illustrative workflow previews built for busy cafés, restaurants, and salons.' }}</p>
         </div>
 
-        {{-- Verified Product Screenshots Row --}}
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.35rem; margin-bottom: 1.75rem; align-items: stretch;">
-            <figure style="margin: 0; padding: 1.15rem; border-radius: 18px; background: #071033; border: 1px solid rgba(196, 181, 253, 0.25); display: flex; flex-direction: column; align-items: center; text-align: center;">
-                <img src="{{ asset('images/landing/ui-qr-poster.webp') }}"
-                     alt="{{ $isAr ? 'شاشة رمز QR وصفحة تسجيل العملاء داخل لوحة المتجر' : 'Store QR code and customer registration poster inside the merchant portal' }}"
-                     width="273"
-                     height="592"
-                     loading="lazy"
-                     style="width: auto; max-width: 100%; max-height: 360px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.2); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);">
-                <figcaption style="margin-top: 0.95rem;">
-                    <div style="font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
-                        {{ $isAr ? '1. رمز QR الجاهز للطباعة' : '1. Ready-to-Print Store QR' }}
-                    </div>
-                    <div style="font-size: 0.86rem; color: #cbd5e1; margin-top: 0.2rem;">
-                        {{ $isAr ? 'اعرضه عند الكاشير أو اطبعه بملف PDF بضغطة واحدة.' : 'Display at checkout or download as a print-ready PDF.' }}
-                    </div>
-                </figcaption>
-            </figure>
-
-            <figure style="margin: 0; padding: 1.15rem; border-radius: 18px; background: #071033; border: 1px solid rgba(196, 181, 253, 0.25); display: flex; flex-direction: column; align-items: center; text-align: center;">
-                <img src="{{ asset('images/landing/ui-customer-join.webp') }}"
-                     alt="{{ $isAr ? 'نموذج تسجيل العميل السريع خلال 15 ثانية عبر المتصفح' : '15-second customer quick signup screen in mobile browser' }}"
-                     width="276"
-                     height="522"
-                     loading="lazy"
-                     style="width: auto; max-width: 100%; max-height: 360px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.2); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);">
-                <figcaption style="margin-top: 0.95rem;">
-                    <div style="font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
-                        {{ $isAr ? '2. تسجيل سريع في 15 ثانية' : '2. 15-Second Customer Join' }}
-                    </div>
-                    <div style="font-size: 0.86rem; color: #cbd5e1; margin-top: 0.2rem;">
-                        {{ $isAr ? 'الاسم ورقم الجوال فقط — بدون تحميل تطبيق.' : 'Name and mobile number in the browser — no app needed.' }}
-                    </div>
-                </figcaption>
-            </figure>
-
-            <figure style="margin: 0; padding: 1.15rem; border-radius: 18px; background: #071033; border: 1px solid rgba(196, 181, 253, 0.25); display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: space-between;">
-                <img src="{{ asset('images/landing/ui-vip-card.webp') }}"
-                     alt="{{ $isAr ? 'بطاقة الولاء الرقمية الحية للعميل مع الأختام ورمز QR الشخصي' : 'Customer live digital loyalty card with stamps and personal QR code' }}"
-                     width="270"
-                     height="362"
-                     loading="lazy"
-                     style="width: auto; max-width: 100%; max-height: 360px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.2); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35); margin-top: auto; margin-bottom: auto;">
-                <figcaption style="margin-top: 0.95rem;">
-                    <div style="font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
-                        {{ $isAr ? '3. بطاقة العميل الرقمية ورمز QR' : '3. Live Stamp Card & Personal QR' }}
-                    </div>
-                    <div style="font-size: 0.86rem; color: #cbd5e1; margin-top: 0.2rem;">
-                        {{ $isAr ? 'يمسحها الكاشير لإضافة الأختام وصرف المكافآت فوراً.' : 'Scanned at checkout to add stamps and redeem rewards.' }}
-                    </div>
-                </figcaption>
-            </figure>
-        </div>
-
-        <div class="dl-card" style="padding: 1.5rem; background: #071033; border-color: rgba(196, 181, 253, 0.25);">
-            {{-- Portal Header + QR Scanner Entry Point --}}
-            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1.15rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(148, 163, 184, 0.16);">
-                <div>
-                    <div style="font-size: 1.05rem; font-weight: 800; color: #f8fafc;">
-                        {{ $isAr ? 'معاينة توضيحية: البحث عن عميل وإضافة ختم — مقهى الياسمين' : 'Illustrative Preview: Find a Customer & Add a Stamp — Jasmine Café' }}
-                    </div>
-                    <div style="font-size: 0.875rem; color: #cbd5e1; margin-top: 0.2rem;">
-                        {{ $isAr ? 'مثال توضيحي ببيانات تجريبية لمسار العمل اليومي للكاشير داخل لوحة المتجر.' : 'Illustrative demo-data preview showing how your cashier finds a customer and stamps a card.' }}
-                    </div>
+        {{-- Split Row 1: Branded Card, QR Poster & Customer Return (Collage 2 + Real QR/Join Strip) --}}
+        <div class="td-split-row" style="margin-bottom: 4.5rem;">
+            <div>
+                <div style="font-size: 0.84rem; font-weight: 800; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.55rem;">
+                    {{ $isAr ? '١ · انضمام فوري وبطاقة بهوية متجرك' : '01 · Instant QR Join & Branded Card' }}
                 </div>
+                <h3 style="font-size: clamp(1.4rem, 2.5vw, 1.95rem); font-weight: 800; color: #f8fafc; margin: 0 0 0.85rem; line-height: 1.3;">
+                    {{ $isAr ? 'بطاقة رقمية يفتحها العميل في المتصفح دون تحميل تطبيق' : 'Customers scan your QR and open their card right in the browser' }}
+                </h3>
+                <p style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.75; margin: 0 0 1.35rem;">
+                    {{ $isAr
+                        ? 'اضبط شعار متجرك وعدد الأختام المطلوبة والمكافأة، واطبع ملصق QR الجاهز بملف PDF لعرضه عند الكاشير. يسجّل العميل اسمه ورقم جواله خلال ثوانٍ وتظهر بطاقته فوراً.'
+                        : 'Set your stamp goal and reward, then print your ready-made PDF QR poster. Guests register with their name and mobile number in seconds—no app store friction.' }}
+                </p>
 
-                <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; border-radius: 12px; background: rgba(116, 62, 226, 0.2); border: 1px solid rgba(196, 181, 253, 0.35); color: #f8fafc; font-size: 0.88rem; font-weight: 700;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                        <path d="M14 14h3v3h-3z"></path>
-                    </svg>
-                    <span>{{ $isAr ? 'ماسح QR وبحث برقم الجوال' : 'QR Scanner & Phone Lookup' }}</span>
+                {{-- Verified Real Product Screenshots Mini Strip --}}
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; background: #071033; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 18px; padding: 0.95rem;">
+                    <figure style="margin: 0; display: flex; align-items: center; gap: 0.7rem;">
+                        <img src="{{ asset('images/landing/ui-qr-poster.webp') }}"
+                             alt="{{ $isAr ? 'شاشة ملصق QR المتجر الجاهز للطباعة' : 'Store QR poster screen inside ThreeDigits' }}"
+                             width="273"
+                             height="592"
+                             loading="lazy"
+                             style="width: 54px; height: auto; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(196, 181, 253, 0.25);">
+                        <figcaption style="font-size: 0.82rem; color: #e2e8f0; font-weight: 700; line-height: 1.4;">
+                            {{ $isAr ? 'ملصق QR جاهز للطباعة بملف PDF' : 'Print-ready counter QR poster (PDF)' }}
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0; display: flex; align-items: center; gap: 0.7rem;">
+                        <img src="{{ asset('images/landing/ui-customer-join.webp') }}"
+                             alt="{{ $isAr ? 'شاشة تسجيل العميل في 15 ثانية' : '15-second customer browser signup screen' }}"
+                             width="276"
+                             height="522"
+                             loading="lazy"
+                             style="width: 54px; height: auto; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(196, 181, 253, 0.25);">
+                        <figcaption style="font-size: 0.82rem; color: #e2e8f0; font-weight: 700; line-height: 1.4;">
+                            {{ $isAr ? 'تسجيل سريع في المتصفح بالعربية والإنجليزية' : '15-second bilingual browser signup' }}
+                        </figcaption>
+                    </figure>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
-                {{-- Campaign Controls --}}
-                <div style="padding: 1.15rem; border-radius: 14px; background: #0C1742; border: 1px solid rgba(148, 163, 184, 0.18);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem;">
-                        <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
-                            {{ $isAr ? 'إعدادات الحملة' : 'Campaign Controls' }}
-                        </h3>
-                        <span style="padding: 0.2rem 0.6rem; border-radius: 999px; background: rgba(16, 185, 129, 0.16); color: #6ee7b7; font-size: 0.78rem; font-weight: 700;">
-                            {{ $isAr ? 'نشطة' : 'Active' }}
-                        </span>
-                    </div>
-                    <div style="display: grid; gap: 0.55rem; font-size: 0.88rem; color: #cbd5e1;">
-                        <div><strong style="color: #f8fafc;">{{ $isAr ? 'الحملة:' : 'Campaign:' }}</strong> {{ $isAr ? 'بطاقة أختام القهوة' : 'Coffee Stamp Card' }}</div>
-                        <div><strong style="color: #f8fafc;">{{ $isAr ? 'الأختام المطلوبة:' : 'Required stamps:' }}</strong> {{ $isAr ? '٦ أختام' : '6 stamps' }}</div>
-                        <div><strong style="color: #f8fafc;">{{ $isAr ? 'المكافأة:' : 'Reward:' }}</strong> {{ $isAr ? 'قهوة مجانية' : 'Free coffee' }}</div>
-                    </div>
-                </div>
+            <div>
+                <img src="{{ asset("images/landing/collage-engagement-{$langSuffix}.webp") }}"
+                     alt="{{ $isAr ? 'تصميم يوضّح إشعار التقدم وبطاقة العميل الرقمية ومعدل عودة الزبائن (بيانات توضيحية)' : 'ThreeDigits customer engagement collage showing QR scan, card progress notification, and live digital stamp card (illustrative metrics)' }}"
+                     width="840"
+                     height="840"
+                     loading="lazy"
+                     class="td-collage-img">
+            </div>
+        </div>
 
-                {{-- Customer List --}}
-                <div style="padding: 1.15rem; border-radius: 14px; background: #0C1742; border: 1px solid rgba(148, 163, 184, 0.18);">
-                    <h3 style="margin: 0 0 0.85rem; font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
-                        {{ $isAr ? 'قائمة العملاء (نموذج)' : 'Customer List (Demo)' }}
-                    </h3>
-                    <div style="display: grid; gap: 0.6rem;">
-                        @foreach($sampleCustomers as $c)
-                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font-size: 0.88rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.12);">
-                                <span style="color: #f8fafc; font-weight: 700;">{{ $c['name'] }}</span>
-                                <span style="color: #c4b5fd; font-weight: 700;">{{ $c['stamps'] }}</span>
-                                <span style="color: {{ str_contains($c['status'], 'جاهزة') || str_contains($c['status'], 'ready') ? '#6ee7b7' : '#cbd5e1' }}; font-size: 0.82rem;">{{ $c['status'] }}</span>
-                            </div>
-                        @endforeach
-                    </div>
+        {{-- Split Row 2 (Reversed): Cashier Stamper, Phone Lookup & Wallet Support (Collage 3) --}}
+        <div class="td-split-row td-reverse" style="margin-bottom: 4.5rem;">
+            <div>
+                <div style="font-size: 0.84rem; font-weight: 800; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.55rem;">
+                    {{ $isAr ? '٢ · ختم فوري وصرف المكافآت' : '02 · Fast Cashier Stamping & Wallet Passes' }}
                 </div>
+                <h3 style="font-size: clamp(1.4rem, 2.5vw, 1.95rem); font-weight: 800; color: #f8fafc; margin: 0 0 0.85rem; line-height: 1.3;">
+                    {{ $isAr ? 'امسح رمز العميل أو ابحث برقم الجوال لإضافة الأختام وصرف المكافأة' : 'Find any customer by QR or phone number to stamp and redeem' }}
+                </h3>
+                <p style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.75; margin: 0 0 1.35rem;">
+                    {{ $isAr
+                        ? 'من صفحة الماسح داخل لوحة المتجر، يطّلع الكاشير على رصيد أختام العميل، يضيف ختم الشراء أو يصرف المكافأة المستحقة بضغطة واحدة، كما يمكن للعميل حفظ بطاقته في المتصفح أو إضافتها إلى محفظة الهاتف.'
+                        : 'Staff open the built-in scanner to check a guest’s stamp balance, add a visit stamp, or redeem an unlocked reward in one tap—while customers keep their card handy in their browser or mobile wallet.' }}
+                </p>
 
-                {{-- Stamp & Transaction History --}}
-                <div style="padding: 1.15rem; border-radius: 14px; background: #0C1742; border: 1px solid rgba(148, 163, 184, 0.18);">
-                    <h3 style="margin: 0 0 0.85rem; font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
-                        {{ $isAr ? 'سجل الأختام والمعاملات' : 'Stamp & Transaction History' }}
-                    </h3>
-                    <div style="display: grid; gap: 0.65rem;">
-                        @foreach($sampleTransactions as $tx)
-                            <div style="font-size: 0.88rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.12);">
-                                <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
-                                    <strong style="color: #f8fafc;">{{ $tx['customer'] }}</strong>
-                                    <span style="color: #94a3b8; font-size: 0.82rem;">{{ $tx['time'] }}</span>
-                                </div>
-                                <div style="color: #6ee7b7; font-size: 0.84rem; margin-top: 0.15rem;">{{ $tx['action'] }}</div>
-                            </div>
-                        @endforeach
-                    </div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 0.7rem; color: #e2e8f0; font-size: 0.94rem;">
+                    <li style="display: flex; align-items: flex-start; gap: 0.6rem;">
+                        <span style="color: #a78bfa; font-weight: 800;">✓</span>
+                        <span>{{ $isAr ? 'بحث فوري برقم جوال العميل حتى لو لم يكن رمز QR مفتوحاً أمامه.' : 'Instant phone number lookup if a guest doesn’t have their QR open.' }}</span>
+                    </li>
+                    <li style="display: flex; align-items: flex-start; gap: 0.6rem;">
+                        <span style="color: #a78bfa; font-weight: 800;">✓</span>
+                        <span>{{ $isAr ? 'منع الأخطاء تلقائياً مع توثيق كل ختم وصرف مكافأة في سجل المعاملات.' : 'Automatic reward-ready state checks and immutable transaction logs.' }}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <img src="{{ asset("images/landing/collage-stamper-{$langSuffix}.webp") }}"
+                     alt="{{ $isAr ? 'معاينة توضيحية لشاشة تفاصيل البطاقة وإضافة الأختام وخيارات المحفظة الرقمية' : 'ThreeDigits 3D smartphone preview showing card details, stamp controls, Apple Wallet and Google Wallet options, and sample branch metrics' }}"
+                     width="840"
+                     height="840"
+                     loading="lazy"
+                     class="td-collage-img">
+            </div>
+        </div>
+
+        {{-- Split Row 3: Store Growth & Multi-Branch Management (Collage 1) --}}
+        <div class="td-split-row">
+            <div>
+                <div style="font-size: 0.84rem; font-weight: 800; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.55rem;">
+                    {{ $isAr ? '٣ · إدارة الفروع ونمو المتجر' : '03 · Multi-Branch Visibility & Control' }}
                 </div>
+                <h3 style="font-size: clamp(1.4rem, 2.5vw, 1.95rem); font-weight: 800; color: #f8fafc; margin: 0 0 0.85rem; line-height: 1.3;">
+                    {{ $isAr ? 'تابع العملاء المسجلين والأختام اليومية عبر جميع فروعك' : 'See enrolled customers, issued stamps, and branch activity at a glance' }}
+                </h3>
+                <p style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.75; margin: 0 0 1.35rem;">
+                    {{ $isAr
+                        ? 'سواء كنت تدير مقهى واحداً أو سلسلة فروع، تمنحك المنصة صلاحيات مستقلة لمدراء الفروع والكاشير مع عزل تام لبيانات متجرك.'
+                        : 'Whether you run a single neighborhood café or multiple locations, assign dedicated Branch Manager and Cashier roles while keeping your store’s customer data completely isolated.' }}
+                </p>
+
+                <div style="display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.95rem; border-radius: 999px; background: rgba(148, 163, 184, 0.12); border: 1px solid rgba(148, 163, 184, 0.24); color: #cbd5e1; font-size: 0.82rem; font-weight: 700;">
+                    <span>{{ $isAr ? 'الأرقام المعروضة في البطاقات التوضيحية هي بيانات نموذجية للمعاينة.' : 'Numbers shown in preview graphics are illustrative sample data.' }}</span>
+                </div>
+            </div>
+
+            <div>
+                <img src="{{ asset("images/landing/collage-growth-{$langSuffix}.webp") }}"
+                     alt="{{ $isAr ? 'صورة صاحب متجر مع بطاقات توضيحية لعدد العملاء المسجلين والأختام المصدرة' : 'Store owner portrait with illustrative ThreeDigits cards for enrolled customers and stamps issued' }}"
+                     width="840"
+                     height="840"
+                     loading="lazy"
+                     class="td-collage-img">
             </div>
         </div>
     </div>

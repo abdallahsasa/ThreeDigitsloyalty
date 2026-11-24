@@ -18,7 +18,8 @@
         {{-- Desktop Navigation --}}
         <nav aria-label="{{ $isAr ? 'التنقل الرئيسي' : 'Primary navigation' }}" class="hidden md:flex" style="align-items: center; gap: 1.35rem;">
             <a href="#how-it-works" style="color: #cbd5e1; text-decoration: none; font-size: 0.92rem; font-weight: 600;">{{ __('landing.nav_how_it_works') }}</a>
-            <a href="#features" style="color: #cbd5e1; text-decoration: none; font-size: 0.92rem; font-weight: 600;">{{ __('landing.nav_features') }}</a>
+            <a href="#merchant-tools" style="color: #cbd5e1; text-decoration: none; font-size: 0.92rem; font-weight: 600;">{{ $isAr ? 'أدوات المتجر' : 'Merchant tools' }}</a>
+            <a href="#industries" style="color: #cbd5e1; text-decoration: none; font-size: 0.92rem; font-weight: 600;">{{ $isAr ? 'القطاعات' : 'Industries' }}</a>
             <a href="#pricing" style="color: #cbd5e1; text-decoration: none; font-size: 0.92rem; font-weight: 600;">{{ __('landing.nav_pricing') }}</a>
             <a href="{{ url('/shop/login') }}" style="color: #f8fafc; text-decoration: none; font-size: 0.92rem; font-weight: 700;">{{ __('landing.nav_login') }}</a>
         </nav>
@@ -66,7 +67,8 @@
     <div x-show="mobileOpen" x-transition x-cloak class="md:hidden" style="border-top: 1px solid rgba(148, 163, 184, 0.16); background: #071033;">
         <div class="dl-container" style="padding-top: 1rem; padding-bottom: 1.25rem; display: grid; gap: 0.75rem;">
             <a href="#how-it-works" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#how-it-works h2, #how-it-works'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ __('landing.nav_how_it_works') }}</a>
-            <a href="#features" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#features h2, #features'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ __('landing.nav_features') }}</a>
+            <a href="#merchant-tools" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#merchant-tools h2, #merchant-tools'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ $isAr ? 'أدوات المتجر' : 'Merchant tools' }}</a>
+            <a href="#industries" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#industries h2, #industries'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ $isAr ? 'القطاعات' : 'Industries' }}</a>
             <a href="#pricing" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#pricing h2, #pricing'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ __('landing.nav_pricing') }}</a>
             <a href="{{ url('/shop/login') }}" style="color: #cbd5e1; text-decoration: none; font-size: 0.95rem; font-weight: 700; padding: 0.4rem 0;">{{ __('landing.nav_login') }}</a>
             <a href="{{ route('merchant.register') }}"

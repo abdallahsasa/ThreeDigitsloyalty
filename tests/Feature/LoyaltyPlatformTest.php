@@ -313,7 +313,7 @@ class LoyaltyPlatformTest extends TestCase
             ->assertDontSee('href="' . url('/admin') . '"', false)
             ->assertDontSee('Luxury Digital Loyalty')
             ->assertDontSee('line-through')
-            ->assertSee('خلّي زبائنك يرجعوا')
+            ->assertSee('بطاقات ولاء رقمية في متصفح الجوال')
             ->assertSee('مقهى الياسمين')
             ->assertSee('31 ديسمبر 2026');
 
@@ -332,9 +332,9 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('lang="en" dir="ltr"', false)
             ->assertSee('<link rel="canonical" href="' . route('home.en') . '">', false)
             ->assertSee('<link rel="alternate" hreflang="ar" href="' . route('home.ar') . '">', false)
-            ->assertSee('Digital loyalty stamp cards for cafés, restaurants, and salons.')
-            ->assertSee('Customers join by scanning a QR code. Your team adds stamps at checkout. No app download required.')
+            ->assertSee('Browser-based loyalty stamp cards — no app download required.')
             ->assertSee('Start free')
+            ->assertSee('Try the card')
             ->assertSee('Jasmine Café')
             ->assertSee('December 31, 2026')
             ->assertSee('A product by Three Digit Software')
@@ -504,7 +504,12 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('images/landing/step-3-stamp.webp', false)
             ->assertSee('images/landing/ui-qr-poster.webp', false)
             ->assertSee('images/landing/ui-customer-join.webp', false)
-            ->assertSee('images/landing/ui-vip-card.webp', false);
+            ->assertSee('images/landing/collage-growth-ar.webp', false)
+            ->assertSee('images/landing/collage-engagement-ar.webp', false)
+            ->assertSee('images/landing/collage-stamper-ar.webp', false)
+            ->assertSee('images/landing/industry-cafe.webp', false)
+            ->assertSee('images/landing/industry-restaurant.webp', false)
+            ->assertSee('images/landing/industry-salon.webp', false);
 
         $this->assertSame(200, $arResponse->getStatusCode());
 
@@ -513,6 +518,10 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('<link rel="canonical" href="' . route('home.en') . '">', false)
             ->assertSee('<link rel="alternate" hreflang="ar" href="' . route('home.ar') . '">', false)
             ->assertSee('<link rel="alternate" hreflang="en" href="' . route('home.en') . '">', false)
+            ->assertSee('Try the card')
+            ->assertSee('images/landing/collage-growth-en.webp', false)
+            ->assertSee('images/landing/collage-engagement-en.webp', false)
+            ->assertSee('images/landing/collage-stamper-en.webp', false)
             ->assertSee('Start free with Starter');
     }
 

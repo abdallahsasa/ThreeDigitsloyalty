@@ -176,30 +176,25 @@
     <x-landing.nav />
 
     <main>
-        {{-- 1. Hero and interactive loyalty card --}}
+        {{-- 1. Hero (Navy): Checkout scene + live interactive stamp card --}}
         <x-landing.hero />
 
-        {{-- 2. How it works (Merchant setup & Customer usage) --}}
+        {{-- 2. How it works (Warm Cream): 3 coordinated café steps + bilingual HTML UI --}}
         <x-landing.how-it-works />
 
-        {{-- 3. Examples for cafés, restaurants and salons --}}
-        <x-landing.examples />
-
-        {{-- 4. Merchant dashboard preview --}}
+        {{-- 3. Merchant tools (Navy Split Layouts): Branded card setup + staff stamp/redeem + real screens --}}
         <x-landing.dashboard-showcase />
 
-        {{-- 5. Main benefits and features --}}
-        <x-landing.features />
+        {{-- 4. Industries (Soft Lavender): Image-led showcases for cafés, restaurants & salons --}}
+        <x-landing.examples />
 
-        {{-- 6. Genuine customer proof omitted until verified merchant testimonials are published --}}
-
-        {{-- 7. Pricing and launch offer --}}
+        {{-- 5. Pricing & launch offer (Navy) --}}
         <x-landing.pricing :plans="$plans" />
 
-        {{-- 8. FAQs --}}
+        {{-- 6. FAQs (Warm Cream) --}}
         <x-landing.faq />
 
-        {{-- 9. Final activation CTA --}}
+        {{-- 7. Final activation CTA (Navy) --}}
         <x-landing.cta />
     </main>
 
