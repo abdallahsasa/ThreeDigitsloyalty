@@ -200,7 +200,7 @@
 
 <div class="container">
     <header class="topbar">
-        <a href="{{ url('/') }}" class="brand">
+        <a href="{{ route($isAr ? 'home.ar' : 'home.en') }}" class="brand">
             <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 32px; width: auto;">
             <span>ThreeDigits Loyalty</span>
         </a>
@@ -209,7 +209,10 @@
             <a href="{{ url('/shop/login') }}" style="color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 700;">
                 {{ $isAr ? 'دخول المتاجر' : 'Merchant login' }}
             </a>
-            <a href="{{ route('lang.switch', $isAr ? 'en' : 'ar') }}" class="lang-pill">
+            <a href="{{ route('lang.switch', ['locale' => $isAr ? 'en' : 'ar', 'plan' => old('plan', $selectedPlanSlug)]) }}"
+               id="register-lang-switch"
+               onclick="var s = document.getElementById('plan'); if (s && s.value) { this.href = '{{ route('lang.switch', $isAr ? 'en' : 'ar') }}?plan=' + encodeURIComponent(s.value); }"
+               class="lang-pill">
                 {{ $isAr ? 'English' : 'عربي' }}
             </a>
         </div>
@@ -288,8 +291,21 @@
                     </div>
                 @endif
 
+                <p style="margin: 0 0 1rem; font-size: 0.84rem; color: var(--muted); line-height: 1.65;">
+                    @if($isAr)
+                        قبل إنشاء الحساب، يمكنك مراجعة
+                        <a href="{{ route('legal.privacy.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">سياسة الخصوصية</a>
+                        و<a href="{{ route('legal.terms.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">شروط الاستخدام</a>.
+                    @else
+                        Before creating your account, review our
+                        <a href="{{ route('legal.privacy.en') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">Privacy Policy</a>
+                        and
+                        <a href="{{ route('legal.terms.en') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">Terms of Service</a>.
+                    @endif
+                </p>
+
                 <button type="submit" class="btn-primary">
-                    {{ $isAr ? 'أنشئ بطاقة متجرك' : 'Create your store’s card' }}
+                    {{ $isAr ? 'أنشئ حساب متجري' : 'Create my store account' }}
                 </button>
             </form>
 

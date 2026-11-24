@@ -35,7 +35,9 @@
                 <div style="display: grid; gap: 0.5rem;">
                     <a href="{{ route('merchant.register') }}" style="color: #cbd5e1; text-decoration: none;">{{ __('landing.nav_cta') }}</a>
                     <a href="{{ url('/shop/login') }}" style="color: #cbd5e1; text-decoration: none;">{{ __('landing.nav_login') }}</a>
-                    <a href="{{ route('lang.switch', $isAr ? 'en' : 'ar') }}" style="color: #cbd5e1; text-decoration: none;">
+                    <a href="{{ route($isAr ? 'home.en' : 'home.ar') }}"
+                       onclick="if (window.location.hash) { this.href = this.href.split('#')[0] + window.location.hash; }"
+                       style="color: #cbd5e1; text-decoration: none;">
                         {{ $isAr ? 'English' : 'عربي' }}
                     </a>
                 </div>
@@ -56,9 +58,14 @@
                     <span style="color: #cbd5e1;">
                         {{ $isAr ? 'بيانات متجرك منفصلة عن بيانات المتاجر الأخرى.' : 'Your store’s data is kept separate from other stores.' }}
                     </span>
-                    <span style="color: #94a3b8; font-size: 0.84rem;">
-                        {{ $isAr ? 'سياسة الخصوصية وشروط الاستخدام: قيد النشر قبل الإطلاق الرسمي.' : 'Privacy Policy & Terms of Service: pending publication prior to public launch.' }}
-                    </span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 0.15rem;">
+                        <a href="{{ route($isAr ? 'legal.privacy.ar' : 'legal.privacy.en') }}" style="color: #c4b5fd; text-decoration: underline; font-size: 0.86rem; font-weight: 600;">
+                            {{ $isAr ? 'سياسة الخصوصية' : 'Privacy Policy' }}
+                        </a>
+                        <a href="{{ route($isAr ? 'legal.terms.ar' : 'legal.terms.en') }}" style="color: #c4b5fd; text-decoration: underline; font-size: 0.86rem; font-weight: 600;">
+                            {{ $isAr ? 'شروط الاستخدام' : 'Terms of Service' }}
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

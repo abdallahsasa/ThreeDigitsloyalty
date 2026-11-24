@@ -1,9 +1,13 @@
-@php $isAr = app()->getLocale() === 'ar'; @endphp
+@php
+    $isAr = app()->getLocale() === 'ar';
+    $homeUrl = route($isAr ? 'home.ar' : 'home.en');
+    $switchHomeUrl = route($isAr ? 'home.en' : 'home.ar');
+@endphp
 
 <header x-data="{ mobileOpen: false }"
     style="position: sticky; top: 0; z-index: 50; background: rgba(1, 10, 41, 0.92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(148, 163, 184, 0.16);">
     <div class="dl-container" style="display: flex; align-items: center; justify-content: space-between; min-height: 70px; gap: 0.75rem;">
-        <a href="{{ url('/') }}" style="display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: #f8fafc; flex-shrink: 0;">
+        <a href="{{ $homeUrl }}" style="display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: #f8fafc; flex-shrink: 0;">
             <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 32px; width: auto; display: block;">
             <div style="line-height: 1.1;">
                 <div style="font-weight: 800; font-size: 1.05rem; color: #f8fafc;">ThreeDigits</div>
@@ -21,7 +25,8 @@
 
         {{-- Desktop Actions --}}
         <div class="hidden md:flex" style="align-items: center; gap: 0.65rem;">
-            <a href="{{ route('lang.switch', $isAr ? 'en' : 'ar') }}"
+            <a href="{{ $switchHomeUrl }}"
+               onclick="if (window.location.hash) { this.href = this.href.split('#')[0] + window.location.hash; }"
                style="padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.28); color: #f8fafc; text-decoration: none; font-size: 0.82rem; font-weight: 700;">
                 {{ $isAr ? 'EN' : 'عربي' }}
             </a>
@@ -34,7 +39,8 @@
 
         {{-- Mobile Actions --}}
         <div class="flex md:hidden" style="align-items: center; gap: 0.5rem;">
-            <a href="{{ route('lang.switch', $isAr ? 'en' : 'ar') }}"
+            <a href="{{ $switchHomeUrl }}"
+               onclick="if (window.location.hash) { this.href = this.href.split('#')[0] + window.location.hash; }"
                style="padding: 0.4rem 0.75rem; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.28); color: #f8fafc; text-decoration: none; font-size: 0.8rem; font-weight: 700;">
                 {{ $isAr ? 'EN' : 'عربي' }}
             </a>

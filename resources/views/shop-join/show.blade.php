@@ -578,7 +578,7 @@
 <div class="page-wrap">
     {{-- Top Navigation --}}
     <header class="nav-bar">
-        <a href="/" class="brand-link">
+        <a href="{{ route($isAr ? 'home.ar' : 'home.en') }}" class="brand-link">
             <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty">
             <div>
                 <span class="brand-title">ThreeDigits</span>
@@ -703,6 +703,19 @@
                     </div>
                     @error('phone') <div class="error-msg">{{ $message }}</div> @enderror
                 </div>
+
+                <p style="font-size: 0.78rem; color: #94a3b8; line-height: 1.6; margin: 0.25rem 0 0.85rem;">
+                    @if($isAr)
+                        قبل إصدار بطاقتك، يمكنك مراجعة
+                        <a href="{{ route('legal.privacy.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">سياسة الخصوصية</a>
+                        و<a href="{{ route('legal.terms.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">شروط الاستخدام</a>.
+                    @else
+                        Before creating your pass, review our
+                        <a href="{{ route('legal.privacy.en') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">Privacy Policy</a>
+                        and
+                        <a href="{{ route('legal.terms.en') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">Terms of Service</a>.
+                    @endif
+                </p>
 
                 <button type="submit" class="cta-btn">
                     <span>{{ $isAr ? 'إصدار بطاقتي الآن' : 'Create My Digital Pass' }}</span>

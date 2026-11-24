@@ -317,19 +317,61 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('مقهى الياسمين')
             ->assertSee('31 ديسمبر 2026');
 
-        $this->get(route('lang.switch', 'en'));
-        $this->get('/')
+        $this->get('/ar')
             ->assertStatus(200)
-            ->assertSee('Give your customers a reason to come back.')
+            ->assertSee('lang="ar" dir="rtl"', false)
+            ->assertSee('<link rel="canonical" href="' . route('home.ar') . '">', false)
+            ->assertSee('<link rel="alternate" hreflang="en" href="' . route('home.en') . '">', false)
+            ->assertSee('ابدأ مجاناً')
+            ->assertSee(route('legal.privacy.ar'), false)
+            ->assertSee(route('legal.terms.ar'), false)
+            ->assertDontSee('pending publication');
+
+        $this->get('/en')
+            ->assertStatus(200)
+            ->assertSee('lang="en" dir="ltr"', false)
+            ->assertSee('<link rel="canonical" href="' . route('home.en') . '">', false)
+            ->assertSee('<link rel="alternate" hreflang="ar" href="' . route('home.ar') . '">', false)
+            ->assertSee('Digital loyalty stamp cards for cafés, restaurants, and salons.')
+            ->assertSee('Customers join by scanning a QR code. Your team adds stamps at checkout. No app download required.')
+            ->assertSee('Start free')
             ->assertSee('Jasmine Café')
             ->assertSee('December 31, 2026')
-            ->assertSee('A product by Three Digit Software');
+            ->assertSee('A product by Three Digit Software')
+            ->assertSee(route('legal.privacy.en'), false)
+            ->assertSee(route('legal.terms.en'), false)
+            ->assertDontSee('pending publication');
+
+        // Legal pages in AR and EN
+        foreach (['/ar/privacy', '/en/privacy', '/ar/terms', '/en/terms'] as $legalUrl) {
+            $this->get($legalUrl)->assertStatus(200);
+        }
+
+        // Language switch from /register preserves selected plan
+        $this->from(route('merchant.register', ['plan' => 'business']))
+            ->get(route('lang.switch', ['locale' => 'ar', 'plan' => 'business']))
+            ->assertRedirect(route('merchant.register', ['plan' => 'business']));
+
+        $this->get(route('merchant.register', ['plan' => 'business']))
+            ->assertStatus(200)
+            ->assertSee('أنشئ حساب متجري')
+            ->assertSee(route('legal.privacy.ar'), false)
+            ->assertSee(route('legal.terms.ar'), false);
+
+        $this->get(route('lang.switch', 'en'));
+        $this->get(route('merchant.register', ['plan' => 'business']))
+            ->assertStatus(200)
+            ->assertSee('Create my store account')
+            ->assertSee(route('legal.privacy.en'), false)
+            ->assertSee(route('legal.terms.en'), false);
 
         // Customer can join a shop with country code (+963 Syria default) + local digits (email optional)
         $phoneOnlyShop = Shop::create(['name' => 'No Email Cafe', 'status' => 'active']);
         $this->get(route('shop.join', $phoneOnlyShop->slug))
             ->assertStatus(200)
-            ->assertSee('value="+963" selected', false);
+            ->assertSee('value="+963" selected', false)
+            ->assertSee(route('legal.privacy.en'), false)
+            ->assertSee(route('legal.terms.en'), false);
 
         $this->post(route('shop.join.store', $phoneOnlyShop->slug), [
             'name' => 'Invalid Phone User',

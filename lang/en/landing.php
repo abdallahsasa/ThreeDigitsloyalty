@@ -9,12 +9,12 @@ return [
     'nav_features' => 'Features',
     'nav_pricing' => 'Pricing',
     'nav_login' => 'Merchant login',
-    'nav_cta' => 'Create your store’s card',
+    'nav_cta' => 'Start free',
 
     // Hero & Interactive Demo
-    'hero_title' => 'Give your customers a reason to come back.',
-    'hero_subtitle' => 'Create a loyalty card for your business, add stamps with each purchase, and reward customers when their card is complete. No app download needed.',
-    'hero_cta_1' => 'Create your store’s card',
+    'hero_title' => 'Digital loyalty stamp cards for cafés, restaurants, and salons.',
+    'hero_subtitle' => 'Customers join by scanning a QR code. Your team adds stamps at checkout. No app download required.',
+    'hero_cta_1' => 'Start free',
     'hero_cta_2' => 'Try a demo card',
     'hero_benefit_1' => 'No app download',
     'hero_benefit_2' => 'Arabic & English',
@@ -72,7 +72,7 @@ return [
     'pricing_free_banner' => 'Launch Offer: All plans are free until December 31, 2026 — no payment card required.',
     'pricing_free_label' => 'Free during launch offer',
     'pricing_free_until' => 'Until December 31, 2026',
-    'pricing_cta_free' => 'Create your store’s card',
+    'pricing_cta_free' => 'Start free',
     'pricing_multi_branch_badge' => 'For multi-branch businesses',
 
     // FAQ

@@ -1,10 +1,18 @@
+@php
+    $currentLocale = app()->getLocale() === 'en' ? 'en' : 'ar';
+    $canonicalUrl = route($currentLocale === 'en' ? 'home.en' : 'home.ar');
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
+<html lang="{{ $currentLocale }}" dir="{{ $currentLocale === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="{{ __('landing.meta_description') }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <link rel="alternate" hreflang="ar" href="{{ route('home.ar') }}">
+    <link rel="alternate" hreflang="en" href="{{ route('home.en') }}">
+    <link rel="alternate" hreflang="x-default" href="{{ route('home.ar') }}">
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
     <title>{{ __('landing.meta_title') }}</title>
 
