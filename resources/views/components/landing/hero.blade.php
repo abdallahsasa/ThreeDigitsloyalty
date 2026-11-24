@@ -14,11 +14,63 @@
             animation: none !important;
         }
     }
+    .td-hero-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2.25rem;
+        align-items: center;
+    }
+    @media (min-width: 980px) {
+        .td-hero-grid {
+            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+            gap: 2.5rem;
+        }
+    }
+    .td-hero-stage {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .td-hero-photo-frame {
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(196, 181, 253, 0.3);
+        background: #071033;
+        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4);
+    }
+    .td-hero-photo-frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+    .td-hero-phone {
+        position: relative;
+        max-width: 370px;
+        margin: -2.25rem auto 0;
+        z-index: 2;
+    }
+    @media (min-width: 640px) {
+        .td-hero-stage {
+            padding-bottom: 1.5rem;
+        }
+        .td-hero-photo-frame {
+            width: 86%;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .td-hero-phone {
+            max-width: 340px;
+            margin: -11.5rem auto 0 0;
+        }
+    }
 </style>
 
 <section style="padding: 2.75rem 0 3.75rem; background: radial-gradient(circle at 80% 20%, rgba(116, 62, 226, 0.16), transparent 55%), #010A29;">
     <div class="dl-container">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; align-items: center;">
+        <div class="td-hero-grid">
             {{-- Copy & CTAs (always first on mobile) --}}
             <div>
                 <h1 style="font-size: {{ $isAr ? 'clamp(1.75rem, 3.2vw, 2.55rem)' : 'clamp(1.9rem, 3.6vw, 2.95rem)' }}; font-weight: 800; line-height: {{ $isAr ? '1.3' : '1.2' }}; max-width: {{ $isAr ? '23ch' : '19ch' }}; margin: 0 0 1.15rem; color: #f8fafc;">
@@ -84,24 +136,26 @@
                          return this.stamps + ' {{ __('landing.demo_stamps_of') }} ' + this.total;
                      }
                  }"
-                 style="position: relative; width: 100%; max-width: 500px; margin: 0 auto;">
-                {{-- Checkout Scene Backdrop --}}
-                <div style="position: relative; border-radius: 26px; padding: 1.25rem; background: linear-gradient(145deg, rgba(245, 158, 11, 0.14) 0%, rgba(116, 62, 226, 0.22) 55%, #071033 100%); border: 1px solid rgba(196, 181, 253, 0.28); overflow: hidden;">
+                 style="width: 100%;">
+                <div class="td-hero-stage">
                     @if(file_exists(public_path('images/landing/hero-checkout.webp')))
-                        <img src="{{ asset('images/landing/hero-checkout.webp') }}"
-                             alt="{{ $isAr ? 'كاشير مقهى حديث مع لوحة QR على الطاولة' : 'Modern café checkout counter with a tabletop QR sign' }}"
-                             width="960"
-                             height="600"
-                             loading="eager"
-                             fetchpriority="high"
-                             style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; pointer-events: none;">
-                    @else
-                        {{-- Subtle decorative checkout counter & QR stand atmosphere --}}
-                        <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(circle at 18% 22%, rgba(251, 191, 36, 0.14), transparent 48%), radial-gradient(circle at 85% 80%, rgba(116, 62, 226, 0.24), transparent 50%); pointer-events: none;"></div>
+                        <div class="td-hero-photo-frame">
+                            <picture>
+                                @if(file_exists(public_path('images/landing/hero-checkout-mobile.webp')))
+                                    <source media="(max-width: 639px)" srcset="{{ asset('images/landing/hero-checkout-mobile.webp') }}" width="800" height="540" type="image/webp">
+                                @endif
+                                <img src="{{ asset('images/landing/hero-checkout.webp') }}"
+                                     alt="{{ $isAr ? 'باريستا يحضّر القهوة خلف طاولة الكاشير وبجانبه حامل رمز QR للولاء' : 'Barista preparing coffee behind a sunlit café counter next to a tabletop QR stand' }}"
+                                     width="1280"
+                                     height="720"
+                                     loading="eager"
+                                     fetchpriority="high">
+                            </picture>
+                        </div>
                     @endif
 
-                    {{-- Phone-Style Frame --}}
-                    <div class="dl-card" style="position: relative; max-width: 390px; margin: 0 auto; padding: 1.15rem 1.25rem 1.35rem; background: #071033; border: 2px solid rgba(196, 181, 253, 0.38); border-radius: 30px; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);">
+                    {{-- Phone-Style Frame (overlaps the clean left plaster area of the photo on >=640px, stacks cleanly below on mobile) --}}
+                    <div class="dl-card td-hero-phone" style="padding: 1.1rem 1.2rem 1.3rem; background: #071033; border: 2px solid rgba(196, 181, 253, 0.42); border-radius: 30px; box-shadow: 0 24px 55px rgba(1, 10, 41, 0.72);">
                         {{-- Phone speaker pill --}}
                         <div aria-hidden="true" style="width: 64px; height: 5px; border-radius: 999px; background: rgba(148, 163, 184, 0.32); margin: 0 auto 0.9rem;"></div>
                         {{-- Group 1: Demo label & progress --}}

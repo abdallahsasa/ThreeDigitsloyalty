@@ -22,9 +22,63 @@
 <section class="dl-section" style="background: #040D30; border-top: 1px solid rgba(148, 163, 184, 0.14);">
     <div class="dl-container">
         <div class="dl-section-head">
-            <span class="dl-eyebrow">{{ __('landing.dashboard_sample_badge') }}</span>
+            <span class="dl-eyebrow">{{ $isAr ? 'شاشات حقيقية من النظام' : 'Real Product Screens' }}</span>
             <h2>{{ __('landing.dashboard_title') }}</h2>
             <p>{{ __('landing.dashboard_subtitle') }}</p>
+        </div>
+
+        {{-- Verified Product Screenshots Row --}}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.35rem; margin-bottom: 1.75rem; align-items: stretch;">
+            <figure style="margin: 0; padding: 1.15rem; border-radius: 18px; background: #071033; border: 1px solid rgba(196, 181, 253, 0.25); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="{{ asset('images/landing/ui-qr-poster.webp') }}"
+                     alt="{{ $isAr ? 'شاشة رمز QR وصفحة تسجيل العملاء داخل لوحة المتجر' : 'Store QR code and customer registration poster inside the merchant portal' }}"
+                     width="273"
+                     height="592"
+                     loading="lazy"
+                     style="width: auto; max-width: 100%; max-height: 360px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.2); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);">
+                <figcaption style="margin-top: 0.95rem;">
+                    <div style="font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
+                        {{ $isAr ? '1. رمز QR الجاهز للطباعة' : '1. Ready-to-Print Store QR' }}
+                    </div>
+                    <div style="font-size: 0.86rem; color: #cbd5e1; margin-top: 0.2rem;">
+                        {{ $isAr ? 'اعرضه عند الكاشير أو اطبعه بملف PDF بضغطة واحدة.' : 'Display at checkout or download as a print-ready PDF.' }}
+                    </div>
+                </figcaption>
+            </figure>
+
+            <figure style="margin: 0; padding: 1.15rem; border-radius: 18px; background: #071033; border: 1px solid rgba(196, 181, 253, 0.25); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="{{ asset('images/landing/ui-customer-join.webp') }}"
+                     alt="{{ $isAr ? 'نموذج تسجيل العميل السريع خلال 15 ثانية عبر المتصفح' : '15-second customer quick signup screen in mobile browser' }}"
+                     width="276"
+                     height="522"
+                     loading="lazy"
+                     style="width: auto; max-width: 100%; max-height: 360px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.2); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);">
+                <figcaption style="margin-top: 0.95rem;">
+                    <div style="font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
+                        {{ $isAr ? '2. تسجيل سريع في 15 ثانية' : '2. 15-Second Customer Join' }}
+                    </div>
+                    <div style="font-size: 0.86rem; color: #cbd5e1; margin-top: 0.2rem;">
+                        {{ $isAr ? 'الاسم ورقم الجوال فقط — بدون تحميل تطبيق.' : 'Name and mobile number in the browser — no app needed.' }}
+                    </div>
+                </figcaption>
+            </figure>
+
+            <figure style="margin: 0; padding: 1.15rem; border-radius: 18px; background: #071033; border: 1px solid rgba(196, 181, 253, 0.25); display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: space-between;">
+                <img src="{{ asset('images/landing/ui-vip-card.webp') }}"
+                     alt="{{ $isAr ? 'بطاقة الولاء الرقمية الحية للعميل مع الأختام ورمز QR الشخصي' : 'Customer live digital loyalty card with stamps and personal QR code' }}"
+                     width="270"
+                     height="362"
+                     loading="lazy"
+                     style="width: auto; max-width: 100%; max-height: 360px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.2); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35); margin-top: auto; margin-bottom: auto;">
+                <figcaption style="margin-top: 0.95rem;">
+                    <div style="font-size: 0.98rem; font-weight: 800; color: #f8fafc;">
+                        {{ $isAr ? '3. بطاقة العميل الرقمية ورمز QR' : '3. Live Stamp Card & Personal QR' }}
+                    </div>
+                    <div style="font-size: 0.86rem; color: #cbd5e1; margin-top: 0.2rem;">
+                        {{ $isAr ? 'يمسحها الكاشير لإضافة الأختام وصرف المكافآت فوراً.' : 'Scanned at checkout to add stamps and redeem rewards.' }}
+                    </div>
+                </figcaption>
+            </figure>
         </div>
 
         <div class="dl-card" style="padding: 1.5rem; background: #071033; border-color: rgba(196, 181, 253, 0.25);">

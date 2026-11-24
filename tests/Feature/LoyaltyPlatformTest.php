@@ -496,7 +496,15 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('جرّب البطاقة')
             ->assertSee('ابدأ مجاناً مع البداية')
             ->assertSee('31 ديسمبر 2026')
-            ->assertDontSee('31 كانون الأول 2026');
+            ->assertDontSee('31 كانون الأول 2026')
+            ->assertSee('images/landing/hero-checkout.webp', false)
+            ->assertSee('images/landing/hero-checkout-mobile.webp', false)
+            ->assertSee('images/landing/step-1-scan.webp', false)
+            ->assertSee('images/landing/step-2-card.webp', false)
+            ->assertSee('images/landing/step-3-stamp.webp', false)
+            ->assertSee('images/landing/ui-qr-poster.webp', false)
+            ->assertSee('images/landing/ui-customer-join.webp', false)
+            ->assertSee('images/landing/ui-vip-card.webp', false);
 
         $this->assertSame(200, $arResponse->getStatusCode());
 
