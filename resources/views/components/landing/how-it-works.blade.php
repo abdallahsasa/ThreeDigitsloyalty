@@ -68,36 +68,12 @@
                 <article style="background: #ffffff; border: 1px solid rgba(116, 62, 226, 0.16); border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06); display: flex; flex-direction: column;">
                     {{-- Image / Visual Frame stacked above its step --}}
                     <div style="position: relative; aspect-ratio: 4 / 3; background: linear-gradient(135deg, #EDE9FE 0%, #FEF3C7 100%); overflow: hidden;">
-                        @if(file_exists(public_path($step['img'])))
-                            <img src="{{ asset($step['img']) }}"
-                                 alt="{{ $step['alt'] }}"
-                                 width="800"
-                                 height="600"
-                                 loading="lazy"
-                                 style="width: 100%; height: 100%; object-fit: cover; display: block;">
-                        @else
-                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
-                                <div style="width: 82px; height: 82px; border-radius: 22px; background: rgba(116, 62, 226, 0.14); border: 1px solid rgba(116, 62, 226, 0.3); color: #5B21B6; display: flex; align-items: center; justify-content: center;">
-                                    @if($step['num'] === '1')
-                                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <rect x="3" y="3" width="7" height="7"></rect>
-                                            <rect x="14" y="3" width="7" height="7"></rect>
-                                            <rect x="3" y="14" width="7" height="7"></rect>
-                                            <path d="M14 14h3v3h-3z"></path>
-                                        </svg>
-                                    @elseif($step['num'] === '2')
-                                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                                        </svg>
-                                    @else
-                                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                        </svg>
-                                    @endif
-                                </div>
-                            </div>
-                        @endif
+                        <img src="{{ asset($step['img']) }}"
+                             alt="{{ $step['alt'] }}"
+                             width="800"
+                             height="600"
+                             loading="lazy"
+                             style="width: 100%; height: 100%; object-fit: cover; display: block;">
 
                         {{-- Real HTML step badge overlay --}}
                         <div style="position: absolute; top: 0.9rem; inset-inline-start: 0.9rem; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.75rem; border-radius: 999px; background: #010A29; color: #ffffff; font-size: 0.8rem; font-weight: 800;">

@@ -138,21 +138,17 @@
                  }"
                  style="width: 100%;">
                 <div class="td-hero-stage">
-                    @if(file_exists(public_path('images/landing/hero-checkout.webp')))
-                        <div class="td-hero-photo-frame">
-                            <picture>
-                                @if(file_exists(public_path('images/landing/hero-checkout-mobile.webp')))
-                                    <source media="(max-width: 639px)" srcset="{{ asset('images/landing/hero-checkout-mobile.webp') }}" width="800" height="540" type="image/webp">
-                                @endif
-                                <img src="{{ asset('images/landing/hero-checkout.webp') }}"
-                                     alt="{{ $isAr ? 'باريستا يحضّر القهوة خلف طاولة الكاشير وبجانبه حامل رمز QR للولاء' : 'Barista preparing coffee behind a sunlit café counter next to a tabletop QR stand' }}"
-                                     width="1280"
-                                     height="720"
-                                     loading="eager"
-                                     fetchpriority="high">
-                            </picture>
-                        </div>
-                    @endif
+                    <div class="td-hero-photo-frame">
+                        <picture>
+                            <source media="(max-width: 639px)" srcset="{{ asset('images/landing/hero-checkout-mobile.webp') }}" width="800" height="540" type="image/webp">
+                            <img src="{{ asset('images/landing/hero-checkout.webp') }}"
+                                 alt="{{ $isAr ? 'باريستا يحضّر القهوة خلف طاولة الكاشير وبجانبه حامل رمز QR للولاء' : 'Barista preparing coffee behind a sunlit café counter next to a tabletop QR stand' }}"
+                                 width="1280"
+                                 height="720"
+                                 loading="eager"
+                                 fetchpriority="high">
+                        </picture>
+                    </div>
 
                     {{-- Phone-Style Frame (overlaps the clean left plaster area of the photo on >=640px, stacks cleanly below on mobile) --}}
                     <div class="dl-card td-hero-phone" style="padding: 1.1rem 1.2rem 1.3rem; background: #071033; border: 2px solid rgba(196, 181, 253, 0.42); border-radius: 30px; box-shadow: 0 24px 55px rgba(1, 10, 41, 0.72);">
