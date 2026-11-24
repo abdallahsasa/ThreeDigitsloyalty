@@ -31,10 +31,10 @@ class LoyaltyCardApiController extends Controller
 
     public function show(string $token): JsonResponse
     {
-        $card = LoyaltyCard::with([
+        $card = LoyaltyCard::withoutGlobalScopes()->with([
             'customer:id,name,phone',
             'shop:id,name,logo,default_language',
-            'campaign:id,name,type,required_purchases_count,reward_name,reward_description,status',
+            'campaign' => fn ($q) => $q->withoutGlobalScopes()->select('id', 'name', 'type', 'required_purchases_count', 'reward_name', 'reward_description', 'status'),
             'transactions' => fn ($q) => $q->latest()->take(10),
         ])
             ->where('token', $token)

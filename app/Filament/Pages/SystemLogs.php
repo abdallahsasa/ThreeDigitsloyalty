@@ -44,6 +44,8 @@ class SystemLogs extends Page
 
     public function downloadSelected(): ?BinaryFileResponse
     {
+        abort_unless(static::canAccess(), 403);
+
         $path = $this->resolveSafeLogPath($this->selectedFile);
         if (!$path) {
             return null;
@@ -54,6 +56,8 @@ class SystemLogs extends Page
 
     public function clearSelected(): void
     {
+        abort_unless(static::canAccess(), 403);
+
         $path = $this->resolveSafeLogPath($this->selectedFile);
         if (!$path) {
             return;

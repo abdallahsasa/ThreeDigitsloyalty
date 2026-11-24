@@ -20,6 +20,11 @@ class WalletNotifications extends Page
 
     public string $messageText = '';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasAnyRole(['Super Admin', 'Shop Owner', 'Branch Manager']) ?? false;
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('Wallet Notifications');
