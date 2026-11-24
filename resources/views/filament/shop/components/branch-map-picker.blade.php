@@ -78,6 +78,10 @@
             const fixedLng = Number(lng).toFixed(7);
             this.lat = fixedLat;
             this.lng = fixedLng;
+            if (this.$wire && typeof this.$wire.set === 'function') {
+                this.$wire.set('data.latitude', fixedLat, false);
+                this.$wire.set('data.longitude', fixedLng, false);
+            }
             this.placeMarker(parseFloat(fixedLat), parseFloat(fixedLng));
             if (pan && this.map) {
                 this.map.setView([parseFloat(fixedLat), parseFloat(fixedLng)], Math.max(this.map.getZoom(), 15));
@@ -86,6 +90,10 @@
         clearLocation() {
             this.lat = null;
             this.lng = null;
+            if (this.$wire && typeof this.$wire.set === 'function') {
+                this.$wire.set('data.latitude', null, false);
+                this.$wire.set('data.longitude', null, false);
+            }
             if (this.marker && this.map) {
                 this.map.removeLayer(this.marker);
                 this.marker = null;

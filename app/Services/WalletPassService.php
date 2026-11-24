@@ -120,7 +120,7 @@ class WalletPassService
         $locations = $this->resolveShopLocations($card);
         if (!empty($locations)) {
             $payload['locations'] = $locations;
-            $payload['maxDistance'] = 150;
+            $payload['maxDistance'] = 300;
         }
 
         return $payload;
@@ -554,14 +554,21 @@ class WalletPassService
 
             $objectUrl = "https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject/{$objectId}";
 
-            $patch = Http::withToken($accessToken)->timeout(8)->patch($objectUrl, [
+            $patchPayload = [
                 'loyaltyPoints' => [
                     'label' => 'Stamps',
                     'balance' => [
                         'string' => "{$card->current_stamps_count} / {$required}",
                     ],
                 ],
-            ]);
+            ];
+
+            $geoLocations = $this->resolveGoogleLocations($card);
+            if (!empty($geoLocations)) {
+                $patchPayload['locations'] = $geoLocations;
+            }
+
+            $patch = Http::withToken($accessToken)->timeout(8)->patch($objectUrl, $patchPayload);
 
             if ($patch->status() === 404) {
                 // Customer has not added this pass to Google Wallet yet
