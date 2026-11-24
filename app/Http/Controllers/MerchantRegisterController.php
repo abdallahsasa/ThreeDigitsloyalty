@@ -33,13 +33,49 @@ class MerchantRegisterController extends Controller
 
     public function store(Request $request, FunnelTracker $tracker)
     {
+        $isAr = app()->getLocale() === 'ar';
+
+        $messages = $isAr ? [
+            'shop_name.required' => 'يرجى إدخال اسم المتجر.',
+            'shop_name.max' => 'اسم المتجر يجب ألا يتجاوز :max حرفاً.',
+            'name.required' => 'يرجى إدخال اسمك الكامل.',
+            'name.max' => 'الاسم يجب ألا يتجاوز :max حرفاً.',
+            'email.required' => 'يرجى إدخال البريد الإلكتروني.',
+            'email.email' => 'يرجى إدخال بريد إلكتروني صحيح.',
+            'email.unique' => 'هذا البريد الإلكتروني مسجل بالفعل.',
+            'password.required' => 'يرجى إدخال كلمة المرور.',
+            'password.min' => 'يجب أن تتكون كلمة المرور من :min أحرف على الأقل.',
+        ] : [
+            'shop_name.required' => 'Please enter your store name.',
+            'name.required' => 'Please enter your full name.',
+            'email.required' => 'Please enter your email address.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email address is already registered.',
+            'password.required' => 'Please enter a password.',
+            'password.min' => 'Your password must be at least :min characters.',
+        ];
+
+        $attributes = $isAr ? [
+            'shop_name' => 'اسم المتجر',
+            'name' => 'الاسم الكامل',
+            'email' => 'البريد الإلكتروني',
+            'password' => 'كلمة المرور',
+            'plan' => 'الخطة المختارة',
+        ] : [
+            'shop_name' => 'store name',
+            'name' => 'full name',
+            'email' => 'email address',
+            'password' => 'password',
+            'plan' => 'selected plan',
+        ];
+
         $validated = $request->validate([
             'shop_name' => ['required', 'string', 'max:120'],
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'plan' => ['nullable', 'string', 'max:60'],
-        ]);
+        ], $messages, $attributes);
 
         $planSlug = Str::slug((string) ($validated['plan'] ?? 'starter'));
         $plans = Plan::where('status', 'active')->orderBy('price', 'asc')->get();

@@ -63,7 +63,7 @@
                 @endphp
                 <div class="dl-card" style="padding: 1.85rem; display: flex; flex-direction: column; justify-content: space-between; {{ $isMultiBranch ? 'border-color: rgba(116, 62, 226, 0.6); background: #0C1742;' : '' }}">
                     <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; min-height: 2.25rem;">
                             <h3 style="font-size: 1.2rem; font-weight: 800; margin: 0; color: #f8fafc;">{{ $translatePlanName($plan->name) }}</h3>
                             @if($isMultiBranch)
                                 <span style="padding: 0.25rem 0.7rem; border-radius: 999px; background: rgba(116, 62, 226, 0.22); color: #c4b5fd; font-size: 0.8rem; font-weight: 700;">
@@ -117,11 +117,12 @@
                         @endif
                     </div>
 
+                    @php $translatedPlanName = $translatePlanName($plan->name); @endphp
                     <a href="{{ route('merchant.register', ['plan' => $planSlug]) }}"
                        onclick="window.trackFunnelEvent && window.trackFunnelEvent('primary_cta_clicked', { location: 'pricing', plan: '{{ $planSlug }}' })"
                        class="{{ $isMultiBranch ? 'dl-btn-primary' : 'dl-btn-ghost' }}"
                        style="width: 100%; font-size: 0.95rem;">
-                        {{ __('landing.pricing_cta_free') }}
+                        {{ $isAr ? "ابدأ مجاناً مع {$translatedPlanName}" : "Start free with {$translatedPlanName}" }}
                     </a>
                 </div>
             @endforeach
@@ -130,8 +131,8 @@
         <div class="dl-card" style="margin-top: 1.75rem; padding: 1.35rem 1.5rem; background: #071033;">
             <p style="margin: 0; font-size: 0.92rem; color: #e2e8f0; line-height: 1.75; text-align: center;">
                 {{ $isAr
-                    ? "لا يُطلب إدخال بطاقة دفع عند التسجيل، ولا يتم أي خصم تلقائي بعد انتهاء العرض في {$offerEndsFormatted} — تختار بنفسك الاستمرار أو التوقف دون أي التزام."
-                    : "No payment card is required to register, and billing does not start automatically after {$offerEndsFormatted}. You choose whether to continue when the launch offer ends." }}
+                    ? "لا يُطلب إدخال بطاقة دفع عند التسجيل، ولا يتم أي خصم تلقائي في 1 يناير 2027 بعد انتهاء العرض في {$offerEndsFormatted}. تبقى بيانات متجرك وبطاقات عملائك محفوظة، وسيتم إشعارك مسبقاً بخيارات التجديد قبل تفعيل أي فوترة."
+                    : "No payment card is required to register, and billing does not start automatically on January 1, 2027 after the offer ends on {$offerEndsFormatted}. Your store data and customer cards remain intact, and renewal options will be shared ahead of time before any billing begins." }}
             </p>
         </div>
     </div>

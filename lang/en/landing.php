@@ -26,7 +26,7 @@ return [
     'demo_stamps_of' => 'of',
     'demo_reward_label' => 'Free coffee when you collect 6 stamps',
     'demo_add_stamp' => 'Try adding a stamp',
-    'demo_reward_ready' => 'Your reward is ready!',
+    'demo_reward_ready' => 'Free coffee unlocked',
     'demo_replay' => 'Replay demo',
     'demo_note' => 'Interactive sample card — no data is saved.',
 

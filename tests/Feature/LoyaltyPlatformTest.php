@@ -483,4 +483,84 @@ class LoyaltyPlatformTest extends TestCase
             'device_library_identifier' => $deviceId,
         ]);
     }
+
+    public function test_landing_pages_render_canonical_hreflang_and_localized_ctas(): void
+    {
+        Plan::create(['name' => 'Starter', 'price' => 19, 'status' => 'active', 'features' => ['1 Branch']]);
+
+        $arResponse = $this->get(route('home.ar'))
+            ->assertStatus(200)
+            ->assertSee('<link rel="canonical" href="' . route('home.ar') . '">', false)
+            ->assertSee('<link rel="alternate" hreflang="ar" href="' . route('home.ar') . '">', false)
+            ->assertSee('<link rel="alternate" hreflang="en" href="' . route('home.en') . '">', false)
+            ->assertSee('جرّب البطاقة')
+            ->assertSee('ابدأ مجاناً مع البداية')
+            ->assertSee('31 ديسمبر 2026')
+            ->assertDontSee('31 كانون الأول 2026');
+
+        $this->assertSame(200, $arResponse->getStatusCode());
+
+        $this->get(route('home.en'))
+            ->assertStatus(200)
+            ->assertSee('<link rel="canonical" href="' . route('home.en') . '">', false)
+            ->assertSee('<link rel="alternate" hreflang="ar" href="' . route('home.ar') . '">', false)
+            ->assertSee('<link rel="alternate" hreflang="en" href="' . route('home.en') . '">', false)
+            ->assertSee('Start free with Starter');
+    }
+
+    public function test_merchant_register_validation_is_localized_and_accessible(): void
+    {
+        Plan::create(['name' => 'Starter', 'price' => 19, 'status' => 'active']);
+
+        $arRes = $this->withSession(['locale' => 'ar'])
+            ->followingRedirects()
+            ->from(route('merchant.register', ['plan' => 'starter']))
+            ->post(route('merchant.register.store'), [
+                'shop_name' => '',
+                'name' => '',
+                'email' => 'not-an-email',
+                'password' => '123',
+                'plan' => 'starter',
+            ]);
+
+        $arRes->assertStatus(200)
+            ->assertSee('يرجى إدخال اسم المتجر.')
+            ->assertSee('يرجى إدخال اسمك الكامل.')
+            ->assertSee('يرجى إدخال بريد إلكتروني صحيح.')
+            ->assertSee('يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.')
+            ->assertSee('aria-invalid="true"', false)
+            ->assertSee('aria-describedby="shop_name-error"', false);
+
+        $enRes = $this->withSession(['locale' => 'en'])
+            ->followingRedirects()
+            ->from(route('merchant.register', ['plan' => 'starter']))
+            ->post(route('merchant.register.store'), [
+                'shop_name' => '',
+                'name' => '',
+                'email' => '',
+                'password' => '',
+                'plan' => 'starter',
+            ]);
+
+        $enRes->assertStatus(200)
+            ->assertSee('Please enter your store name.')
+            ->assertSee('Please enter your full name.')
+            ->assertSee('Please enter your email address.')
+            ->assertSee('Please enter a password.');
+    }
+
+    public function test_shop_login_uses_start_free_cta_and_language_switch(): void
+    {
+        $this->get('/shop/login?lang=ar')
+            ->assertStatus(200)
+            ->assertSee('ابدأ مجاناً')
+            ->assertDontSee('أنشئ بطاقة متجرك')
+            ->assertSee('lang=en', false);
+
+        $this->get('/shop/login?lang=en')
+            ->assertStatus(200)
+            ->assertSee('Start free')
+            ->assertDontSee('Create your store’s card')
+            ->assertSee('lang=ar', false);
+    }
 }

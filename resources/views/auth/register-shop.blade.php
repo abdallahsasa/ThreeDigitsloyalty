@@ -50,28 +50,63 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 1rem;
+            gap: 0.75rem;
             padding-bottom: 1.5rem;
+            flex-wrap: nowrap;
         }
 
         .brand {
             display: inline-flex;
             align-items: center;
-            gap: 0.65rem;
+            gap: 0.5rem;
             color: var(--text);
             text-decoration: none;
             font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 0.96rem;
+            white-space: nowrap;
+            min-height: 44px;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 480px) {
+            .brand {
+                gap: 0.65rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .topbar-login {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 0.45rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 700;
+            white-space: nowrap;
         }
 
         .lang-pill {
-            padding: 0.45rem 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 0.9rem;
             border-radius: 999px;
             border: 1px solid var(--border);
             color: var(--text);
             text-decoration: none;
             font-size: 0.85rem;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .lang-pill:focus-visible, .btn-primary:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
@@ -123,6 +158,20 @@
             background: var(--surface-2);
             color: var(--text);
             font-size: 0.95rem;
+        }
+
+        input::placeholder {
+            color: #94A3B8;
+            opacity: 1;
+        }
+
+        input[aria-invalid="true"], select[aria-invalid="true"] {
+            border-color: var(--red);
+        }
+
+        input:disabled, select:disabled, .btn-primary:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
         }
 
         .password-wrap {
@@ -205,8 +254,8 @@
             <span>ThreeDigits Loyalty</span>
         </a>
 
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <a href="{{ url('/shop/login') }}" style="color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 700;">
+        <div class="topbar-actions">
+            <a href="{{ url('/shop/login') }}" class="topbar-login">
                 {{ $isAr ? 'دخول المتاجر' : 'Merchant login' }}
             </a>
             <a href="{{ route('lang.switch', ['locale' => $isAr ? 'en' : 'ar', 'plan' => old('plan', $selectedPlanSlug)]) }}"
@@ -236,37 +285,37 @@
 
                 <div class="field">
                     <label for="shop_name">{{ $isAr ? 'اسم المتجر أو المقهى' : 'Store or café name' }}</label>
-                    <input id="shop_name" name="shop_name" type="text" value="{{ old('shop_name') }}" required autocomplete="organization" placeholder="{{ $isAr ? 'مثال: مقهى الياسمين' : 'e.g. Jasmine Café' }}">
-                    @error('shop_name') <div class="error-text" role="alert">{{ $message }}</div> @enderror
+                    <input id="shop_name" name="shop_name" type="text" value="{{ old('shop_name') }}" required autocomplete="organization" placeholder="{{ $isAr ? 'مثال: مقهى الياسمين' : 'e.g. Jasmine Café' }}" @error('shop_name') aria-invalid="true" aria-describedby="shop_name-error" @enderror>
+                    @error('shop_name') <div id="shop_name-error" class="error-text" role="alert">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="field">
                     <label for="name">{{ $isAr ? 'اسمك الكامل' : 'Your full name' }}</label>
-                    <input id="name" name="name" type="text" value="{{ old('name') }}" required autocomplete="name" placeholder="{{ $isAr ? 'الاسم الكامل' : 'Full name' }}">
-                    @error('name') <div class="error-text" role="alert">{{ $message }}</div> @enderror
+                    <input id="name" name="name" type="text" value="{{ old('name') }}" required autocomplete="name" placeholder="{{ $isAr ? 'الاسم الكامل' : 'Full name' }}" @error('name') aria-invalid="true" aria-describedby="name-error" @enderror>
+                    @error('name') <div id="name-error" class="error-text" role="alert">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="field">
                     <label for="email">{{ $isAr ? 'البريد الإلكتروني' : 'Email address' }}</label>
-                    <input id="email" name="email" type="email" dir="ltr" style="text-align: start;" value="{{ old('email') }}" required autocomplete="email" placeholder="owner@yourstore.com">
-                    @error('email') <div class="error-text" role="alert">{{ $message }}</div> @enderror
+                    <input id="email" name="email" type="email" dir="ltr" style="text-align: start;" value="{{ old('email') }}" required autocomplete="email" placeholder="owner@yourstore.com" @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
+                    @error('email') <div id="email-error" class="error-text" role="alert">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="field">
                     <label for="password">{{ $isAr ? 'كلمة المرور (8 أحرف على الأقل)' : 'Password (minimum 8 characters)' }}</label>
                     <div class="password-wrap">
-                        <input id="password" name="password" type="password" dir="ltr" required autocomplete="new-password" minlength="8" style="padding-inline-end: 4.5rem;">
+                        <input id="password" name="password" type="password" dir="ltr" required autocomplete="new-password" minlength="8" placeholder="{{ $isAr ? '8 أحرف على الأقل' : 'At least 8 characters' }}" style="padding-inline-end: 4.5rem;" @error('password') aria-invalid="true" aria-describedby="password-error" @enderror>
                         <button type="button" class="password-toggle" id="toggle-pw" aria-label="{{ $isAr ? 'إظهار أو إخفاء كلمة المرور' : 'Show or hide password' }}">
                             {{ $isAr ? 'إظهار' : 'Show' }}
                         </button>
                     </div>
-                    @error('password') <div class="error-text" role="alert">{{ $message }}</div> @enderror
+                    @error('password') <div id="password-error" class="error-text" role="alert">{{ $message }}</div> @enderror
                 </div>
 
                 @if($plans->isNotEmpty())
                     <div class="field">
-                        <label for="plan">{{ $isAr ? 'الخطة المختارة (مجانية حتى 31 ديسمبر 2026)' : 'Selected plan (free until December 31, 2026)' }}</label>
-                        <select id="plan" name="plan">
+                        <label for="plan">{{ $isAr ? 'الخطة المختارة' : 'Selected plan' }}</label>
+                        <select id="plan" name="plan" @error('plan') aria-invalid="true" aria-describedby="plan-error" @enderror>
                             @foreach($plans as $plan)
                                 @php
                                     $slug = \Illuminate\Support\Str::slug($plan->name);
@@ -281,13 +330,14 @@
                                 @endphp
                                 <option value="{{ $slug }}" {{ old('plan', $selectedPlanSlug) === $slug ? 'selected' : '' }}>
                                     @if($isAr)
-                                        {{ $arPlanName }} — مجاني الآن (بعد العرض: {{ $arAfterPrice }})
+                                        {{ $arPlanName }} — مجانية حتى 31 ديسمبر 2026 (بعد العرض: {{ $arAfterPrice }})
                                     @else
-                                        {{ $plan->name }} — Free now (after offer: ${{ $intPrice }}/month)
+                                        {{ $plan->name }} — Free until Dec 31, 2026 (then ${{ $intPrice }}/month)
                                     @endif
                                 </option>
                             @endforeach
                         </select>
+                        @error('plan') <div id="plan-error" class="error-text" role="alert">{{ $message }}</div> @enderror
                     </div>
                 @endif
 
@@ -365,6 +415,11 @@
 
 <script>
     (function () {
+        var firstInvalid = document.querySelector('[aria-invalid="true"]');
+        if (firstInvalid && typeof firstInvalid.focus === 'function') {
+            firstInvalid.focus();
+        }
+
         var btn = document.getElementById('toggle-pw');
         var input = document.getElementById('password');
         if (!btn || !input) return;

@@ -32,10 +32,10 @@
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1.15rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(148, 163, 184, 0.16);">
                 <div>
                     <div style="font-size: 1.05rem; font-weight: 800; color: #f8fafc;">
-                        {{ $isAr ? 'لوحة تحكم المتجر — مقهى الياسمين (بيانات توضيحية)' : 'Merchant Portal — Jasmine Café (Demo Data)' }}
+                        {{ $isAr ? 'معاينة توضيحية: البحث عن عميل وإضافة ختم — مقهى الياسمين' : 'Illustrative Preview: Find a Customer & Add a Stamp — Jasmine Café' }}
                     </div>
                     <div style="font-size: 0.875rem; color: #cbd5e1; margin-top: 0.2rem;">
-                        {{ $isAr ? 'معاينة للشاشات الفعلية المتوفرة داخل لوحة المتجر.' : 'Preview of the real tools inside your store dashboard.' }}
+                        {{ $isAr ? 'مثال توضيحي ببيانات تجريبية لمسار العمل اليومي للكاشير داخل لوحة المتجر.' : 'Illustrative demo-data preview showing how your cashier finds a customer and stamps a card.' }}
                     </div>
                 </div>
 

@@ -16,10 +16,10 @@
     }
 </style>
 
-<section style="padding: 3rem 0 3.75rem; background: #010A29;">
+<section style="padding: 2.75rem 0 3.75rem; background: radial-gradient(circle at 80% 20%, rgba(116, 62, 226, 0.16), transparent 55%), #010A29;">
     <div class="dl-container">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; align-items: center;">
-            {{-- Copy & CTAs --}}
+            {{-- Copy & CTAs (always first on mobile) --}}
             <div>
                 <h1 style="font-size: {{ $isAr ? 'clamp(1.75rem, 3.2vw, 2.55rem)' : 'clamp(1.9rem, 3.6vw, 2.95rem)' }}; font-weight: 800; line-height: {{ $isAr ? '1.3' : '1.2' }}; max-width: {{ $isAr ? '23ch' : '19ch' }}; margin: 0 0 1.15rem; color: #f8fafc;">
                     {{ __('landing.hero_title') }}
@@ -53,7 +53,7 @@
                 </ul>
             </div>
 
-            {{-- Interactive Café Loyalty Card Demo (5 of 6 -> 6 of 6) --}}
+            {{-- Checkout Scene + Phone-Style Interactive Loyalty Card Demo --}}
             <div id="interactive-demo"
                  x-data="{
                      stamps: 5,
@@ -81,21 +81,34 @@
                          this.justStamped = false;
                      },
                      formattedCount() {
-                         const arDigits = ['٠','١','٢','٣','٤','٥','٦'];
-                         @if($isAr)
-                             return (arDigits[this.stamps] || this.stamps) + ' {{ __('landing.demo_stamps_of') }} ' + (arDigits[this.total] || this.total);
-                         @else
-                             return this.stamps + ' {{ __('landing.demo_stamps_of') }} ' + this.total;
-                         @endif
+                         return this.stamps + ' {{ __('landing.demo_stamps_of') }} ' + this.total;
                      }
                  }"
-                 style="max-width: 440px; width: 100%; margin: 0 auto;">
-                <div class="dl-card" style="padding: 1.5rem; background: #071033; border: 1px solid rgba(196, 181, 253, 0.3);">
-                    {{-- Group 1: Demo label & progress --}}
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                        <span class="dl-eyebrow">{{ __('landing.demo_badge') }}</span>
-                        <span style="font-size: 0.95rem; font-weight: 800; color: #f8fafc;" x-text="formattedCount()"></span>
-                    </div>
+                 style="position: relative; width: 100%; max-width: 500px; margin: 0 auto;">
+                {{-- Checkout Scene Backdrop --}}
+                <div style="position: relative; border-radius: 26px; padding: 1.25rem; background: linear-gradient(145deg, rgba(245, 158, 11, 0.14) 0%, rgba(116, 62, 226, 0.22) 55%, #071033 100%); border: 1px solid rgba(196, 181, 253, 0.28); overflow: hidden;">
+                    @if(file_exists(public_path('images/landing/hero-checkout.webp')))
+                        <img src="{{ asset('images/landing/hero-checkout.webp') }}"
+                             alt="{{ $isAr ? 'كاشير مقهى حديث مع لوحة QR على الطاولة' : 'Modern café checkout counter with a tabletop QR sign' }}"
+                             width="960"
+                             height="600"
+                             loading="eager"
+                             fetchpriority="high"
+                             style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; pointer-events: none;">
+                    @else
+                        {{-- Subtle decorative checkout counter & QR stand atmosphere --}}
+                        <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(circle at 18% 22%, rgba(251, 191, 36, 0.14), transparent 48%), radial-gradient(circle at 85% 80%, rgba(116, 62, 226, 0.24), transparent 50%); pointer-events: none;"></div>
+                    @endif
+
+                    {{-- Phone-Style Frame --}}
+                    <div class="dl-card" style="position: relative; max-width: 390px; margin: 0 auto; padding: 1.15rem 1.25rem 1.35rem; background: #071033; border: 2px solid rgba(196, 181, 253, 0.38); border-radius: 30px; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);">
+                        {{-- Phone speaker pill --}}
+                        <div aria-hidden="true" style="width: 64px; height: 5px; border-radius: 999px; background: rgba(148, 163, 184, 0.32); margin: 0 auto 0.9rem;"></div>
+                        {{-- Group 1: Demo label & progress --}}
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                            <span class="dl-eyebrow">{{ __('landing.demo_badge') }}</span>
+                            <span style="font-size: 0.95rem; font-weight: 800; color: #f8fafc;" x-text="formattedCount()"></span>
+                        </div>
 
                     {{-- Loyalty Card Frame --}}
                     <div style="border-radius: 18px; overflow: hidden; border: 1px solid rgba(148, 163, 184, 0.22); background: #0C1742;">
@@ -122,18 +135,26 @@
                                  role="group"
                                  aria-label="{{ $isAr ? 'أختام البطاقة' : 'Loyalty stamp slots' }}">
                                 <template x-for="slot in total" :key="slot">
-                                    <div style="aspect-ratio: 1; border-radius: 999px; display: flex; align-items: center; justify-content: center; transition: background-color 0.25s ease, border-color 0.25s ease;"
+                                    <div style="position: relative; aspect-ratio: 1; border-radius: 999px; display: flex; align-items: center; justify-content: center; transition: background-color 0.25s ease, border-color 0.25s ease;"
                                          :class="{ 'td-stamp-pop': justStamped && slot === total }"
+                                         :aria-label="slot <= stamps ? '{{ $isAr ? 'ختم مكتمل' : 'Filled stamp' }}' : '{{ $isAr ? 'ختم متبقي' : 'Empty stamp' }}'"
                                          :style="slot <= stamps
-                                            ? 'background: #743EE2; border: 2px solid #a78bfa; color: #ffffff;'
+                                            ? 'background: #743EE2; border: 2px solid #c4b5fd; color: #ffffff; box-shadow: 0 4px 12px rgba(116, 62, 226, 0.35);'
                                             : 'background: rgba(1, 10, 41, 0.55); border: 2px dashed rgba(196, 181, 253, 0.45); color: rgba(196, 181, 253, 0.48);'">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: block;">
                                             <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
                                             <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
                                             <line x1="6" y1="2" x2="6" y2="4"></line>
                                             <line x1="10" y1="2" x2="10" y2="4"></line>
                                             <line x1="14" y1="2" x2="14" y2="4"></line>
                                         </svg>
+                                        <span x-show="slot <= stamps"
+                                              aria-hidden="true"
+                                              style="position: absolute; bottom: -2px; inset-inline-end: -2px; width: 18px; height: 18px; border-radius: 999px; background: #10b981; border: 2px solid #0C1742; display: flex; align-items: center; justify-content: center;">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </span>
                                     </div>
                                 </template>
                             </div>
@@ -199,6 +220,7 @@
                     <p style="margin: 0.85rem 0 0; font-size: 0.875rem; color: #cbd5e1; text-align: center;">
                         {{ __('landing.demo_note') }}
                     </p>
+                    </div>
                 </div>
             </div>
         </div>
