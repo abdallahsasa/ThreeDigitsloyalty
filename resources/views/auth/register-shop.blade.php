@@ -43,26 +43,32 @@
             width: 100%;
             max-width: 1040px;
             margin: 0 auto;
-            padding: 1.5rem;
+            padding: 1rem;
+        }
+
+        @media (min-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
         }
 
         .topbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 0.75rem;
-            padding-bottom: 1.5rem;
-            flex-wrap: nowrap;
+            gap: 0.5rem;
+            padding-bottom: 1.25rem;
+            flex-wrap: wrap;
         }
 
         .brand {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.45rem;
             color: var(--text);
             text-decoration: none;
             font-weight: 800;
-            font-size: 0.96rem;
+            font-size: 0.92rem;
             white-space: nowrap;
             min-height: 44px;
             flex-shrink: 0;
@@ -78,7 +84,7 @@
         .topbar-actions {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             flex-shrink: 0;
         }
 
@@ -86,10 +92,10 @@
             display: inline-flex;
             align-items: center;
             min-height: 44px;
-            padding: 0 0.45rem;
+            padding: 0 0.35rem;
             color: var(--muted);
             text-decoration: none;
-            font-size: 0.86rem;
+            font-size: 0.84rem;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -99,12 +105,12 @@
             align-items: center;
             justify-content: center;
             min-height: 44px;
-            padding: 0 0.9rem;
+            padding: 0 0.8rem;
             border-radius: 999px;
             border: 1px solid var(--border);
             color: var(--text);
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -116,14 +122,14 @@
 
         .grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1.75rem;
             align-items: start;
         }
 
         @media (min-width: 860px) {
             .grid {
-                grid-template-columns: 1.15fr 0.85fr;
+                grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
             }
         }
 
@@ -131,7 +137,13 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 1.75rem;
+            padding: 1.25rem;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        @media (min-width: 480px) {
+            .card { padding: 1.75rem; }
         }
 
         @media (min-width: 640px) {
@@ -140,6 +152,7 @@
 
         .field {
             margin-bottom: 1.15rem;
+            min-width: 0;
         }
 
         label {
@@ -152,12 +165,15 @@
 
         input, select {
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
             padding: 0.85rem 1rem;
             border-radius: 12px;
             border: 1px solid var(--border);
             background: var(--surface-2);
             color: var(--text);
             font-size: 0.95rem;
+            text-overflow: ellipsis;
         }
 
         input::placeholder {

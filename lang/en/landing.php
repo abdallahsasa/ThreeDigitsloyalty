@@ -12,8 +12,8 @@ return [
     'nav_cta' => 'Start free',
 
     // Hero & Interactive Demo
-    'hero_title' => 'Browser-based loyalty stamp cards — no app download required.',
-    'hero_subtitle' => 'Place a QR sign at your counter. Customers scan to open your branded stamp card in their phone browser, and your team stamps visits in seconds.',
+    'hero_title' => 'Digital stamp cards your customers open in their browser.',
+    'hero_subtitle' => 'Customers scan your QR code to open their card in their browser. They can also save it to Apple Wallet or Google Wallet — no app required.',
     'hero_cta_1' => 'Start free',
     'hero_cta_2' => 'Try the card',
     'hero_benefit_1' => 'No app download',

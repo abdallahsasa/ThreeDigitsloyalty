@@ -131,8 +131,8 @@
         <div class="dl-card" style="margin-top: 1.75rem; padding: 1.35rem 1.5rem; background: #071033;">
             <p style="margin: 0; font-size: 0.92rem; color: #e2e8f0; line-height: 1.75; text-align: center;">
                 {{ $isAr
-                    ? "لا يُطلب إدخال بطاقة دفع عند التسجيل، ولا يتم أي خصم تلقائي في 1 يناير 2027 بعد انتهاء العرض في {$offerEndsFormatted}. تبقى بيانات متجرك وبطاقات عملائك محفوظة، وسيتم إشعارك مسبقاً بخيارات التجديد قبل تفعيل أي فوترة."
-                    : "No payment card is required to register, and billing does not start automatically on January 1, 2027 after the offer ends on {$offerEndsFormatted}. Your store data and customer cards remain intact, and renewal options will be shared ahead of time before any billing begins." }}
+                    ? "لا يُطلب إدخال بطاقة دفع عند التسجيل، ولا يتم أي خصم تلقائي في 1 يناير 2027 بعد انتهاء العرض في {$offerEndsFormatted}. تبقى بيانات متجرك وبطاقات عملائك محفوظة، ويستمر العملاء في فتح بطاقاتهم ويبقى دخول المتجر وإضافة الأختام وصرف المكافآت القائمة متاحاً دون إيقاف تلقائي؛ وسيتم إشعارك مسبقاً بخيارات التجديد الاختياري قبل تفعيل أي فوترة."
+                    : "No payment card is required to register, and billing does not start automatically on January 1, 2027 after the offer ends on {$offerEndsFormatted}. Your store data and customer cards remain intact—customers can still open their cards, and merchant sign-in, stamping, and redeeming existing rewards are not automatically cut off. Optional renewal terms will be shared in advance before any paid billing is enabled." }}
             </p>
         </div>
     </div>

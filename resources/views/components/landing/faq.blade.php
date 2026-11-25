@@ -1,15 +1,15 @@
 @php
     $isAr = app()->getLocale() === 'ar';
     $faqs = $isAr ? [
-        ['q' => 'هل يحتاج العميل إلى تحميل تطبيق؟', 'a' => 'لا. يمسح العميل رمز QR بكاميرا هاتفه فتفتح بطاقته الرقمية ورمز QR الشخصي مباشرة في المتصفح بدون تحميل أي تطبيق.'],
+        ['q' => 'هل يحتاج العميل إلى تحميل تطبيق؟', 'a' => 'لا. يمسح العميل رمز QR بكاميرا هاتفه فتفتح بطاقته الرقمية مباشرة في المتصفح، ويمكنه أيضاً حفظها اختيارياً في Apple Wallet أو Google Wallet.'],
         ['q' => 'هل يلزم إدخال بطاقة دفع للاستفادة من العرض المجاني؟', 'a' => 'لا، التسجيل مجاني بالكامل حتى 31 ديسمبر 2026 بدون بطاقة دفع، ولا يتم أي خصم تلقائي بعد انتهاء الفترة المجانية.'],
-        ['q' => 'ماذا يحدث بعد 31 ديسمبر 2026؟', 'a' => 'لا يتم خصم أي رسوم تلقائياً لعدم وجود بطاقة دفع مسجلة. سيتم إشعارك مسبقاً بتفاصيل وآلية التجديد الاختياري قبل تفعيل أي فوترة، مع الحفاظ على بيانات متجرك وبطاقات العملاء دون إلغاء مفاجئ.'],
+        ['q' => 'ماذا يحدث في 1 يناير 2027 بعد انتهاء العرض المجاني؟', 'a' => 'لا يتم خصم أي رسوم تلقائياً لعدم وجود بطاقة دفع مسجلة، ولا يوجد إيقاف تلقائي للحسابات. تبقى بيانات متجرك وبطاقات العملاء محفوظة، ويمكن للعملاء فتح بطاقاتهم وللمتاجر تسجيل الدخول وإضافة الأختام وصرف المكافآت القائمة، على أن يتم إشعارك مسبقاً بتفاصيل التجديد الاختياري قبل تفعيل أي فوترة.'],
         ['q' => 'كيف يضيف الكاشير الأختام ويصرف المكافأة؟', 'a' => 'من خلال صفحة ماسح QR داخل لوحة المتجر، أو عبر البحث برقم جوال العميل لإضافة الختم أو صرف المكافأة المستحقة.'],
         ['q' => 'هل يمكنني إدارة أكثر من فرع وموظف؟', 'a' => 'نعم، تدعم المنصة تعدد الفروع وتعيين مدراء فروع وكاشير بصلاحيات محددة، مع فصل كامل لبيانات متجرك عن المتاجر الأخرى.'],
     ] : [
-        ['q' => 'Do customers need to download an app?', 'a' => 'No. Customers scan your counter QR code with their phone camera and open their digital stamp card and personal QR directly in their mobile browser.'],
+        ['q' => 'Do customers need to download an app?', 'a' => 'No. Customers scan your counter QR code to open their digital stamp card in their mobile browser, and they can also optionally save it to Apple Wallet or Google Wallet.'],
         ['q' => 'Is a payment card required for the free launch offer?', 'a' => 'No. All plans are free until December 31, 2026 with no payment card required, and billing does not start automatically afterward.'],
-        ['q' => 'What happens after December 31, 2026?', 'a' => 'Because no payment card is collected, you will never be charged automatically on January 1, 2027. Optional renewal and continuation terms will be shared with merchants ahead of time, without surprise billing or sudden data loss.'],
+        ['q' => 'What happens on January 1, 2027 after the launch offer ends?', 'a' => 'Because no payment card is collected, you will never be charged automatically and accounts are not automatically suspended. Store data and customer cards remain intact—customers can still open their cards, and merchants can still sign in, add stamps, and redeem existing rewards while optional renewal terms are shared ahead of time before any paid billing starts.'],
         ['q' => 'How does my staff add stamps or redeem a reward?', 'a' => 'Using the built-in QR Scanner inside your merchant dashboard, or by looking up the customer’s mobile number at checkout.'],
         ['q' => 'Can I manage multiple branches and staff roles?', 'a' => 'Yes. You can add multiple branches, assign Branch Manager and Cashier permissions, and keep your store’s data isolated from other businesses.'],
     ];

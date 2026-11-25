@@ -4,7 +4,24 @@
     $switchHomeUrl = route($isAr ? 'home.en' : 'home.ar');
 @endphp
 
-<header x-data="{ mobileOpen: false }"
+<header x-data="{
+        mobileOpen: false,
+        navigateSection(id) {
+            this.mobileOpen = false;
+            if (window.history && window.history.pushState) {
+                window.history.pushState(null, '', '#' + id);
+            }
+            this.$nextTick(() => {
+                const section = document.getElementById(id);
+                if (!section) return;
+                const heading = section.querySelector('h2') || section;
+                const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                section.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+                heading.setAttribute('tabindex', '-1');
+                heading.focus({ preventScroll: true });
+            });
+        }
+    }"
     style="position: sticky; top: 0; z-index: 50; background: rgba(1, 10, 41, 0.92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(148, 163, 184, 0.16);">
     <div class="dl-container" style="display: flex; align-items: center; justify-content: space-between; min-height: 70px; gap: 0.75rem;">
         <a href="{{ $homeUrl }}" style="display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: #f8fafc; flex-shrink: 0;">
@@ -66,10 +83,10 @@
     {{-- Mobile Dropdown --}}
     <div x-show="mobileOpen" x-transition x-cloak class="md:hidden" style="border-top: 1px solid rgba(148, 163, 184, 0.16); background: #071033;">
         <div class="dl-container" style="padding-top: 1rem; padding-bottom: 1.25rem; display: grid; gap: 0.75rem;">
-            <a href="#how-it-works" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#how-it-works h2, #how-it-works'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ __('landing.nav_how_it_works') }}</a>
-            <a href="#merchant-tools" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#merchant-tools h2, #merchant-tools'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ $isAr ? 'أدوات المتجر' : 'Merchant tools' }}</a>
-            <a href="#industries" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#industries h2, #industries'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ $isAr ? 'القطاعات' : 'Industries' }}</a>
-            <a href="#pricing" @click="mobileOpen = false; $nextTick(() => { const h = document.querySelector('#pricing h2, #pricing'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ __('landing.nav_pricing') }}</a>
+            <a href="#how-it-works" @click.prevent="navigateSection('how-it-works')" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ __('landing.nav_how_it_works') }}</a>
+            <a href="#merchant-tools" @click.prevent="navigateSection('merchant-tools')" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ $isAr ? 'أدوات المتجر' : 'Merchant tools' }}</a>
+            <a href="#industries" @click.prevent="navigateSection('industries')" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ $isAr ? 'القطاعات' : 'Industries' }}</a>
+            <a href="#pricing" @click.prevent="navigateSection('pricing')" style="color: #f8fafc; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0; min-height: 44px; display: flex; align-items: center;">{{ __('landing.nav_pricing') }}</a>
             <a href="{{ url('/shop/login') }}" style="color: #cbd5e1; text-decoration: none; font-size: 0.95rem; font-weight: 700; padding: 0.4rem 0;">{{ __('landing.nav_login') }}</a>
             <a href="{{ route('merchant.register') }}"
                onclick="window.trackFunnelEvent && window.trackFunnelEvent('primary_cta_clicked', { location: 'mobile_nav' })"

@@ -8,11 +8,11 @@
         position: relative;
         overflow: hidden;
         background: linear-gradient(135deg, #743EE2 0%, #5B21B6 52%, #2E1065 100%);
-        padding: 2.75rem 0 3.75rem;
+        padding: 1.5rem 0 2.5rem;
     }
-    @media (min-width: 980px) {
+    @media (min-width: 960px) {
         .td-hero-wrap {
-            padding: 3.25rem 0 4.25rem;
+            padding: 3.25rem 0 4rem;
         }
     }
     .td-hero-dots-tr {
@@ -39,15 +39,45 @@
         position: relative;
         z-index: 2;
         display: grid;
-        grid-template-columns: 1fr;
-        gap: 2.25rem;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "copy"
+            "visual"
+            "benefits";
+        gap: 1.25rem;
         align-items: center;
+    }
+    .td-hero-copy { grid-area: copy; }
+    .td-hero-visual-wrap {
+        grid-area: visual;
+        position: relative;
+        width: 100%;
+        max-width: 540px;
+        margin: 0 auto;
+    }
+    .td-hero-benefits {
+        grid-area: benefits;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem 1.25rem;
+        color: #DDD6FE;
+        font-size: 0.9rem;
+        font-weight: 600;
     }
     @media (min-width: 960px) {
         .td-hero-grid {
             grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
-            gap: 2.5rem;
+            grid-template-rows: auto auto;
+            grid-template-areas:
+                "copy visual"
+                "benefits visual";
+            gap: 1.25rem 2.5rem;
         }
+        .td-hero-copy { align-self: end; }
+        .td-hero-benefits { align-self: start; }
     }
     .td-hero-btn-white {
         display: inline-flex;
@@ -57,7 +87,7 @@
         background: #ffffff;
         color: #4C1D95;
         font-weight: 800;
-        padding: 0.92rem 1.85rem;
+        padding: 0.82rem 1.65rem;
         border-radius: 999px;
         border: 2px solid #ffffff;
         text-decoration: none;
@@ -76,7 +106,7 @@
         background: rgba(255, 255, 255, 0.12);
         color: #ffffff;
         font-weight: 700;
-        padding: 0.92rem 1.6rem;
+        padding: 0.82rem 1.45rem;
         border-radius: 999px;
         border: 1.5px solid rgba(255, 255, 255, 0.35);
         text-decoration: none;
@@ -88,70 +118,87 @@
     }
     .td-hero-visual {
         width: 100%;
-        max-width: 560px;
         height: auto;
         display: block;
-        margin: 0 auto;
+    }
+    .td-sample-tag {
+        position: absolute;
+        bottom: 0.5rem;
+        inset-inline-start: 50%;
+        transform: translateX(-50%);
+        padding: 0.28rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(1, 10, 41, 0.88);
+        border: 1px solid rgba(196, 181, 253, 0.45);
+        color: #f8fafc;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 6px 18px rgba(1, 10, 41, 0.35);
+    }
+    [dir="rtl"] .td-sample-tag {
+        transform: translateX(50%);
     }
 </style>
 
 <section class="td-hero-wrap">
-    {{-- Subtle Geometric Halo & Corner Dot Accents --}}
     <div aria-hidden="true" style="position: absolute; top: -120px; inset-inline-start: 18%; width: 520px; height: 520px; border-radius: 999px; background: radial-gradient(circle, rgba(255, 255, 255, 0.11) 0%, transparent 68%); pointer-events: none;"></div>
     <div aria-hidden="true" class="td-hero-dots-tr"></div>
     <div aria-hidden="true" class="td-hero-dots-bl"></div>
 
     <div class="dl-container">
         <div class="td-hero-grid">
-            {{-- Copy & CTAs (Always first on mobile) --}}
-            <div>
-                <h1 style="font-size: {{ $isAr ? 'clamp(2rem, 3.8vw, 3.1rem)' : 'clamp(2.15rem, 4.2vw, 3.35rem)' }}; font-weight: 800; line-height: {{ $isAr ? '1.28' : '1.14' }}; max-width: {{ $isAr ? '20ch' : '17ch' }}; margin: 0 0 1.25rem; color: #ffffff;">
+            {{-- Copy & Primary Actions (Compact on mobile so artwork enters first screen) --}}
+            <div class="td-hero-copy">
+                <h1 style="font-size: {{ $isAr ? 'clamp(1.75rem, 3.8vw, 3.05rem)' : 'clamp(1.85rem, 4vw, 3.25rem)' }}; font-weight: 800; line-height: {{ $isAr ? '1.26' : '1.14' }}; max-width: {{ $isAr ? '20ch' : '18ch' }}; margin: 0 0 0.85rem; color: #ffffff;">
                     {{ __('landing.hero_title') }}
                 </h1>
 
-                <p style="font-size: 1.08rem; color: #EDE9FE; line-height: 1.75; margin: 0 0 2rem; max-width: 540px; font-weight: 500;">
+                <p style="font-size: 0.98rem; color: #EDE9FE; line-height: 1.65; margin: 0 0 1.25rem; max-width: 530px; font-weight: 500;">
                     {{ __('landing.hero_subtitle') }}
                 </p>
 
-                <div style="display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 1.35rem;">
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.9rem;">
                     <a href="{{ route('merchant.register') }}"
                        onclick="window.trackFunnelEvent && window.trackFunnelEvent('primary_cta_clicked', { location: 'hero' })"
-                       class="td-hero-btn-white" style="font-size: 1.02rem;">
+                       class="td-hero-btn-white" style="font-size: 0.98rem;">
                         <span>{{ __('landing.hero_cta_1') }}</span>
                         <span aria-hidden="true">{{ $isAr ? '←' : '→' }}</span>
                     </a>
-                    <a href="#interactive-demo" class="td-hero-btn-outline" style="font-size: 0.98rem;">
+                    <a href="#interactive-demo" class="td-hero-btn-outline" style="font-size: 0.95rem;">
                         <span>{{ __('landing.hero_cta_2') }}</span>
                     </a>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 0.5rem; color: #F5F3FF; font-size: 0.94rem; font-weight: 700; margin-bottom: 1.25rem;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 0.45rem; color: #F5F3FF; font-size: 0.88rem; font-weight: 700;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    <span>{{ $isAr ? 'مجاني حتى 31 ديسمبر 2026 — بدون بطاقة دفع للبدء' : 'Free until December 31, 2026 — no payment card needed to get started' }}</span>
+                    <span>{{ $isAr ? 'مجاني حتى 31 ديسمبر 2026 — بدون بطاقة دفع' : 'Free until December 31, 2026 — no payment card needed' }}</span>
                 </div>
-
-                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.75rem 1.35rem; color: #DDD6FE; font-size: 0.9rem; font-weight: 600;">
-                    @foreach([__('landing.hero_benefit_1'), __('landing.hero_benefit_2'), __('landing.hero_benefit_3')] as $benefit)
-                        <li style="display: inline-flex; align-items: center; gap: 0.4rem;">
-                            <span aria-hidden="true" style="color: #6ee7b7; font-weight: 800;">✓</span>
-                            <span>{{ $benefit }}</span>
-                        </li>
-                    @endforeach
-                </ul>
             </div>
 
-            {{-- Right Visual: 3D Tilted Smartphone + Floating Wallet & Stamp Metrics Collage --}}
-            <div>
+            {{-- 3D Tilted Smartphone + Wallet Badges + Anchored HTML Sample-Data Label --}}
+            <div class="td-hero-visual-wrap">
                 <img src="{{ asset("images/landing/collage-stamper-{$langSuffix}.webp") }}"
-                     alt="{{ $isAr ? 'هاتف يعرض بطاقة أختام ThreeDigits Loyalty مع خيارات إضافة الأختام وحفظ البطاقة في Apple Wallet وGoogle Wallet' : 'ThreeDigits Loyalty 3D smartphone displaying a digital coffee stamp card, cashier stamp controls, Apple Wallet and Google Wallet badges, and sample store metrics' }}"
+                     alt="{{ $isAr ? 'معاينة توضيحية بأرقام نموذجية لبطاقة أختام ThreeDigits Loyalty على الهاتف مع خيارات إضافة الأختام وحفظ البطاقة في Apple Wallet وGoogle Wallet' : 'Illustrative preview with sample figures showing a ThreeDigits Loyalty digital stamp card on a smartphone, cashier stamp controls, and Apple Wallet and Google Wallet badges' }}"
                      width="840"
                      height="840"
                      loading="eager"
                      fetchpriority="high"
                      class="td-hero-visual">
+                <span class="td-sample-tag">{{ $isAr ? 'بيانات توضيحية' : 'Sample data' }}</span>
             </div>
+
+            {{-- Benefit List (Moves below artwork on narrow screens, stays under CTAs on desktop) --}}
+            <ul class="td-hero-benefits">
+                @foreach([__('landing.hero_benefit_1'), __('landing.hero_benefit_2'), __('landing.hero_benefit_3')] as $benefit)
+                    <li style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <span aria-hidden="true" style="color: #6ee7b7; font-weight: 800;">✓</span>
+                        <span>{{ $benefit }}</span>
+                    </li>
+                @endforeach
+            </ul>
         </div>
     </div>
 </section>

@@ -313,7 +313,10 @@ class LoyaltyPlatformTest extends TestCase
             ->assertDontSee('href="' . url('/admin') . '"', false)
             ->assertDontSee('Luxury Digital Loyalty')
             ->assertDontSee('line-through')
-            ->assertSee('بطاقات ولاء رقمية في متصفح الجوال')
+            ->assertSee('بطاقات أختام رقمية يفتحها عملاؤك في المتصفح.')
+            ->assertSee('بيانات توضيحية')
+            ->assertSee('Apple Wallet')
+            ->assertSee('Google Wallet')
             ->assertSee('مقهى الياسمين')
             ->assertSee('31 ديسمبر 2026');
 
@@ -332,7 +335,10 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('lang="en" dir="ltr"', false)
             ->assertSee('<link rel="canonical" href="' . route('home.en') . '">', false)
             ->assertSee('<link rel="alternate" hreflang="ar" href="' . route('home.ar') . '">', false)
-            ->assertSee('Browser-based loyalty stamp cards — no app download required.')
+            ->assertSee('Digital stamp cards your customers open in their browser.')
+            ->assertSee('Sample data')
+            ->assertSee('Apple Wallet')
+            ->assertSee('Google Wallet')
             ->assertSee('Start free')
             ->assertSee('Try the card')
             ->assertSee('Jasmine Café')
