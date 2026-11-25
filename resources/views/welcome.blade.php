@@ -176,13 +176,16 @@
     <x-landing.nav />
 
     <main>
-        {{-- 1. Hero (Navy): Checkout scene + live interactive stamp card --}}
+        {{-- 1. Hero (Navy-Purple Gradient): Bold headline + 3D Smartphone & Wallet Collage --}}
         <x-landing.hero />
 
         {{-- 2. How it works (Warm Cream): 3 coordinated café steps + bilingual HTML UI --}}
         <x-landing.how-it-works />
 
-        {{-- 3. Merchant tools (Navy Split Layouts): Branded card setup + staff stamp/redeem + real screens --}}
+        {{-- 3. Interactive Live Stamp Card Demo (Deep Navy): Checkout photo + playable 5-of-6 card --}}
+        <x-landing.interactive-demo />
+
+        {{-- 4. Merchant tools (Navy Split Layouts): Branded card setup + multi-branch growth --}}
         <x-landing.dashboard-showcase />
 
         {{-- 4. Industries (Soft Lavender): Image-led showcases for cafés, restaurants & salons --}}

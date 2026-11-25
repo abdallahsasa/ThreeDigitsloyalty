@@ -92,56 +92,19 @@
             </div>
         </div>
 
-        {{-- Split Row 2 (Reversed): Cashier Stamper, Phone Lookup & Wallet Support (Collage 3) --}}
-        <div class="td-split-row td-reverse" style="margin-bottom: 4.5rem;">
+        {{-- Split Row 2 (Reversed): Store Growth, Phone Lookup & Multi-Branch Management (Collage 1) --}}
+        <div class="td-split-row td-reverse">
             <div>
                 <div style="font-size: 0.84rem; font-weight: 800; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.55rem;">
-                    {{ $isAr ? '٢ · ختم فوري وصرف المكافآت' : '02 · Fast Cashier Stamping & Wallet Passes' }}
-                </div>
-                <h3 style="font-size: clamp(1.4rem, 2.5vw, 1.95rem); font-weight: 800; color: #f8fafc; margin: 0 0 0.85rem; line-height: 1.3;">
-                    {{ $isAr ? 'امسح رمز العميل أو ابحث برقم الجوال لإضافة الأختام وصرف المكافأة' : 'Find any customer by QR or phone number to stamp and redeem' }}
-                </h3>
-                <p style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.75; margin: 0 0 1.35rem;">
-                    {{ $isAr
-                        ? 'من صفحة الماسح داخل لوحة المتجر، يطّلع الكاشير على رصيد أختام العميل، يضيف ختم الشراء أو يصرف المكافأة المستحقة بضغطة واحدة، كما يمكن للعميل حفظ بطاقته في المتصفح أو إضافتها إلى محفظة الهاتف.'
-                        : 'Staff open the built-in scanner to check a guest’s stamp balance, add a visit stamp, or redeem an unlocked reward in one tap—while customers keep their card handy in their browser or mobile wallet.' }}
-                </p>
-
-                <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 0.7rem; color: #e2e8f0; font-size: 0.94rem;">
-                    <li style="display: flex; align-items: flex-start; gap: 0.6rem;">
-                        <span style="color: #a78bfa; font-weight: 800;">✓</span>
-                        <span>{{ $isAr ? 'بحث فوري برقم جوال العميل حتى لو لم يكن رمز QR مفتوحاً أمامه.' : 'Instant phone number lookup if a guest doesn’t have their QR open.' }}</span>
-                    </li>
-                    <li style="display: flex; align-items: flex-start; gap: 0.6rem;">
-                        <span style="color: #a78bfa; font-weight: 800;">✓</span>
-                        <span>{{ $isAr ? 'منع الأخطاء تلقائياً مع توثيق كل ختم وصرف مكافأة في سجل المعاملات.' : 'Automatic reward-ready state checks and immutable transaction logs.' }}</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div>
-                <img src="{{ asset("images/landing/collage-stamper-{$langSuffix}.webp") }}"
-                     alt="{{ $isAr ? 'معاينة توضيحية لشاشة تفاصيل البطاقة وإضافة الأختام وخيارات المحفظة الرقمية' : 'ThreeDigits 3D smartphone preview showing card details, stamp controls, Apple Wallet and Google Wallet options, and sample branch metrics' }}"
-                     width="840"
-                     height="840"
-                     loading="lazy"
-                     class="td-collage-img">
-            </div>
-        </div>
-
-        {{-- Split Row 3: Store Growth & Multi-Branch Management (Collage 1) --}}
-        <div class="td-split-row">
-            <div>
-                <div style="font-size: 0.84rem; font-weight: 800; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.55rem;">
-                    {{ $isAr ? '٣ · إدارة الفروع ونمو المتجر' : '03 · Multi-Branch Visibility & Control' }}
+                    {{ $isAr ? '٢ · إدارة الفروع ونمو المتجر' : '02 · Multi-Branch Visibility & Control' }}
                 </div>
                 <h3 style="font-size: clamp(1.4rem, 2.5vw, 1.95rem); font-weight: 800; color: #f8fafc; margin: 0 0 0.85rem; line-height: 1.3;">
                     {{ $isAr ? 'تابع العملاء المسجلين والأختام اليومية عبر جميع فروعك' : 'See enrolled customers, issued stamps, and branch activity at a glance' }}
                 </h3>
                 <p style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.75; margin: 0 0 1.35rem;">
                     {{ $isAr
-                        ? 'سواء كنت تدير مقهى واحداً أو سلسلة فروع، تمنحك المنصة صلاحيات مستقلة لمدراء الفروع والكاشير مع عزل تام لبيانات متجرك.'
-                        : 'Whether you run a single neighborhood café or multiple locations, assign dedicated Branch Manager and Cashier roles while keeping your store’s customer data completely isolated.' }}
+                        ? 'سواء كنت تدير مقهى واحداً أو سلسلة فروع، يبحث الكاشير برقم الجوال أو يمسح QR العميل لإضافة الختم وصرف المكافأة مع صلاحيات مستقلة وعزل تام لبيانات متجرك.'
+                        : 'Whether you run a single neighborhood café or multiple locations, staff can scan a QR or look up a phone number to stamp and redeem—with dedicated Branch Manager and Cashier roles and isolated store data.' }}
                 </p>
 
                 <div style="display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.95rem; border-radius: 999px; background: rgba(148, 163, 184, 0.12); border: 1px solid rgba(148, 163, 184, 0.24); color: #cbd5e1; font-size: 0.82rem; font-weight: 700;">
