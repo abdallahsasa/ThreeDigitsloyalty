@@ -506,7 +506,7 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('images/landing/ui-customer-join.webp', false)
             ->assertSee('images/landing/collage-growth-ar.webp', false)
             ->assertSee('images/landing/collage-engagement-ar.webp', false)
-            ->assertSee('images/landing/hero-stamper-ar.webp', false)
+            ->assertSee('images/landing/collage-stamper-ar.webp', false)
             ->assertSee('images/landing/industry-cafe.webp', false)
             ->assertSee('images/landing/industry-restaurant.webp', false)
             ->assertSee('images/landing/industry-salon.webp', false);
@@ -521,7 +521,7 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('Try the card')
             ->assertSee('images/landing/collage-growth-en.webp', false)
             ->assertSee('images/landing/collage-engagement-en.webp', false)
-            ->assertSee('images/landing/hero-stamper-en.webp', false)
+            ->assertSee('images/landing/collage-stamper-en.webp', false)
             ->assertSee('Start free with Starter');
     }
 
