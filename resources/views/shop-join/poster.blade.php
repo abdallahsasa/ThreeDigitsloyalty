@@ -489,6 +489,8 @@
             {{ $isAr ? 'بدون تنزيل تطبيق' : 'No app download needed' }}
         </div>
 
+        <x-poster.wallet-badges />
+
         <div class="poster-footer">
             <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" class="td-logo">
             <span>Powered by ThreeDigits Loyalty</span>
@@ -577,6 +579,7 @@
                     <div class="qr-cta-sub">
                         {{ $isAr ? 'بدون تنزيل تطبيق' : 'No app download needed' }}
                     </div>
+                    <x-poster.wallet-badges />
                 </div>
             </div>
 

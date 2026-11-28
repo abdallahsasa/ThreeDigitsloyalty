@@ -686,6 +686,8 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('#10B981')
             ->assertSee('data-category-icon="cafe"', false)
             ->assertSee('data-category-medallion="cafe"', false)
+            ->assertSee('Apple Wallet')
+            ->assertSee('Google Wallet')
             ->assertSee('Powered by ThreeDigits Loyalty')
             ->assertSee('images/logo-icon.png', false)
             ->assertSee('uploads/shops/velvet-logo.png', false);

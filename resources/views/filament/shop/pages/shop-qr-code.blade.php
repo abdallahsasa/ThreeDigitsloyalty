@@ -353,6 +353,7 @@
                                 <div class="td-qr-sub">
                                     {{ $isAr ? 'بدون تنزيل تطبيق' : 'No app download needed' }}
                                 </div>
+                                <x-poster.wallet-badges :compact="true" />
                             </div>
                         </div>
 
