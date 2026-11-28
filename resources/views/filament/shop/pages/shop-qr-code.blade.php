@@ -282,6 +282,18 @@
     </style>
 
     @if($shop)
+        @if(!empty($fromOnboarding))
+            <div style="margin-bottom: 1.25rem; padding: 0.95rem 1.2rem; border-radius: 16px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.85rem;">
+                <span style="font-size: 0.88rem; font-weight: 700;">
+                    ✅ {{ $isAr ? 'رمز QR جاهز! عند الضغط على طباعة البوستر أو زر المتابعة سيتم إعادتك تلقائياً لإكمال الخطوة الأخيرة.' : 'Your store QR is ready! Printing the poster or clicking Continue returns you to Getting Started.' }}
+                </span>
+                <a href="{{ url("/shop/{$shop->id}/getting-started") }}"
+                   style="padding: 0.5rem 1.1rem; border-radius: 999px; background: #059669; color: #ffffff; font-size: 0.84rem; font-weight: 800; text-decoration: none;">
+                    {{ $isAr ? 'تم — المتابعة للخطوة التالية ←' : 'Done — Next Setup Step →' }}
+                </a>
+            </div>
+        @endif
+
         <div class="td-qr-grid">
             {{-- Left: Live Tent-Card Poster Preview --}}
             <div>
@@ -365,12 +377,18 @@
                 </div>
 
                 <div class="td-btn-row">
-                    <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1, 'style' => 'arch']) }}" target="_blank" class="td-btn-primary">
+                    <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1, 'style' => 'arch']) }}"
+                       target="_blank"
+                       @if(!empty($fromOnboarding)) onclick="setTimeout(function(){ window.location.href = '{{ url("/shop/{$shop->id}/getting-started") }}'; }, 500);" @endif
+                       class="td-btn-primary">
                         <span>🖨️</span>
                         <span>{{ $isAr ? 'طباعة البوستر المميز (PDF)' : 'Print Featured Poster (PDF)' }}</span>
                     </a>
 
-                    <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1, 'style' => 'minimal']) }}" target="_blank" class="td-btn-ghost">
+                    <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1, 'style' => 'minimal']) }}"
+                       target="_blank"
+                       @if(!empty($fromOnboarding)) onclick="setTimeout(function(){ window.location.href = '{{ url("/shop/{$shop->id}/getting-started") }}'; }, 500);" @endif
+                       class="td-btn-ghost">
                         <span>📄</span>
                         <span>{{ $isAr ? 'طباعة التصميم الكلاسيكي' : 'Print Classic Cream Poster' }}</span>
                     </a>

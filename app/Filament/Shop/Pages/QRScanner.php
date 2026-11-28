@@ -39,6 +39,9 @@ class QRScanner extends Page implements HasForms
 
     public ?LoyaltyCard $scannedCard = null;
 
+    #[\Livewire\Attributes\Url(as: 'onboarding')]
+    public bool $fromOnboarding = false;
+
     public function mount(): void
     {
         $this->form->fill();
@@ -178,6 +181,10 @@ class QRScanner extends Page implements HasForms
                 ->title(app()->getLocale() === 'ar' ? 'تمت إضافة الختم بنجاح' : 'Stamp added successfully')
                 ->success()
                 ->send();
+
+            if ($this->fromOnboarding && ($tenant = Filament::getTenant())) {
+                $this->redirect(url("/shop/{$tenant->id}/getting-started"));
+            }
         } catch (Exception $e) {
             Notification::make()
                 ->title($e->getMessage())

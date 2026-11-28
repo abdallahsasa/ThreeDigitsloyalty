@@ -26,6 +26,9 @@ class CardBranding extends Page implements HasForms
 
     public ?array $data = [];
 
+    #[\Livewire\Attributes\Url(as: 'onboarding')]
+    public bool $fromOnboarding = false;
+
     public static function canAccess(): bool
     {
         $user = auth()->user();
@@ -137,5 +140,9 @@ class CardBranding extends Page implements HasForms
             ->title(app()->getLocale() === 'ar' ? 'تم حفظ تصميم البطاقة والشعار بنجاح' : 'Card design and logo saved')
             ->success()
             ->send();
+
+        if ($this->fromOnboarding) {
+            $this->redirect(url("/shop/{$shop->id}/getting-started"));
+        }
     }
 }

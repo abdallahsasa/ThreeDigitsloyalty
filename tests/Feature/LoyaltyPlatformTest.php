@@ -785,4 +785,76 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('WELLNESS & CARE')
             ->assertSee('data-category-icon="wellness"', false);
     }
+
+    public function test_getting_started_steps_auto_redirect_back_after_completion(): void
+    {
+        $shop = Shop::create(['name' => 'Onboarding Cafe', 'status' => 'active']);
+        $owner = User::create([
+            'name' => 'New Merchant',
+            'email' => 'new@onboarding.test',
+            'password' => bcrypt('password123'),
+            'shop_id' => $shop->id,
+        ]);
+        $owner->assignRole('Shop Owner');
+
+        $this->actingAs($owner);
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('shop'));
+        \Filament\Facades\Filament::setTenant($shop);
+
+        // Getting Started renders onboarding=1 links directly to step forms
+        $this->get("/shop/{$shop->id}/getting-started")
+            ->assertStatus(200)
+            ->assertSee("/shop/{$shop->id}/card-branding?onboarding=1", false)
+            ->assertSee("/shop/{$shop->id}/loyalty-campaigns/create?onboarding=1", false)
+            ->assertSee("/shop/{$shop->id}/shop-qr-code?onboarding=1", false)
+            ->assertSee("/shop/{$shop->id}/q-r-scanner?onboarding=1", false);
+
+        // Step 1: Saving CardBranding with onboarding=1 redirects back to Getting Started
+        \Livewire\Livewire::withQueryParams(['onboarding' => '1'])
+            ->test(\App\Filament\Shop\Pages\CardBranding::class)
+            ->set('data.category', 'cafe')
+            ->set('data.card_bg_color', '#2C1B18')
+            ->set('data.card_accent_color', '#8E3B20')
+            ->set('data.card_text_color', '#FFFFFF')
+            ->call('save')
+            ->assertRedirect(url("/shop/{$shop->id}/getting-started"));
+
+        // Step 2: Creating first LoyaltyCampaign with onboarding=1 redirects back to Getting Started
+        \Livewire\Livewire::withQueryParams(['onboarding' => '1'])
+            ->test(\App\Filament\Shop\Resources\LoyaltyCampaigns\Pages\CreateLoyaltyCampaign::class)
+            ->fillForm([
+                'name' => 'Coffee Club',
+                'type' => 'stamps',
+                'required_purchases_count' => 6,
+                'reward_name' => 'Free Flat White',
+                'status' => 'active',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertRedirect(url("/shop/{$shop->id}/getting-started"));
+
+        // Step 3: Visiting ShopQrCode with onboarding=1 marks QR reviewed
+        $this->get("/shop/{$shop->id}/shop-qr-code?onboarding=1")
+            ->assertStatus(200)
+            ->assertSee("/shop/{$shop->id}/getting-started", false);
+
+        // Step 4: Issuing first stamp in QRScanner with onboarding=1 redirects back to Getting Started
+        $campaign = LoyaltyCampaign::withoutGlobalScopes()->where('shop_id', $shop->id)->firstOrFail();
+        $customer = Customer::create(['name' => 'Test Member', 'phone' => '+963944123456', 'status' => 'active']);
+        $card = LoyaltyCard::create([
+            'customer_id' => $customer->id,
+            'shop_id' => $shop->id,
+            'campaign_id' => $campaign->id,
+            'token' => Str::random(32),
+            'current_stamps_count' => 0,
+            'reward_status' => 'not_ready',
+        ]);
+
+        \Livewire\Livewire::withQueryParams(['onboarding' => '1'])
+            ->test(\App\Filament\Shop\Pages\QRScanner::class)
+            ->set('token', $card->token)
+            ->call('searchCard')
+            ->call('addPurchase')
+            ->assertRedirect(url("/shop/{$shop->id}/getting-started"));
+    }
 }

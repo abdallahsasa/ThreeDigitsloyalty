@@ -15,6 +15,17 @@
 @endphp
 
 <x-filament-panels::page>
+    @if(!empty($fromOnboarding) && $shop)
+        <div style="margin-bottom: 1.25rem; padding: 0.9rem 1.15rem; border-radius: 14px; background: rgba(116, 62, 226, 0.08); border: 1px solid rgba(116, 62, 226, 0.3); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
+            <span style="font-size: 0.86rem; font-weight: 700;">
+                🚀 {{ $isAr ? 'خطوة إعداد المتجر: بعد حفظ التصميم والشعار سيتم إعادتك تلقائياً لإكمال بقية الخطوات.' : 'Setup Step: After saving your card design & logo, you will automatically return to Getting Started.' }}
+            </span>
+            <a href="{{ url("/shop/{$shop->id}/getting-started") }}" style="font-size: 0.82rem; font-weight: 800; color: #743EE2; text-decoration: none;">
+                {{ $isAr ? '← العودة لدليل البدء' : '← Back to Getting Started' }}
+            </a>
+        </div>
+    @endif
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.75rem; align-items: start;">
         {{-- Left: Branding Form --}}
         <div style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 18px; padding: 1.5rem;">
@@ -39,7 +50,11 @@
 
                 <div>
                     <x-filament::button type="submit" color="primary" size="lg">
-                        {{ $isAr ? 'حفظ التصميم والشعار' : 'Save Card Design & Logo' }}
+                        @if(!empty($fromOnboarding))
+                            {{ $isAr ? 'حفظ والمتابعة للخطوة التالية ←' : 'Save & Continue Setup →' }}
+                        @else
+                            {{ $isAr ? 'حفظ التصميم والشعار' : 'Save Card Design & Logo' }}
+                        @endif
                     </x-filament::button>
                 </div>
             </form>
