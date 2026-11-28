@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\LoyaltyCard;
 use App\Services\WalletPassService;
 
@@ -10,14 +9,7 @@ class LoyaltyCardController extends Controller
 {
     public function show($token, WalletPassService $walletService)
     {
-        $card = LoyaltyCard::withoutGlobalScopes()
-            ->with([
-                'customer',
-                'shop',
-                'campaign' => fn ($query) => $query->withoutGlobalScopes(),
-            ])
-            ->where('token', $token)
-            ->firstOrFail();
+        $card = $this->findCardByToken((string) $token);
 
         $qrUrl = route('loyalty-card.show', $token);
         $appleConfigured = $walletService->isAppleWalletConfigured();
@@ -28,15 +20,7 @@ class LoyaltyCardController extends Controller
 
     public function manifest(string $token, WalletPassService $walletService)
     {
-        $card = LoyaltyCard::withoutGlobalScopes()
-            ->with([
-                'customer',
-                'shop',
-                'campaign' => fn ($query) => $query->withoutGlobalScopes(),
-            ])
-            ->where('token', $token)
-            ->firstOrFail();
-
+        $card = $this->findCardByToken($token);
         $cardUrl = route('loyalty-card.show', $token);
 
         return response()
@@ -78,13 +62,22 @@ class LoyaltyCardController extends Controller
 
     protected function findCardByToken(string $token): LoyaltyCard
     {
-        return LoyaltyCard::withoutGlobalScopes()
+        $card = LoyaltyCard::withoutGlobalScopes()
             ->with([
-                'customer',
-                'shop',
+                'customer' => fn ($query) => $query->withTrashed(),
+                'shop' => fn ($query) => $query->withTrashed(),
                 'campaign' => fn ($query) => $query->withoutGlobalScopes(),
             ])
             ->where('token', $token)
             ->firstOrFail();
+
+        abort_if(! $card->shop || $card->shop->trashed(), 404);
+
+        // Auto-heal soft-deleted customer if an active card is opened (e.g. re-joined before restore fix)
+        if (! $card->trashed() && $card->customer && $card->customer->trashed()) {
+            $card->customer->restore();
+        }
+
+        return $card;
     }
 }

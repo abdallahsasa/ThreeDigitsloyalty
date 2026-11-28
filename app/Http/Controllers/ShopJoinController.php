@@ -100,9 +100,12 @@ class ShopJoinController extends Controller
                 'email' => $emailInput ?? $existingCustomer?->email,
                 'language' => 'ar',
                 'status' => 'active',
-                'deleted_at' => null,
             ]
         );
+
+        if ($customer->trashed()) {
+            $customer->restore();
+        }
 
         $campaign = LoyaltyCampaign::withoutGlobalScopes()
             ->where('shop_id', $shop->id)
@@ -134,6 +137,10 @@ class ShopJoinController extends Controller
                 'last_activity_date' => now(),
             ]
         );
+
+        if ($card->trashed()) {
+            $card->restore();
+        }
 
         $card->setRelation('campaign', $campaign);
         $card->setRelation('shop', $shop);

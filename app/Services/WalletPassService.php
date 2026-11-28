@@ -74,14 +74,14 @@ class WalletPassService
                 'message' => $card->token,
                 'format' => 'PKBarcodeFormatQR',
                 'messageEncoding' => 'iso-8859-1',
-                'altText' => $card->customer->phone,
+                'altText' => $card->customer?->phone ?? $card->token,
             ],
             'barcodes' => [
                 [
                     'message' => $card->token,
                     'format' => 'PKBarcodeFormatQR',
                     'messageEncoding' => 'iso-8859-1',
-                    'altText' => $card->customer->phone,
+                    'altText' => $card->customer?->phone ?? $card->token,
                 ],
             ],
             'storeCard' => [
@@ -97,7 +97,7 @@ class WalletPassService
                     [
                         'key' => 'customer',
                         'label' => 'MEMBER',
-                        'value' => $card->customer->name,
+                        'value' => $card->customer?->name ?? 'Store Member',
                     ],
                     [
                         'key' => 'campaign',
@@ -287,8 +287,8 @@ class WalletPassService
             'classId' => $classId,
             'state' => 'ACTIVE',
             'notifyPreference' => 'NOTIFY_ON_UPDATE',
-            'accountId' => $card->customer->phone,
-            'accountName' => $card->customer->name,
+            'accountId' => $card->customer?->phone ?? $card->token,
+            'accountName' => $card->customer?->name ?? 'Store Member',
             'loyaltyPoints' => [
                 'label' => 'Stamps',
                 'balance' => [
@@ -298,7 +298,7 @@ class WalletPassService
             'barcode' => [
                 'type' => 'QR_CODE',
                 'value' => $card->token,
-                'alternateText' => $card->customer->phone,
+                'alternateText' => $card->customer?->phone ?? $card->token,
             ],
             'textModulesData' => [
                 [
@@ -910,7 +910,7 @@ class WalletPassService
             'id' => "threedigits-pass-{$card->token}",
             'name' => "{$card->shop->name} — Loyalty Pass",
             'short_name' => $card->shop->name,
-            'description' => "{$card->campaign->name} ({$card->current_stamps_count}/{$card->campaign->required_purchases_count})",
+            'description' => ($card->campaign?->name ?? 'VIP Stamp Card') . " ({$card->current_stamps_count}/" . ($card->campaign?->required_purchases_count ?? 8) . ')',
             'start_url' => $cardUrl,
             'scope' => $cardUrl,
             'display' => 'standalone',

@@ -27,17 +27,17 @@ class LoyaltyCard extends Model
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Customer::class)->withTrashed();
     }
 
     public function shop(): BelongsTo
     {
-        return $this->belongsTo(Shop::class);
+        return $this->belongsTo(Shop::class)->withTrashed();
     }
 
     public function campaign(): BelongsTo
     {
-        return $this->belongsTo(LoyaltyCampaign::class);
+        return $this->belongsTo(LoyaltyCampaign::class)->withoutGlobalScopes();
     }
 
     public function transactions(): HasMany

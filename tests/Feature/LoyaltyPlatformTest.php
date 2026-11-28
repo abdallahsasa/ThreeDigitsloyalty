@@ -721,4 +721,59 @@ class LoyaltyPlatformTest extends TestCase
             ->assertJsonPath('backgroundColor', 'rgb(6, 95, 70)')
             ->assertJsonPath('foregroundColor', 'rgb(255, 255, 255)');
     }
+
+    public function test_soft_deleted_customer_rejoining_shop_restores_customer_and_renders_card_without_null_error(): void
+    {
+        Mail::fake();
+
+        $shop = Shop::create(['name' => 'Roast & Co Coffee', 'status' => 'active']);
+        $campaign = LoyaltyCampaign::create([
+            'shop_id' => $shop->id,
+            'name' => 'VIP Stamp Card',
+            'required_purchases_count' => 8,
+            'reward_name' => 'Free Signature Latte',
+            'status' => 'active',
+        ]);
+
+        // Customer previously existed and was soft-deleted
+        $customer = Customer::create([
+            'name' => 'Old Name',
+            'phone' => '+966550001122',
+            'status' => 'active',
+        ]);
+        $existingCard = LoyaltyCard::create([
+            'customer_id' => $customer->id,
+            'shop_id' => $shop->id,
+            'campaign_id' => $campaign->id,
+            'token' => 'LOQGj9SRFyw5jw6ZDDqyWC6ZVzQ2sit9',
+            'current_stamps_count' => 2,
+            'reward_status' => 'not_ready',
+        ]);
+        $customer->delete();
+        $this->assertSoftDeleted('customers', ['id' => $customer->id]);
+
+        // Even before re-joining, visiting an existing card whose customer was soft-deleted auto-heals & renders 200
+        $this->get(route('loyalty-card.show', ['token' => $existingCard->token, 'joined' => 1]))
+            ->assertStatus(200)
+            ->assertSee('Old Name');
+
+        $this->assertDatabaseHas('customers', ['id' => $customer->id, 'deleted_at' => null]);
+
+        // Soft-delete again and test re-joining via POST /join/{shop}
+        $customer->delete();
+        $existingCard->delete();
+
+        $response = $this->post(route('shop.join.store', $shop->slug), [
+            'name' => 'Restored Customer',
+            'email' => 'restored@example.test',
+            'phone' => '+966550001122',
+        ]);
+
+        $response->assertRedirect(route('loyalty-card.show', ['token' => $existingCard->token, 'joined' => 1]));
+
+        $this->get(route('loyalty-card.show', ['token' => $existingCard->token, 'joined' => 1]))
+            ->assertStatus(200)
+            ->assertSee('Restored Customer')
+            ->assertSee('+966550001122');
+    }
 }

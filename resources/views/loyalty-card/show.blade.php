@@ -503,14 +503,19 @@
     <div class="pass-card">
         <div class="pass-header">
             <div class="shop-identity">
-                @if($card->shop->logo_url)
+                @if($card->shop?->logo_url)
                     <img src="{{ $card->shop->logo_url }}" alt="{{ $card->shop->name }}" class="shop-avatar">
                 @else
-                    <div class="shop-avatar">{{ mb_substr($card->shop->name, 0, 1) }}</div>
+                    <div class="shop-avatar">{{ mb_substr($card->shop?->name ?? 'T', 0, 1) }}</div>
                 @endif
                 <div style="min-width: 0;">
-                    <div class="shop-name">{{ $card->shop->name }}</div>
-                    <div class="customer-sub">{{ $card->customer->name }} · {{ $card->customer->phone }}</div>
+                    <div class="shop-name">{{ $card->shop?->name }}</div>
+                    <div class="customer-sub">
+                        {{ $card->customer?->name ?? ($isAr ? 'عميل المتجر' : 'Store Member') }}
+                        @if($card->customer?->phone)
+                            · <span dir="ltr" style="unicode-bidi: isolate;">{{ $card->customer->phone }}</span>
+                        @endif
+                    </div>
                 </div>
             </div>
             <span class="status-chip status-{{ $card->reward_status }}">{{ $statusLabel }}</span>
@@ -519,11 +524,11 @@
         <div class="pass-body">
             <div class="reward-banner {{ $isReady ? 'is-ready' : '' }}">
                 <div class="campaign-row">
-                    <div class="campaign-title">{{ $card->campaign->name }}</div>
+                    <div class="campaign-title">{{ $card->campaign?->name ?? ($isAr ? 'بطاقة الأختام' : 'VIP Stamp Card') }}</div>
                     <div class="stamp-counter">{{ $card->current_stamps_count }} / {{ $requiredStamps }}</div>
                 </div>
 
-                @if($card->campaign->reward_name)
+                @if($card->campaign?->reward_name)
                     <div class="reward-prize">
                         {{ $isAr ? 'المكافأة:' : 'Reward:' }} <strong>{{ $card->campaign->reward_name }}</strong>
                     </div>
