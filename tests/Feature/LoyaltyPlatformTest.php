@@ -679,6 +679,21 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('images/logo-icon.png', false)
             ->assertSee('uploads/shops/velvet-logo.png', false);
 
+        // Printable QR poster (/join/{shop}/poster?print=1) & Shop Dashboard QR page show custom colors + both logos
+        $this->get(route('shop.join.poster', ['shop' => $shop->slug, 'print' => 1]))
+            ->assertStatus(200)
+            ->assertSee('#065F46')
+            ->assertSee('#10B981')
+            ->assertSee('images/logo-icon.png', false)
+            ->assertSee('uploads/shops/velvet-logo.png', false);
+
+        $this->actingAs($owner)
+            ->get("/shop/{$shop->id}/shop-qr-code")
+            ->assertStatus(200)
+            ->assertSee('#065F46')
+            ->assertSee('images/logo-icon.png', false)
+            ->assertSee('uploads/shops/velvet-logo.png', false);
+
         // Apple Wallet payload uses the custom RGB background & foreground colors
         $this->getJson(route('loyalty-card.apple-payload', $card->token))
             ->assertStatus(200)

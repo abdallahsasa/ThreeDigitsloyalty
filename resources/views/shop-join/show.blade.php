@@ -811,7 +811,16 @@
 {{-- Store QR Poster Modal (For Shop Owner Display) --}}
 <div id="qr-modal" class="qr-modal-backdrop" onclick="if(event.target === this) toggleQrModal()">
     <div class="qr-modal-box">
-        <div style="font-size: 0.75rem; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em;">
+        <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(1, 10, 41, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 999px; padding: 0.3rem 0.8rem; font-size: 0.68rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem;">
+            <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 15px; width: auto; display: block;">
+            <span>ThreeDigits Loyalty</span>
+        </div>
+        @if($shop->logo_url)
+            <div style="width: 56px; height: 56px; margin: 0 auto 0.6rem; border-radius: 16px; background: #ffffff; padding: 3px; overflow: hidden; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);">
+                <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block;">
+            </div>
+        @endif
+        <div style="font-size: 0.85rem; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em;">
             {{ $shop->name }}
         </div>
         <h3 style="font-size: 1.2rem; font-weight: 800; margin-top: 0.35rem;">

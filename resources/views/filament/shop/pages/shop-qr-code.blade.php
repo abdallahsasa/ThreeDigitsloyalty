@@ -1,5 +1,10 @@
 <x-filament-panels::page>
-    @php $isAr = app()->getLocale() === 'ar'; @endphp
+    @php
+        $isAr = app()->getLocale() === 'ar';
+        $cardBg = $shop ? $shop->resolvedCardBgColor() : '#743EE2';
+        $cardAccent = $shop ? $shop->resolvedCardAccentColor() : '#3B42D5';
+        $cardText = $shop ? $shop->resolvedCardTextColor() : '#FFFFFF';
+    @endphp
 
     <style>
         .td-qr-grid {
@@ -15,7 +20,7 @@
         }
         .td-poster-card {
             background: linear-gradient(160deg, #010A29 0%, #09143E 100%);
-            border: 1px solid rgba(116, 62, 226, 0.35);
+            border: 2px solid {{ $cardBg }};
             border-radius: 24px;
             overflow: hidden;
             color: #ffffff;
@@ -23,28 +28,55 @@
             box-shadow: 0 20px 45px -12px rgba(1, 10, 41, 0.35);
         }
         .td-poster-header {
-            background: linear-gradient(135deg, #743EE2 0%, #6145E8 52%, #3B42D5 100%);
+            background: linear-gradient(135deg, {{ $cardBg }} 0%, {{ $cardAccent }} 100%);
+            color: {{ $cardText }};
             padding: 1.5rem 1.25rem;
         }
         .td-poster-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.3rem 0.8rem;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.16);
+            background: rgba(1, 10, 41, 0.78);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.22);
             font-size: 0.7rem;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .td-poster-logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            margin: 0 auto 0.65rem;
+            background: #ffffff;
+            padding: 3px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .td-poster-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
         }
         .td-poster-shop {
             font-size: 1.35rem;
             font-weight: 800;
             margin: 0;
+            color: {{ $cardText }};
         }
         .td-poster-sub {
             font-size: 0.82rem;
-            color: rgba(255, 255, 255, 0.85);
+            color: {{ $cardText }};
+            opacity: 0.88;
             margin-top: 0.25rem;
         }
         .td-poster-body {
@@ -78,8 +110,8 @@
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            background: linear-gradient(135deg, #743EE2 0%, #6145E8 50%, #3B42D5 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, {{ $cardBg }} 0%, {{ $cardAccent }} 100%);
+            color: {{ $cardText }};
             text-decoration: none;
             font-weight: 700;
             font-size: 0.84rem;
@@ -87,7 +119,7 @@
             border-radius: 12px;
             border: none;
             cursor: pointer;
-            box-shadow: 0 8px 20px -6px rgba(116, 62, 226, 0.6);
+            box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.45);
         }
         .td-btn-ghost {
             display: inline-flex;
@@ -148,8 +180,8 @@
             width: 34px;
             height: 34px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #743EE2, #3B42D5);
-            color: #ffffff;
+            background: linear-gradient(135deg, {{ $cardBg }}, {{ $cardAccent }});
+            color: {{ $cardText }};
             display: flex;
             align-items: center;
             justify-content: center;
@@ -192,7 +224,15 @@
             {{-- Left: Branded Printable In-Store Counter Stand --}}
             <div class="td-poster-card">
                 <div class="td-poster-header">
-                    <span class="td-poster-badge">ThreeDigits Loyalty</span>
+                    <span class="td-poster-badge">
+                        <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 16px; width: auto; display: block;">
+                        <span>ThreeDigits Loyalty</span>
+                    </span>
+                    @if($shop->logo_url)
+                        <div class="td-poster-logo">
+                            <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}">
+                        </div>
+                    @endif
                     <h2 class="td-poster-shop">{{ $shop->name }}</h2>
                     <div class="td-poster-sub">
                         {{ $isAr ? 'امسح الرمز للانضمام والحصول على بطاقة الولاء' : 'Scan to Join & Get Your Digital Loyalty Pass' }}
