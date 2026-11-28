@@ -1,3 +1,8 @@
+@php
+    $cardBg = $shop->resolvedCardBgColor();
+    $cardAccent = $shop->resolvedCardAccentColor();
+    $cardText = $shop->resolvedCardTextColor();
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
@@ -15,9 +20,10 @@
             --surface-elevated: #0C1742;
             --border-subtle: rgba(116, 62, 226, 0.22);
             --border-accent: rgba(116, 62, 226, 0.5);
-            --primary: #743EE2;
-            --primary-mid: #6145E8;
-            --primary-deep: #3B42D5;
+            --primary: {{ $cardBg }};
+            --primary-mid: {{ $cardBg }};
+            --primary-deep: {{ $cardAccent }};
+            --card-text: {{ $cardText }};
             --primary-glow: #9F7AEA;
             --gold: #724CDA;
             --emerald: #10b981;
@@ -362,8 +368,8 @@
         }
 
         .pass-top {
-            background: linear-gradient(135deg, #743EE2 0%, #6145E8 52%, #3B42D5 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+            color: var(--card-text);
             padding: 1.4rem 1.4rem 1.25rem;
             display: flex;
             align-items: center;
@@ -479,9 +485,9 @@
         }
 
         .stamp-circle.welcome-bonus {
-            background: linear-gradient(135deg, #743EE2, #3B42D5);
-            color: #ffffff;
-            box-shadow: 0 4px 10px rgba(116, 62, 226, 0.32);
+            background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+            color: var(--card-text);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.24);
         }
 
         .stamp-circle.slot {
@@ -733,7 +739,7 @@
         {{-- Right: Live Interactive Passbook Preview --}}
         <div class="preview-col">
             <div class="pass-preview">
-                <div class="pass-top">
+                <div class="pass-top" style="background: linear-gradient(135deg, {{ $cardBg }} 0%, {{ $cardAccent }} 100%); color: {{ $cardText }};">
                     <div class="pass-shop">
                         <div class="pass-avatar">
                             @if($shop->logo_url)
@@ -785,6 +791,16 @@
                         <div class="mini-qr">
                             {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(68)->margin(0)->generate($joinUrl) !!}
                         </div>
+                    </div>
+
+                    <div style="margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: #64748b; font-weight: 700;">
+                            <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 18px; width: auto; display: block;">
+                            <span>ThreeDigits Loyalty</span>
+                        </div>
+                        @if($shop->logo_url)
+                            <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}" style="height: 20px; width: 20px; border-radius: 5px; object-fit: cover; border: 1px solid #e2e8f0;">
+                        @endif
                     </div>
                 </div>
             </div>

@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Shops\Schemas;
 
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -27,6 +29,24 @@ class ShopForm
                     ->getUploadedFileNameForStorageUsing(
                         fn (\Illuminate\Http\UploadedFile $file): string => 'shop-' . time() . '-' . \Illuminate\Support\Str::random(10) . '.' . $file->extension()
                     ),
+                ColorPicker::make('card_bg_color')
+                    ->label('Card Primary Color')
+                    ->default('#743EE2'),
+                ColorPicker::make('card_accent_color')
+                    ->label('Card Accent Color')
+                    ->default('#3B42D5'),
+                ColorPicker::make('card_text_color')
+                    ->label('Card Text Color')
+                    ->default('#FFFFFF'),
+                ColorPicker::make('card_bg_color')
+                    ->label('Card Primary Color')
+                    ->default('#743EE2'),
+                ColorPicker::make('card_accent_color')
+                    ->label('Card Accent Color')
+                    ->default('#3B42D5'),
+                ColorPicker::make('card_text_color')
+                    ->label('Card Text Color')
+                    ->default('#FFFFFF'),
                 TextInput::make('phone')
                     ->tel(),
                 TextInput::make('email')

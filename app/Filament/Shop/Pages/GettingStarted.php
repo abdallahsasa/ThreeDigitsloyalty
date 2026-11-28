@@ -40,9 +40,9 @@ class GettingStarted extends Page
             [
                 'done' => (bool) $hasLogoOrBranch,
                 'title' => __('Store details and logo'),
-                'desc' => __('Add your branch details and upload your store logo.'),
-                'url' => $tenant ? url("/shop/{$tenant->id}/branches") : '#',
-                'cta' => __('Open Branches'),
+                'desc' => __('Upload your store logo and customize your loyalty card colors.'),
+                'url' => $tenant ? url("/shop/{$tenant->id}/card-branding") : '#',
+                'cta' => __('Customize Card & Logo'),
             ],
             [
                 'done' => (bool) $hasCampaign,

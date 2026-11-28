@@ -53,6 +53,10 @@ class WalletPassService
             ],
         ];
 
+        $bgRgb = $this->hexToRgbTuple($card->shop->resolvedCardBgColor(), [10, 15, 44]);
+        $fgRgb = $this->hexToRgbTuple($card->shop->resolvedCardTextColor(), [248, 250, 252]);
+        $accentRgb = $this->hexToRgbTuple($card->shop->resolvedCardAccentColor(), [196, 181, 253]);
+
         $payload = [
             'formatVersion' => 1,
             'passTypeIdentifier' => config('services.wallet.apple_pass_type_id', 'pass.com.threedigitsoftware.loyalty'),
@@ -63,9 +67,9 @@ class WalletPassService
             'organizationName' => $card->shop->name,
             'description' => $card->campaign->name ?? ($card->shop->name . ' Loyalty Card'),
             'logoText' => $card->shop->name,
-            'foregroundColor' => 'rgb(248, 250, 252)',
-            'backgroundColor' => 'rgb(10, 15, 44)',
-            'labelColor' => 'rgb(196, 181, 253)',
+            'foregroundColor' => sprintf('rgb(%d, %d, %d)', $fgRgb[0], $fgRgb[1], $fgRgb[2]),
+            'backgroundColor' => sprintf('rgb(%d, %d, %d)', $bgRgb[0], $bgRgb[1], $bgRgb[2]),
+            'labelColor' => sprintf('rgb(%d, %d, %d)', $fgRgb[0], $fgRgb[1], $fgRgb[2]),
             'barcode' => [
                 'message' => $card->token,
                 'format' => 'PKBarcodeFormatQR',
@@ -120,7 +124,7 @@ class WalletPassService
         $locations = $this->resolveShopLocations($card);
         if (!empty($locations)) {
             $payload['locations'] = $locations;
-            $payload['maxDistance'] = 300;
+            $payload['maxDistance'] = 100;
         }
 
         return $payload;
@@ -191,14 +195,21 @@ class WalletPassService
             );
             file_put_contents("{$workDir}/pass.json", $passJson);
 
-            // 2. Write required icon, logo, and visual stamp-card strip PNG assets
+            // 2. Write required icon, co-branded logo, and visual stamp-card strip PNG assets
             $sourceImage = $this->resolveShopLogoFilePath($card);
+            $hasCustomShopLogo = $sourceImage !== public_path('images/logo-icon.png');
             $this->writeResizedPng($sourceImage, "{$workDir}/icon.png", 29, 29);
             $this->writeResizedPng($sourceImage, "{$workDir}/icon@2x.png", 58, 58);
             $this->writeResizedPng($sourceImage, "{$workDir}/icon@3x.png", 87, 87);
-            $this->writeResizedPng($sourceImage, "{$workDir}/logo.png", 50, 50);
-            $this->writeResizedPng($sourceImage, "{$workDir}/logo@2x.png", 100, 100);
-            $this->writeResizedPng($sourceImage, "{$workDir}/logo@3x.png", 150, 150);
+            if ($hasCustomShopLogo) {
+                $this->writeDualLogoPng($sourceImage, public_path('images/logo-icon.png'), "{$workDir}/logo.png", 110, 50);
+                $this->writeDualLogoPng($sourceImage, public_path('images/logo-icon.png'), "{$workDir}/logo@2x.png", 220, 100);
+                $this->writeDualLogoPng($sourceImage, public_path('images/logo-icon.png'), "{$workDir}/logo@3x.png", 330, 150);
+            } else {
+                $this->writeResizedPng($sourceImage, "{$workDir}/logo.png", 50, 50);
+                $this->writeResizedPng($sourceImage, "{$workDir}/logo@2x.png", 100, 100);
+                $this->writeResizedPng($sourceImage, "{$workDir}/logo@3x.png", 150, 150);
+            }
             $this->writeStampStripPng($card, "{$workDir}/strip.png", 375, 123);
             $this->writeStampStripPng($card, "{$workDir}/strip@2x.png", 750, 246);
             $this->writeStampStripPng($card, "{$workDir}/strip@3x.png", 1125, 369);
@@ -564,15 +575,21 @@ class WalletPassService
             ];
 
             $geoLocations = $this->resolveGoogleLocations($card);
-            if (!empty($geoLocations)) {
-                $patchPayload['locations'] = $geoLocations;
-            }
+            $patchPayload['locations'] = $geoLocations;
 
             $patch = Http::withToken($accessToken)->timeout(8)->patch($objectUrl, $patchPayload);
 
             if ($patch->status() === 404) {
                 // Customer has not added this pass to Google Wallet yet
                 return false;
+            }
+
+            if (!$patch->successful()) {
+                Log::warning('Google Wallet loyaltyObject PATCH failed', [
+                    'objectId' => $objectId,
+                    'status' => $patch->status(),
+                    'body' => $patch->body(),
+                ]);
             }
 
             if ($message !== null && trim($message) !== '') {
@@ -604,6 +621,181 @@ class WalletPassService
         }
     }
 
+    public function syncShopBrandingToGoogleClass(Shop $shop): bool
+    {
+        if (!$this->isGoogleWalletConfigured() || app()->runningUnitTests()) {
+            return false;
+        }
+
+        try {
+            [$clientEmail, $privateKeyPem] = $this->resolveGoogleServiceAccountCredentials();
+            $accessToken = $this->getGoogleOAuthAccessToken($clientEmail, $privateKeyPem);
+            if (!$accessToken) {
+                return false;
+            }
+
+            $issuerId = config('services.wallet.google_issuer_id') ?: '3388000000022222222';
+            $classSuffix = preg_replace('/[^a-zA-Z0-9_.-]/', '_', config('services.wallet.google_class_suffix', 'threedigits_loyalty_pass'));
+            $classId = "{$issuerId}.{$classSuffix}_{$shop->id}";
+            Cache::forget('google_wallet_class_ready_' . md5($classId));
+
+            $logoUrl = $shop->logo_url ?: asset('images/logo-icon.png');
+            if (!str_starts_with($logoUrl, 'https://')) {
+                $logoUrl = 'https://loylty.threedigitsoftware.com/images/logo-icon.png';
+            }
+
+            $res = Http::withToken($accessToken)
+                ->timeout(8)
+                ->patch("https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass/{$classId}", [
+                    'issuerName' => $shop->name ?: 'ThreeDigits Loyalty',
+                    'hexBackgroundColor' => $shop->resolvedCardBgColor(),
+                    'programLogo' => [
+                        'sourceUri' => ['uri' => $logoUrl],
+                        'contentDescription' => [
+                            'defaultValue' => [
+                                'language' => 'en-US',
+                                'value' => $shop->name ?: 'ThreeDigits Loyalty',
+                            ],
+                        ],
+                    ],
+                ]);
+
+            return $res->successful();
+        } catch (\Throwable $e) {
+            Log::warning('Google Wallet loyaltyClass branding sync error', ['error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Render a co-branded Apple Wallet header logo combining the shop's logo and ThreeDigits' logo.
+     */
+    protected function writeDualLogoPng(string $shopLogoPath, string $brandLogoPath, string $destPath, int $width, int $height): void
+    {
+        $dstImg = imagecreatetruecolor($width, $height);
+        imagealphablending($dstImg, false);
+        imagesavealpha($dstImg, true);
+        $transparent = imagecolorallocatealpha($dstImg, 0, 0, 0, 127);
+        imagefilledrectangle($dstImg, 0, 0, $width, $height, $transparent);
+        imagealphablending($dstImg, true);
+
+        $load = function (string $path) {
+            $info = @getimagesize($path);
+            if (! $info || ! isset($info[2])) {
+                return null;
+            }
+
+            return match ($info[2]) {
+                IMAGETYPE_PNG => @imagecreatefrompng($path),
+                IMAGETYPE_JPEG => @imagecreatefromjpeg($path),
+                IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : null,
+                default => null,
+            };
+        };
+
+        $slotW = (int) floor(($width - 10) / 2);
+        $drawInto = function ($srcImg, int $offsetX) use ($dstImg, $slotW, $height): void {
+            if (! $srcImg) {
+                return;
+            }
+            $srcW = max(1, imagesx($srcImg));
+            $srcH = max(1, imagesy($srcImg));
+            $scale = min($slotW / $srcW, $height / $srcH);
+            $newW = max(1, (int) round($srcW * $scale));
+            $newH = max(1, (int) round($srcH * $scale));
+            $dstX = $offsetX + (int) floor(($slotW - $newW) / 2);
+            $dstY = (int) floor(($height - $newH) / 2);
+            imagecopyresampled($dstImg, $srcImg, $dstX, $dstY, 0, 0, $newW, $newH, $srcW, $srcH);
+            imagedestroy($srcImg);
+        };
+
+        $drawInto($load($shopLogoPath), 0);
+
+        $divider = imagecolorallocatealpha($dstImg, 255, 255, 255, 75);
+        $midX = (int) floor($width / 2);
+        imageline($dstImg, $midX, (int) round($height * 0.2), $midX, (int) round($height * 0.8), $divider);
+
+        $drawInto($load($brandLogoPath), $slotW + 10);
+
+        imagepng($dstImg, $destPath);
+        imagedestroy($dstImg);
+    }
+
+    /**
+     * @return array{0: int, 1: int, 2: int}
+     */
+    protected function hexToRgbTuple(string $hex, array $fallback): array
+    {
+        $hex = ltrim(trim($hex), '#');
+        if (! preg_match('/^[0-9A-Fa-f]{6}$/', $hex)) {
+            return $fallback;
+        }
+
+        return [
+            hexdec(substr($hex, 0, 2)),
+            hexdec(substr($hex, 2, 2)),
+            hexdec(substr($hex, 4, 2)),
+        ];
+    }
+
+    /**
+     * Patch Google Wallet LoyaltyClass.locations so geofence nearby notifications stay synced with active branches.
+     */
+    public function syncShopLocationsToGoogleClass(int $shopId): bool
+    {
+        if (!$this->isGoogleWalletConfigured() || app()->runningUnitTests()) {
+            return false;
+        }
+
+        try {
+            [$clientEmail, $privateKeyPem] = $this->resolveGoogleServiceAccountCredentials();
+            $accessToken = $this->getGoogleOAuthAccessToken($clientEmail, $privateKeyPem);
+            if (!$accessToken) {
+                return false;
+            }
+
+            $issuerId = config('services.wallet.google_issuer_id') ?: '3388000000022222222';
+            $classSuffix = preg_replace('/[^a-zA-Z0-9_.-]/', '_', config('services.wallet.google_class_suffix', 'threedigits_loyalty_pass'));
+            $classId = "{$issuerId}.{$classSuffix}_{$shopId}";
+            Cache::forget('google_wallet_class_ready_' . md5($classId));
+
+            $locations = Branch::withoutGlobalScopes()
+                ->where('shop_id', $shopId)
+                ->where('status', 'active')
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->limit(10)
+                ->get()
+                ->map(fn (Branch $branch) => [
+                    'latitude' => (float) $branch->latitude,
+                    'longitude' => (float) $branch->longitude,
+                ])
+                ->values()
+                ->all();
+
+            $res = Http::withToken($accessToken)
+                ->timeout(8)
+                ->patch("https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass/{$classId}", [
+                    'locations' => $locations,
+                ]);
+
+            if (!$res->successful() && $res->status() !== 404) {
+                Log::warning('Google Wallet loyaltyClass locations PATCH failed', [
+                    'classId' => $classId,
+                    'status' => $res->status(),
+                    'body' => $res->body(),
+                ]);
+            }
+
+            return $res->successful();
+        } catch (\Throwable $e) {
+            Log::warning('Google Wallet loyaltyClass location sync error', ['error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
     /**
      * Ensure the shop's LoyaltyClass exists in Google Wallet API (creates it via REST API if missing).
      */
@@ -629,6 +821,12 @@ class WalletPassService
             $check = Http::withToken($accessToken)->timeout(8)->get("{$baseUrl}/{$classId}");
 
             if ($check->successful()) {
+                $geoLocations = $this->resolveGoogleLocations($card);
+                if (!empty($geoLocations)) {
+                    Http::withToken($accessToken)->timeout(8)->patch("{$baseUrl}/{$classId}", [
+                        'locations' => $geoLocations,
+                    ]);
+                }
                 Cache::put($cacheKey, true, now()->addHours(12));
 
                 return;
@@ -650,9 +848,14 @@ class WalletPassService
                             ],
                         ],
                     ],
-                    'hexBackgroundColor' => '#0A0F2C',
+                    'hexBackgroundColor' => $card->shop->resolvedCardBgColor(),
                     'reviewStatus' => 'UNDER_REVIEW',
                 ];
+
+                $geoLocations = $this->resolveGoogleLocations($card);
+                if (!empty($geoLocations)) {
+                    $classPayload['locations'] = $geoLocations;
+                }
 
                 $create = Http::withToken($accessToken)->timeout(8)->post($baseUrl, $classPayload);
 
@@ -788,19 +991,22 @@ class WalletPassService
         $img = imagecreatetruecolor($width, $height);
         imagealphablending($img, true);
 
-        // Smooth vertical-diagonal ThreeDigits Midnight Navy -> Indigo -> Electric Violet gradient
+        [$bgR, $bgG, $bgB] = $this->hexToRgbTuple($card->shop->resolvedCardBgColor(), [11, 18, 56]);
+        [$acR, $acG, $acB] = $this->hexToRgbTuple($card->shop->resolvedCardAccentColor(), [76, 29, 149]);
+
+        // Smooth vertical gradient using the shop's chosen card colors
         for ($y = 0; $y < $height; $y++) {
             $t = $y / max(1, $height - 1);
-            $r = (int) round(11 + (76 - 11) * $t);
-            $g = (int) round(18 + (29 - 18) * $t);
-            $b = (int) round(56 + (149 - 56) * $t);
-            $lineColor = imagecolorallocate($img, $r, $g, $b);
+            $r = (int) round(max(0, $bgR * 0.65) + ($acR - max(0, $bgR * 0.65)) * $t);
+            $g = (int) round(max(0, $bgG * 0.65) + ($acG - max(0, $bgG * 0.65)) * $t);
+            $b = (int) round(max(0, $bgB * 0.65) + ($acB - max(0, $bgB * 0.65)) * $t);
+            $lineColor = imagecolorallocate($img, min(255, $r), min(255, $g), min(255, $b));
             imageline($img, 0, $y, $width, $y, $lineColor);
         }
 
-        // Subtle decorative glow orbs
-        $glow1 = imagecolorallocatealpha($img, 116, 62, 226, 98);
-        $glow2 = imagecolorallocatealpha($img, 59, 66, 213, 102);
+        // Subtle decorative glow orbs tinted with shop accent
+        $glow1 = imagecolorallocatealpha($img, $bgR, $bgG, $bgB, 96);
+        $glow2 = imagecolorallocatealpha($img, $acR, $acG, $acB, 100);
         imagefilledellipse($img, (int) round($width * 0.14), (int) round($height * 0.18), (int) round($width * 0.42), (int) round($width * 0.42), $glow1);
         imagefilledellipse($img, (int) round($width * 0.88), (int) round($height * 0.82), (int) round($width * 0.36), (int) round($width * 0.36), $glow2);
 
@@ -823,8 +1029,8 @@ class WalletPassService
         $radius = max(4, (int) floor($diameter / 2));
 
         $filledBg = $isReady
-            ? imagecolorallocate($img, 16, 185, 129)   // Emerald when reward ready
-            : imagecolorallocate($img, 116, 62, 226);  // Electric Violet for earned stamps
+            ? imagecolorallocate($img, 16, 185, 129)
+            : imagecolorallocate($img, $bgR, $bgG, $bgB);
         $filledRing = imagecolorallocatealpha($img, 255, 255, 255, 45);
         $emptyBg = imagecolorallocatealpha($img, 10, 15, 44, 55);
         $emptyRing = imagecolorallocatealpha($img, 196, 181, 253, 65);

@@ -128,7 +128,7 @@
             {{ $isAr ? 'موقع الفرع على الخريطة (لتنبيهات القرب التلقائية)' : 'Branch Location on Map (for Nearby Wallet Alerts)' }}
         </label>
         <span x-show="lat && lng" style="font-size: 0.78rem; color: #10b981; font-weight: 700;">
-            ✓ {{ $isAr ? 'تم تحديد الموقع' : 'Location pinned' }}
+            ✓ {{ $isAr ? 'تم تحديد الموقع' : 'Location pinned' }} (<span dir="ltr" x-text="lat + ', ' + lng"></span>)
         </span>
     </div>
 

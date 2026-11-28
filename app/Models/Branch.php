@@ -26,9 +26,14 @@ class Branch extends Model
                 return;
             }
 
-            if ($branch->wasChanged(['latitude', 'longitude', 'nearby_message', 'status'])) {
+            $locationCreated = $branch->wasRecentlyCreated && $branch->latitude !== null && $branch->longitude !== null;
+            $locationUpdated = $branch->wasChanged(['latitude', 'longitude', 'nearby_message', 'status']);
+
+            if ($locationCreated || $locationUpdated) {
                 try {
                     $walletService = app(WalletPassService::class);
+                    $walletService->syncShopLocationsToGoogleClass((int) $branch->shop_id);
+
                     LoyaltyCard::withoutGlobalScopes()
                         ->with(['customer', 'shop', 'campaign' => fn ($q) => $q->withoutGlobalScopes()])
                         ->where('shop_id', $branch->shop_id)

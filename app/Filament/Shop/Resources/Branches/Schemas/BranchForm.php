@@ -32,8 +32,10 @@ class BranchForm
                         fn (\Illuminate\Http\UploadedFile $file): string => 'branch-' . time() . '-' . \Illuminate\Support\Str::random(10) . '.' . $file->extension()
                     ),
                 TextInput::make('address'),
-                Hidden::make('latitude'),
-                Hidden::make('longitude'),
+                Hidden::make('latitude')
+                    ->dehydrated(true),
+                Hidden::make('longitude')
+                    ->dehydrated(true),
                 View::make('filament.shop.components.branch-map-picker')
                     ->columnSpanFull(),
                 TextInput::make('nearby_message')

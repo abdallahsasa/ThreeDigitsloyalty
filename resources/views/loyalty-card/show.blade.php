@@ -1,9 +1,14 @@
+@php
+    $cardBg = $card->shop->resolvedCardBgColor();
+    $cardAccent = $card->shop->resolvedCardAccentColor();
+    $cardText = $card->shop->resolvedCardTextColor();
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0b1120">
+    <meta name="theme-color" content="{{ $cardBg }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="{{ $card->shop->name }}">
@@ -14,6 +19,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@php
+    $cardBg = $card->shop->resolvedCardBgColor();
+    $cardAccent = $card->shop->resolvedCardAccentColor();
+    $cardText = $card->shop->resolvedCardTextColor();
+@endphp
     <style>
         :root {
             --bg-page: #010A29;
@@ -21,7 +31,10 @@
             --surface-muted: #f8fafc;
             --text-primary: #010A29;
             --text-secondary: #64748b;
-            --accent: #743EE2;
+            --card-bg: {{ $cardBg }};
+            --card-accent: {{ $cardAccent }};
+            --card-text: {{ $cardText }};
+            --accent: {{ $cardBg }};
             --accent-soft: #f3effe;
             --success: #10b981;
             --success-soft: #ecfdf5;
@@ -105,8 +118,8 @@
         }
 
         .pass-header {
-            background: linear-gradient(135deg, #743EE2 0%, #6145E8 52%, #3B42D5 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-accent) 100%);
+            color: var(--card-text);
             padding: 1.5rem 1.5rem 1.35rem;
             display: flex;
             align-items: center;
@@ -244,13 +257,14 @@
         }
 
         .stamp-slot.filled {
-            background: linear-gradient(135deg, #743EE2, #6145E8, #3B42D5);
-            color: #ffffff;
-            box-shadow: 0 4px 10px rgba(116, 62, 226, 0.32);
+            background: linear-gradient(135deg, var(--card-bg), var(--card-accent));
+            color: var(--card-text);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22);
         }
 
         .reward-banner.is-ready .stamp-slot.filled {
             background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
             box-shadow: 0 4px 10px rgba(16, 185, 129, 0.28);
         }
 
@@ -270,7 +284,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #743EE2, #6145E8, #3B42D5);
+            background: linear-gradient(90deg, var(--card-bg), var(--card-accent));
             border-radius: 999px;
             transition: width 0.4s ease;
         }
@@ -592,6 +606,20 @@
                     <button type="button" class="copy-btn" onclick="copyCardUrl(this)">
                         <span>{{ $isAr ? 'نسخ رابط البطاقة' : 'Copy Pass Link' }}</span>
                     </button>
+                </div>
+
+                {{-- Dual Branding Strip Inside Card: ThreeDigits Logo + Shop Logo --}}
+                <div style="margin-top: 1.25rem; padding-top: 0.9rem; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.75rem; font-weight: 700; color: #64748b;">
+                        <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 20px; width: auto; display: block;">
+                        <span>ThreeDigits Loyalty</span>
+                    </div>
+                    @if($card->shop->logo_url)
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 700; color: #334155;">
+                            <img src="{{ $card->shop->logo_url }}" alt="{{ $card->shop->name }}" style="height: 22px; width: 22px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0;">
+                            <span>{{ $card->shop->name }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

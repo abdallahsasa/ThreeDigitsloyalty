@@ -586,4 +586,103 @@ class LoyaltyPlatformTest extends TestCase
             ->assertDontSee('Create your store’s card')
             ->assertSee('lang=ar', false);
     }
+
+    public function test_apple_pass_payload_includes_branch_geolocation_and_relevant_text(): void
+    {
+        $shop = Shop::create(['name' => 'Geo Cafe', 'status' => 'active', 'default_language' => 'en']);
+        Branch::create([
+            'shop_id' => $shop->id,
+            'name' => 'Main Branch',
+            'latitude' => 33.5138000,
+            'longitude' => 36.2765000,
+            'nearby_message' => 'Stop by Geo Cafe for your next stamp!',
+            'status' => 'active',
+        ]);
+        $customer = Customer::create(['name' => 'Lina', 'phone' => '+963933112233', 'status' => 'active']);
+        $campaign = LoyaltyCampaign::create([
+            'shop_id' => $shop->id,
+            'name' => 'Geo Club',
+            'required_purchases_count' => 6,
+            'reward_name' => 'Free Latte',
+            'status' => 'active',
+        ]);
+        $card = LoyaltyCard::create([
+            'customer_id' => $customer->id,
+            'shop_id' => $shop->id,
+            'campaign_id' => $campaign->id,
+            'token' => Str::random(32),
+            'current_stamps_count' => 2,
+            'reward_status' => 'not_ready',
+        ]);
+
+        $this->getJson(route('loyalty-card.apple-payload', $card->token))
+            ->assertStatus(200)
+            ->assertJsonPath('maxDistance', 100)
+            ->assertJsonPath('locations.0.latitude', 33.5138)
+            ->assertJsonPath('locations.0.longitude', 36.2765)
+            ->assertJsonPath('locations.0.relevantText', 'Stop by Geo Cafe for your next stamp!');
+    }
+
+    public function test_shop_custom_card_colors_and_dual_logos_render_on_card_and_wallet_payload(): void
+    {
+        $shop = Shop::create([
+            'name' => 'Velvet Espresso',
+            'status' => 'active',
+            'logo' => 'shops/velvet-logo.png',
+            'card_bg_color' => '#065F46',
+            'card_accent_color' => '#10B981',
+            'card_text_color' => '#FFFFFF',
+        ]);
+        $owner = User::create([
+            'name' => 'Velvet Owner',
+            'email' => 'owner@velvet.test',
+            'password' => bcrypt('password123'),
+            'shop_id' => $shop->id,
+        ]);
+        $owner->assignRole('Shop Owner');
+
+        $customer = Customer::create(['name' => 'Maya', 'phone' => '+963944000111', 'status' => 'active']);
+        $campaign = LoyaltyCampaign::create([
+            'shop_id' => $shop->id,
+            'name' => 'Espresso Club',
+            'required_purchases_count' => 6,
+            'reward_name' => 'Free Cortado',
+            'status' => 'active',
+        ]);
+        $card = LoyaltyCard::create([
+            'customer_id' => $customer->id,
+            'shop_id' => $shop->id,
+            'campaign_id' => $campaign->id,
+            'token' => Str::random(32),
+            'current_stamps_count' => 3,
+            'reward_status' => 'not_ready',
+        ]);
+
+        // Shop Owner can access Card Design & Logo dashboard page
+        $this->actingAs($owner)
+            ->get("/shop/{$shop->id}/card-branding")
+            ->assertStatus(200)
+            ->assertSee('Velvet Espresso');
+
+        // Customer web loyalty card applies chosen colors + displays both ThreeDigits logo and Shop logo
+        $this->get(route('loyalty-card.show', $card->token))
+            ->assertStatus(200)
+            ->assertSee('#065F46')
+            ->assertSee('#10B981')
+            ->assertSee('images/logo-icon.png', false)
+            ->assertSee('uploads/shops/velvet-logo.png', false);
+
+        // QR join page live preview also applies custom colors and dual logos
+        $this->get(route('shop.join', $shop->slug))
+            ->assertStatus(200)
+            ->assertSee('#065F46')
+            ->assertSee('images/logo-icon.png', false)
+            ->assertSee('uploads/shops/velvet-logo.png', false);
+
+        // Apple Wallet payload uses the custom RGB background & foreground colors
+        $this->getJson(route('loyalty-card.apple-payload', $card->token))
+            ->assertStatus(200)
+            ->assertJsonPath('backgroundColor', 'rgb(6, 95, 70)')
+            ->assertJsonPath('foregroundColor', 'rgb(255, 255, 255)');
+    }
 }

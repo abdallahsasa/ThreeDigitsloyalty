@@ -24,6 +24,54 @@ class Shop extends Model
                 $shop->slug = Str::slug($shop->slug) ?: static::generateUniqueSlug($shop->name, $shop->id);
             }
         });
+
+        static::saved(function (Shop $shop): void {
+            if (app()->runningUnitTests()) {
+                return;
+            }
+
+            if ($shop->wasChanged(['logo', 'card_bg_color', 'card_accent_color', 'card_text_color', 'name'])) {
+                try {
+                    $walletService = app(\App\Services\WalletPassService::class);
+                    $walletService->syncShopBrandingToGoogleClass($shop);
+
+                    LoyaltyCard::withoutGlobalScopes()
+                        ->with(['customer', 'shop', 'campaign' => fn ($q) => $q->withoutGlobalScopes()])
+                        ->where('shop_id', $shop->id)
+                        ->each(fn (LoyaltyCard $card) => $walletService->sendPassNotification($card));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Failed to sync Wallet passes after shop branding update', [
+                        'shop_id' => $shop->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        });
+    }
+
+    public function resolvedCardBgColor(): string
+    {
+        return self::sanitizeHexColor($this->card_bg_color, '#743EE2');
+    }
+
+    public function resolvedCardAccentColor(): string
+    {
+        return self::sanitizeHexColor($this->card_accent_color, '#3B42D5');
+    }
+
+    public function resolvedCardTextColor(): string
+    {
+        return self::sanitizeHexColor($this->card_text_color, '#FFFFFF');
+    }
+
+    public static function sanitizeHexColor(?string $color, string $fallback): string
+    {
+        $color = trim((string) $color);
+        if (preg_match('/^#[0-9A-Fa-f]{6}$/', $color)) {
+            return strtoupper($color);
+        }
+
+        return $fallback;
     }
 
     public static function generateUniqueSlug(?string $name, ?int $ignoreId = null): string
