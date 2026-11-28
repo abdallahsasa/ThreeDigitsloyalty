@@ -679,18 +679,37 @@ class LoyaltyPlatformTest extends TestCase
             ->assertSee('images/logo-icon.png', false)
             ->assertSee('uploads/shops/velvet-logo.png', false);
 
-        // Printable QR poster (/join/{shop}/poster?print=1) & Shop Dashboard QR page show custom colors + both logos
+        // Printable QR poster (/join/{shop}/poster?print=1) & Shop Dashboard QR page show custom colors + both logos + category icon
         $this->get(route('shop.join.poster', ['shop' => $shop->slug, 'print' => 1]))
             ->assertStatus(200)
             ->assertSee('#065F46')
             ->assertSee('#10B981')
+            ->assertSee('data-category-icon="cafe"', false)
+            ->assertSee('data-category-medallion="cafe"', false)
+            ->assertSee('Powered by ThreeDigits Loyalty')
             ->assertSee('images/logo-icon.png', false)
             ->assertSee('uploads/shops/velvet-logo.png', false);
+
+        // Classic minimal cream variant also renders category icon + logos + custom colors
+        $this->get(route('shop.join.poster', ['shop' => $shop->slug, 'style' => 'minimal']))
+            ->assertStatus(200)
+            ->assertSee('#065F46')
+            ->assertSee('data-category-icon="cafe"', false)
+            ->assertSee('uploads/shops/velvet-logo.png', false);
+
+        // Changing shop category dynamically swaps the poster icon & medallion
+        $shop->update(['category' => 'salon']);
+        $this->get(route('shop.join.poster', $shop->slug))
+            ->assertStatus(200)
+            ->assertSee('SALON & SPA')
+            ->assertSee('data-category-icon="salon"', false)
+            ->assertSee('data-category-medallion="salon"', false);
 
         $this->actingAs($owner)
             ->get("/shop/{$shop->id}/shop-qr-code")
             ->assertStatus(200)
             ->assertSee('#065F46')
+            ->assertSee('data-category-icon="salon"', false)
             ->assertSee('images/logo-icon.png', false)
             ->assertSee('uploads/shops/velvet-logo.png', false);
 

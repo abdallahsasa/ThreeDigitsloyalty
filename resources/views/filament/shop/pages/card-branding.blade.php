@@ -8,7 +8,7 @@
     $presets = [
         ['name' => $isAr ? 'بنفسجي ThreeDigits' : 'ThreeDigits Purple', 'bg' => '#743EE2', 'accent' => '#3B42D5', 'text' => '#FFFFFF'],
         ['name' => $isAr ? 'كحلي ليلي' : 'Midnight Navy', 'bg' => '#0A0F2C', 'accent' => '#3B82F6', 'text' => '#FFFFFF'],
-        ['name' => $isAr ? 'إسبريسو دافئ' : 'Warm Espresso', 'bg' => '#4A2C2A', 'accent' => '#B45309', 'text' => '#FFFFFF'],
+        ['name' => $isAr ? 'إسبريسو دافئ' : 'Warm Espresso', 'bg' => '#2C1B18', 'accent' => '#8E3B20', 'text' => '#FFFFFF'],
         ['name' => $isAr ? 'زمردي للمقاهي' : 'Emerald Café', 'bg' => '#065F46', 'accent' => '#10B981', 'text' => '#FFFFFF'],
         ['name' => $isAr ? 'وردي للصالونات' : 'Salon Rose', 'bg' => '#9D174D', 'accent' => '#EC4899', 'text' => '#FFFFFF'],
     ];

@@ -306,6 +306,16 @@
                 </div>
 
                 <div class="field">
+                    <label for="category">{{ $isAr ? 'تصنيف المتجر' : 'Store category' }}</label>
+                    <select id="category" name="category" @error('category') aria-invalid="true" aria-describedby="category-error" @enderror>
+                        @foreach(\App\Models\Shop::categoryOptions($isAr ? 'ar' : 'en') as $catKey => $catLabel)
+                            <option value="{{ $catKey }}" {{ old('category', 'cafe') === $catKey ? 'selected' : '' }}>{{ $catLabel }}</option>
+                        @endforeach
+                    </select>
+                    @error('category') <div id="category-error" class="error-text" role="alert">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="field">
                     <label for="name">{{ $isAr ? 'اسمك الكامل' : 'Your full name' }}</label>
                     <input id="name" name="name" type="text" value="{{ old('name') }}" required autocomplete="name" placeholder="{{ $isAr ? 'الاسم الكامل' : 'Full name' }}" @error('name') aria-invalid="true" aria-describedby="name-error" @enderror>
                     @error('name') <div id="name-error" class="error-text" role="alert">{{ $message }}</div> @enderror

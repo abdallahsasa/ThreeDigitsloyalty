@@ -6,6 +6,7 @@ use App\Models\Shop;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -48,6 +49,7 @@ class CardBranding extends Page implements HasForms
         $shop = Filament::getTenant();
 
         $this->form->fill([
+            'category' => $shop?->resolvedCategory() ?? 'cafe',
             'logo' => $shop?->logo,
             'card_bg_color' => $shop?->resolvedCardBgColor() ?? '#743EE2',
             'card_accent_color' => $shop?->resolvedCardAccentColor() ?? '#3B42D5',
@@ -62,6 +64,13 @@ class CardBranding extends Page implements HasForms
         return $schema
             ->statePath('data')
             ->components([
+                Select::make('category')
+                    ->label($isAr ? 'تصنيف النشاط (يحدد أيقونة البوستر المطبوع)' : 'Store Category (sets your printed QR poster icon)')
+                    ->options(Shop::categoryOptions($isAr ? 'ar' : 'en'))
+                    ->default('cafe')
+                    ->live()
+                    ->required(),
+
                 FileUpload::make('logo')
                     ->label($isAr ? 'شعار المتجر (يظهر على بطاقة العميل ومحفظة الهاتف)' : 'Store Logo (shown on customer card & phone wallet)')
                     ->disk('uploads')
@@ -111,7 +120,13 @@ class CardBranding extends Page implements HasForms
 
         $state = $this->form->getState();
 
+        $category = strtolower(trim((string) ($state['category'] ?? 'cafe')));
+        if (! in_array($category, Shop::CATEGORIES, true)) {
+            $category = 'cafe';
+        }
+
         $shop->update([
+            'category' => $category,
             'logo' => $state['logo'] ?? null,
             'card_bg_color' => Shop::sanitizeHexColor($state['card_bg_color'] ?? null, '#743EE2'),
             'card_accent_color' => Shop::sanitizeHexColor($state['card_accent_color'] ?? null, '#3B42D5'),

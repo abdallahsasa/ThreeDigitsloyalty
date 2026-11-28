@@ -19,6 +19,10 @@ class ShopForm
                 TextInput::make('slug')
                     ->helperText('Leave blank to auto-generate from shop name (used in /join/{slug}).')
                     ->unique(ignoreRecord: true),
+                Select::make('category')
+                    ->label('Shop Category')
+                    ->options(\App\Models\Shop::categoryOptions('en'))
+                    ->default('cafe'),
                 FileUpload::make('logo')
                     ->disk('uploads')
                     ->directory('shops')

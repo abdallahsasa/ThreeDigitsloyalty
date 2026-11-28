@@ -25,9 +25,17 @@ class ShopQrCode extends Page
     {
         $tenant = Filament::getTenant();
         $joinUrl = $tenant ? route('shop.join', $tenant->slug ?: $tenant->id) : url('/');
+        $campaign = $tenant
+            ? \App\Models\LoyaltyCampaign::withoutGlobalScopes()
+                ->where('shop_id', $tenant->id)
+                ->where('status', 'active')
+                ->latest()
+                ->first()
+            : null;
 
         return [
             'shop' => $tenant,
+            'campaign' => $campaign,
             'joinUrl' => $joinUrl,
         ];
     }

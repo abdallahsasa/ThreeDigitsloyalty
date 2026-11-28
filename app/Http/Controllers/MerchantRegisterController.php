@@ -71,6 +71,7 @@ class MerchantRegisterController extends Controller
 
         $validated = $request->validate([
             'shop_name' => ['required', 'string', 'max:120'],
+            'category' => ['nullable', 'string', \Illuminate\Validation\Rule::in(Shop::CATEGORIES)],
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
@@ -84,6 +85,7 @@ class MerchantRegisterController extends Controller
         [$shop, $user] = DB::transaction(function () use ($validated, $selectedPlan) {
             $shop = Shop::create([
                 'name' => trim($validated['shop_name']),
+                'category' => $validated['category'] ?? null,
                 'plan_id' => $selectedPlan?->id,
                 'status' => 'active',
                 'default_language' => app()->getLocale() === 'ar' ? 'ar' : 'en',

@@ -4,107 +4,184 @@
         $cardBg = $shop ? $shop->resolvedCardBgColor() : '#743EE2';
         $cardAccent = $shop ? $shop->resolvedCardAccentColor() : '#3B42D5';
         $cardText = $shop ? $shop->resolvedCardTextColor() : '#FFFFFF';
+        $category = $shop ? $shop->resolvedCategory() : 'cafe';
+        $categorySubtitle = $shop ? $shop->categoryPosterSubtitle($isAr ? 'ar' : 'en') : 'COFFEE';
+        $hasArabicShopName = $shop ? (bool) preg_match('/\p{Arabic}/u', (string) $shop->name) : false;
+        $reqStamps = (int) ($campaign?->required_purchases_count ?? 8);
+        $stampsWordAr = ($reqStamps >= 3 && $reqStamps <= 10) ? 'أختام' : 'ختماً';
     @endphp
 
     <style>
         .td-qr-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 1.5rem;
+            gap: 1.75rem;
             align-items: start;
         }
-        @media (min-width: 960px) {
+        @media (min-width: 980px) {
             .td-qr-grid {
                 grid-template-columns: 440px 1fr;
             }
         }
         .td-poster-card {
-            background: linear-gradient(160deg, #010A29 0%, #09143E 100%);
-            border: 2px solid {{ $cardBg }};
-            border-radius: 24px;
+            background: #F7F1E8;
+            border-radius: 20px;
             overflow: hidden;
-            color: #ffffff;
-            text-align: center;
-            box-shadow: 0 20px 45px -12px rgba(1, 10, 41, 0.35);
+            box-shadow: 0 22px 48px -14px rgba(15, 10, 8, 0.3), 0 0 0 1px rgba(30, 22, 18, 0.12);
         }
-        .td-poster-header {
-            background: linear-gradient(135deg, {{ $cardBg }} 0%, {{ $cardAccent }} 100%);
+        .td-arch-top {
+            background: {{ $cardBg }};
             color: {{ $cardText }};
-            padding: 1.5rem 1.25rem;
+            padding: 0;
         }
-        .td-poster-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.3rem 0.8rem;
-            border-radius: 999px;
-            background: rgba(1, 10, 41, 0.78);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.22);
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 0.75rem;
+        .td-arch-header-inner {
+            padding: 1.45rem 1.65rem 0;
         }
-        .td-poster-logo {
-            width: 58px;
-            height: 58px;
-            border-radius: 16px;
-            margin: 0 auto 0.65rem;
-            background: #ffffff;
-            padding: 3px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
+        .td-header-row {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+        }
+        .td-brand-side {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            min-width: 0;
+        }
+        .td-poster-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: #ffffff;
+            padding: 2.5px;
+            flex-shrink: 0;
             overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         .td-poster-logo img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 8px;
             display: block;
         }
         .td-poster-shop {
-            font-size: 1.35rem;
+            font-size: 1.45rem;
             font-weight: 800;
+            line-height: 1.15;
             margin: 0;
             color: {{ $cardText }};
         }
-        .td-poster-sub {
-            font-size: 0.82rem;
+        .td-poster-cat {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.86;
+            margin-top: 0.2rem;
             color: {{ $cardText }};
-            opacity: 0.88;
-            margin-top: 0.25rem;
         }
-        .td-poster-body {
-            padding: 1.75rem 1.5rem;
+        .td-poster-cat.ar-cat {
+            letter-spacing: 0;
+            font-size: 0.74rem;
+        }
+        .td-cat-icon {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            color: {{ $cardText }};
+        }
+        .td-arch-dome {
+            display: block;
+            width: 100%;
+            height: 102px;
+            margin-top: 1.65rem;
+            margin-bottom: -1px;
+        }
+        .td-arch-accent {
+            background: {{ $cardAccent }};
+            color: {{ $cardText }};
+            padding: 1px 1.5rem 1.65rem;
+            text-align: center;
+        }
+        .td-medallion {
+            width: 128px;
+            height: 128px;
+            margin: -130px auto 0.9rem;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 12px 20px rgba(15, 10, 8, 0.34));
+        }
+        .td-offer-line1 {
+            font-size: 1.65rem;
+            font-weight: 900;
+            line-height: 1.25;
+            color: {{ $cardText }};
+        }
+        .td-offer-line2 {
+            font-size: 1.18rem;
+            font-weight: 800;
+            line-height: 1.35;
+            color: #F6CFA0;
+            margin-top: 0.2rem;
+        }
+        .td-cream-bottom {
+            background: #F7F1E8;
+            color: #1E1612;
+            padding: 1.45rem 1.65rem 1.15rem;
+        }
+        .td-qr-split {
+            display: grid;
+            grid-template-columns: auto 1.5px 1fr;
+            align-items: center;
+            gap: 1.15rem;
         }
         .td-qr-frame {
             display: inline-flex;
-            padding: 1.15rem;
+            padding: 0.6rem;
             background: #ffffff;
-            border-radius: 22px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-            margin-bottom: 1.15rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(30, 22, 18, 0.08);
         }
-        .td-url-pill {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            padding: 0.55rem 0.85rem;
+        .td-qr-sep {
+            width: 1.5px;
+            height: 98px;
+            background: rgba(30, 22, 18, 0.2);
+        }
+        .td-qr-cta {
+            text-align: center;
+            font-size: 1.22rem;
+            font-weight: 900;
+            line-height: 1.35;
+            color: #1E1612;
+        }
+        .td-qr-sub {
+            margin-top: 0.28rem;
             font-size: 0.78rem;
-            color: #cbd5e1;
-            word-break: break-all;
-            margin-bottom: 1.25rem;
+            font-weight: 700;
+            color: #5C4E46;
+        }
+        .td-powered-footer {
+            margin-top: 1.15rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(30, 22, 18, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #3B302A;
+            direction: ltr;
         }
         .td-btn-row {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
             gap: 0.65rem;
+            margin-top: 1rem;
         }
         .td-btn-primary {
             display: inline-flex;
@@ -115,25 +192,30 @@
             text-decoration: none;
             font-weight: 700;
             font-size: 0.84rem;
-            padding: 0.65rem 1.15rem;
+            padding: 0.68rem 1.15rem;
             border-radius: 12px;
             border: none;
             cursor: pointer;
-            box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.45);
+            box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.35);
         }
         .td-btn-ghost {
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            color: #f8fafc;
-            font-family: inherit;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            text-decoration: none;
             font-weight: 700;
             font-size: 0.84rem;
-            padding: 0.65rem 1.15rem;
+            padding: 0.68rem 1.15rem;
             border-radius: 12px;
             cursor: pointer;
+        }
+        .dark .td-btn-ghost {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.16);
+            color: #f8fafc;
         }
         .td-steps-card {
             background: #ffffff;
@@ -197,66 +279,105 @@
         .dark .td-step-text {
             color: #cbd5e1;
         }
-        @media print {
-            .fi-sidebar, .fi-topbar, .fi-header, .td-steps-card, .td-btn-row {
-                display: none !important;
-            }
-            .fi-main, .fi-page, body {
-                padding: 0 !important;
-                margin: 0 !important;
-                background: #ffffff !important;
-            }
-            .td-qr-grid {
-                display: block !important;
-            }
-            .td-poster-card {
-                max-width: 480px !important;
-                margin: 0 auto !important;
-                box-shadow: none !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-        }
     </style>
 
     @if($shop)
         <div class="td-qr-grid">
-            {{-- Left: Branded Printable In-Store Counter Stand --}}
-            <div class="td-poster-card">
-                <div class="td-poster-header">
-                    <span class="td-poster-badge">
-                        <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 16px; width: auto; display: block;">
-                        <span>ThreeDigits Loyalty</span>
-                    </span>
-                    @if($shop->logo_url)
-                        <div class="td-poster-logo">
-                            <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}">
+            {{-- Left: Live Tent-Card Poster Preview --}}
+            <div>
+                <div class="td-poster-card">
+                    <div class="td-arch-top">
+                        <div class="td-arch-header-inner">
+                            <div class="td-header-row" dir="{{ $hasArabicShopName ? 'rtl' : 'ltr' }}">
+                                <div class="td-brand-side">
+                                    @if($shop->logo_url)
+                                        <div class="td-poster-logo">
+                                            <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}">
+                                        </div>
+                                    @endif
+                                    <div style="min-width: 0; text-align: start;">
+                                        <h2 class="td-poster-shop">{{ $shop->name }}</h2>
+                                        <div class="td-poster-cat {{ $hasArabicShopName ? 'ar-cat' : '' }}">{{ $categorySubtitle }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="td-cat-icon">
+                                    <x-poster.category-art :category="$category" mode="icon" />
+                                </div>
+                            </div>
                         </div>
-                    @endif
-                    <h2 class="td-poster-shop">{{ $shop->name }}</h2>
-                    <div class="td-poster-sub">
-                        {{ $isAr ? 'امسح الرمز للانضمام والحصول على بطاقة الولاء' : 'Scan to Join & Get Your Digital Loyalty Pass' }}
+
+                        <svg class="td-arch-dome" viewBox="0 0 500 130" preserveAspectRatio="none" aria-hidden="true">
+                            <path d="M0,130 C90,10 410,10 500,130 L500,130 L0,130 Z" fill="{{ $cardAccent }}"/>
+                        </svg>
+                    </div>
+
+                    <div class="td-arch-accent">
+                        <div class="td-medallion">
+                            <x-poster.category-art :category="$category" mode="medallion" :accent="$cardAccent" :bg="$cardBg" />
+                        </div>
+
+                        @if($campaign)
+                            <div class="td-offer-line1">
+                                {{ $isAr ? "جمّع {$reqStamps} {$stampsWordAr}،" : "Collect {$reqStamps} stamps," }}
+                            </div>
+                            <div class="td-offer-line2">
+                                @if($isAr)
+                                    وخُذ {{ $campaign->reward_name }}{{ str_contains($campaign->reward_name, 'مجان') ? '.' : ' مجاناً.' }}
+                                @else
+                                    and get {{ $campaign->reward_name }}!
+                                @endif
+                            </div>
+                        @else
+                            <div class="td-offer-line1">
+                                {{ $isAr ? 'بطاقة أختامك الرقمية' : 'Your Digital Stamp Card' }}
+                            </div>
+                            <div class="td-offer-line2">
+                                {{ $isAr ? 'اجمع الأختام واستبدلها بمكافآت مجانية.' : 'Collect stamps & unlock free rewards.' }}
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="td-cream-bottom">
+                        <div class="td-qr-split" dir="ltr">
+                            <div class="td-qr-frame">
+                                {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(126)->margin(0)->generate($joinUrl) !!}
+                            </div>
+                            <div class="td-qr-sep" aria-hidden="true"></div>
+                            <div class="td-qr-cta" dir="{{ $isAr ? 'rtl' : 'ltr' }}">
+                                @if($isAr)
+                                    امسح لتفتح<br>بطاقة أختامك
+                                @else
+                                    Scan to open<br>your stamp card
+                                @endif
+                                <div class="td-qr-sub">
+                                    {{ $isAr ? 'بدون تنزيل تطبيق' : 'No app download needed' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="td-powered-footer">
+                            <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 20px; width: auto; display: block;">
+                            <span>Powered by ThreeDigits Loyalty</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="td-poster-body">
-                    <div class="td-qr-frame">
-                        {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(210)->margin(1)->generate($joinUrl) !!}
-                    </div>
+                <div class="td-btn-row">
+                    <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1, 'style' => 'arch']) }}" target="_blank" class="td-btn-primary">
+                        <span>🖨️</span>
+                        <span>{{ $isAr ? 'طباعة البوستر المميز (PDF)' : 'Print Featured Poster (PDF)' }}</span>
+                    </a>
 
-                    <div class="td-url-pill">{{ $joinUrl }}</div>
+                    <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1, 'style' => 'minimal']) }}" target="_blank" class="td-btn-ghost">
+                        <span>📄</span>
+                        <span>{{ $isAr ? 'طباعة التصميم الكلاسيكي' : 'Print Classic Cream Poster' }}</span>
+                    </a>
 
-                    <div class="td-btn-row">
-                        <a href="{{ $joinUrl }}" target="_blank" class="td-btn-primary">
-                            <span>↗</span>
-                            <span>{{ $isAr ? 'فتح صفحة التسجيل' : 'Open Customer Join Page' }}</span>
-                        </a>
-
-                        <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1]) }}" target="_blank" class="td-btn-ghost" style="text-decoration: none;">
-                            <span>🖨️</span>
-                            <span>{{ $isAr ? 'تحميل / طباعة PDF' : 'Print / Save PDF Poster' }}</span>
-                        </a>
-                    </div>
+                    <a href="{{ url("/shop/{$shop->id}/card-branding") }}" class="td-btn-ghost">
+                        <span>🎨</span>
+                        <span>{{ $isAr ? 'تغيير الألوان والأيقونة' : 'Customize Colors & Icon' }}</span>
+                    </a>
                 </div>
             </div>
 
@@ -267,8 +388,8 @@
                 </h3>
                 <p class="td-steps-desc">
                     {{ $isAr
-                        ? 'اعرض هذا الرمز عند الكاشير أو اطبعه لتمكين عملائك من التسجيل في ثوانٍ.'
-                        : 'Display or print this QR stand at your checkout counter so customers can enroll in 15 seconds.' }}
+                        ? 'اعرض هذا البوستر عند الكاشير أو على الطاولات لتمكين عملائك من فتح بطاقة الأختام في ثوانٍ.'
+                        : 'Display or print this counter stand at checkout so customers can open their stamp card in seconds.' }}
                 </p>
 
                 <div class="td-step-list">
@@ -276,9 +397,9 @@
                         <div class="td-step-num">1</div>
                         <div class="td-step-text">
                             @if($isAr)
-                                يمسح العميل رمز QR الخاص بمتجر <strong>{{ $shop->name }}</strong> بكاميرا هاتفه (iPhone أو Android).
+                                يمسح العميل رمز QR الخاص بمتجر <strong>{{ $shop->name }}</strong> بكاميرا هاتفه مباشرة بدون تنزيل أي تطبيق.
                             @else
-                                Customer scans your <strong>{{ $shop->name }}</strong> QR code using their iPhone or Android camera.
+                                Customer scans your <strong>{{ $shop->name }}</strong> QR code with their phone camera — no app download needed.
                             @endif
                         </div>
                     </div>
@@ -287,9 +408,9 @@
                         <div class="td-step-num">2</div>
                         <div class="td-step-text">
                             @if($isAr)
-                                يدخل العميل <strong>الاسم، البريد الإلكتروني، ورقم الجوال</strong> فقط في صفحة التسجيل السريع.
+                                يدخل العميل <strong>الاسم ورقم الجوال</strong> فقط لتفتح بطاقة أختامه فوراً في المتصفح.
                             @else
-                                They enter only <strong>Name, Email, and Phone Number</strong> on your branded registration page.
+                                They enter their <strong>Name and Phone Number</strong> to open their stamp card right in the browser.
                             @endif
                         </div>
                     </div>
@@ -298,23 +419,19 @@
                         <div class="td-step-num">3</div>
                         <div class="td-step-text">
                             @if($isAr)
-                                تفتح بطاقة الولاء الرقمية فوراً ليتمكن من إضافتها إلى <strong>iPhone</strong> أو <strong>Android</strong> بضغطة زر.
+                                يمكنه حفظ البطاقة في <strong>Apple Wallet أو Google Wallet</strong> وتلقي إشعارات الأختام والمكافآت تلقائياً.
                             @else
-                                Their digital loyalty pass opens immediately so they can save it to <strong>iPhone</strong> or <strong>Android</strong>.
+                                Optionally save to <strong>Apple Wallet or Google Wallet</strong> for instant stamp and reward updates.
                             @endif
                         </div>
                     </div>
+                </div>
 
-                    <div class="td-step-item">
-                        <div class="td-step-num">4</div>
-                        <div class="td-step-text">
-                            @if($isAr)
-                                تصله تلقائياً رسالة ترحيب عربية (بخط <strong>Cairo</strong>) من <strong>ThreeDigits Loyalty و {{ $shop->name }}</strong> تحتوي على رابط البطاقة وتعليمات الاستخدام.
-                            @else
-                                They automatically receive an Arabic welcome email (in <strong>Cairo</strong> font) from <strong>ThreeDigits Loyalty & {{ $shop->name }}</strong> with their pass link and instructions.
-                            @endif
-                        </div>
+                <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; border-radius: 14px; background: rgba(116, 62, 226, 0.06); border: 1px dashed rgba(116, 62, 226, 0.28); font-size: 0.82rem; color: #475569;">
+                    <div style="font-weight: 800; margin-bottom: 0.25rem; color: #0f172a;">
+                        {{ $isAr ? 'رابط صفحة التسجيل المباشر:' : 'Direct Customer Join Link:' }}
                     </div>
+                    <a href="{{ $joinUrl }}" target="_blank" style="color: {{ $cardBg }}; font-weight: 700; word-break: break-all;">{{ $joinUrl }}</a>
                 </div>
             </div>
         </div>
