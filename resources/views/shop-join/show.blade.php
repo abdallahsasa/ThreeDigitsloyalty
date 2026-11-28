@@ -1,34 +1,41 @@
 @php
+    $isAr = app()->getLocale() === 'ar';
     $cardBg = $shop->resolvedCardBgColor();
     $cardAccent = $shop->resolvedCardAccentColor();
     $cardText = $shop->resolvedCardTextColor();
+    $category = $shop->resolvedCategory();
+    $categorySubtitle = $shop->categoryPosterSubtitle($isAr ? 'ar' : 'en');
+    $bgRgb = \App\Models\Shop::hexToRgbString($cardBg);
+    $accentRgb = \App\Models\Shop::hexToRgbString($cardAccent);
+    $deepBgHex = \App\Models\Shop::darkenedHex($cardBg, 0.24);
+    $surfaceHex = \App\Models\Shop::darkenedHex($cardBg, 0.36);
+    $requiredStamps = max(1, (int) ($campaign->required_purchases_count ?? 8));
+    $rewardName = $campaign->reward_name ?? ($isAr ? 'مكافأة مجانية' : 'Free Signature Reward');
+    $campaignName = $campaign->name ?? ($isAr ? 'نادي الولاء VIP' : 'VIP Loyalty Club');
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $isAr ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
-    <title>{{ $shop->name }} — {{ app()->getLocale() === 'ar' ? 'انضم لبرنامج الولاء' : 'Join Loyalty Club' }}</title>
+    <meta name="theme-color" content="{{ $cardBg }}">
+    <link rel="icon" type="image/png" href="{{ $shop->logo_url ?: asset('images/logo-icon.png') }}">
+    <title>{{ $shop->name }} — {{ $isAr ? 'انضم لبرنامج الولاء' : 'Join Loyalty Club' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #010A29;
-            --surface: #071033;
-            --surface-elevated: #0C1742;
-            --border-subtle: rgba(116, 62, 226, 0.22);
-            --border-accent: rgba(116, 62, 226, 0.5);
+            --bg-deep: {{ $deepBgHex }};
+            --surface: {{ $surfaceHex }};
             --primary: {{ $cardBg }};
-            --primary-mid: {{ $cardBg }};
             --primary-deep: {{ $cardAccent }};
             --card-text: {{ $cardText }};
-            --primary-glow: #9F7AEA;
-            --gold: #724CDA;
+            --border-subtle: rgba({{ $accentRgb }}, 0.28);
+            --border-accent: rgba({{ $accentRgb }}, 0.52);
             --emerald: #10b981;
             --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --text-muted: #cbd5e1;
         }
 
         *, *::before, *::after, body, input, button, select, textarea {
@@ -40,8 +47,8 @@
 
         body {
             background:
-                radial-gradient(circle at 12% 18%, rgba(116, 62, 226, 0.32), transparent 44%),
-                radial-gradient(circle at 88% 82%, rgba(59, 66, 213, 0.28), transparent 44%),
+                radial-gradient(circle at 14% 18%, rgba({{ $bgRgb }}, 0.55), transparent 48%),
+                radial-gradient(circle at 88% 82%, rgba({{ $accentRgb }}, 0.38), transparent 48%),
                 var(--bg-deep);
             color: var(--text-main);
             min-height: 100vh;
@@ -58,52 +65,80 @@
             margin: 0 auto;
         }
 
-        /* Header */
+        /* Shop-Branded Header */
         .nav-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
             padding: 0.5rem 0 1.75rem;
         }
 
-        .brand-link {
+        .shop-brand-header {
             display: inline-flex;
             align-items: center;
-            gap: 0.65rem;
-            text-decoration: none;
-            color: var(--text-main);
+            gap: 0.75rem;
+            min-width: 0;
         }
 
-        .brand-link img {
-            height: 32px;
-            width: auto;
+        .shop-header-crest {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+            color: var(--card-text);
+            border: 1.5px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px;
+            flex-shrink: 0;
+            overflow: hidden;
         }
 
-        .brand-title {
-            font-weight: 800;
-            font-size: 1rem;
-            letter-spacing: -0.02em;
+        .shop-header-crest.has-logo {
+            background: #ffffff;
+            padding: 2px;
         }
 
-        .brand-sub {
+        .shop-header-crest img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
             display: block;
-            font-size: 0.58rem;
+        }
+
+        .shop-header-title {
+            font-weight: 800;
+            font-size: 1.05rem;
+            line-height: 1.15;
+            color: #ffffff;
+        }
+
+        .shop-header-cat {
+            display: block;
+            font-size: 0.65rem;
             font-weight: 700;
-            letter-spacing: 0.22em;
-            color: var(--primary-glow);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.76);
+            margin-top: 0.15rem;
         }
 
         .nav-actions {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.55rem;
         }
 
         .pill-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-main);
-            padding: 0.45rem 0.9rem;
+            padding: 0.45rem 0.95rem;
             border-radius: 999px;
             font-family: inherit;
             font-size: 0.76rem;
@@ -114,8 +149,8 @@
         }
 
         .pill-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.35);
         }
 
         /* Split Layout */
@@ -133,57 +168,59 @@
             }
         }
 
-        /* Left Column: Form Card */
+        /* Form Card Tinted to Shop Brand */
         .form-card {
-            background: linear-gradient(165deg, rgba(12, 23, 66, 0.94) 0%, rgba(5, 12, 42, 0.98) 100%);
-            border: 1px solid rgba(116, 62, 226, 0.32);
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.36) 100%), var(--surface);
+            border: 1px solid rgba({{ $accentRgb }}, 0.38);
             border-radius: 28px;
             padding: 2.25rem 2rem;
-            box-shadow: 0 30px 60px -15px rgba(1, 10, 41, 0.85);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.65);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(14px);
         }
 
         .form-card::before {
             content: '';
             position: absolute;
             top: 0;
-            left: 15%;
-            right: 15%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #743EE2, #6145E8, #3B42D5, transparent);
+            left: 10%;
+            right: 10%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--primary-deep), transparent);
         }
 
         .step-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            padding: 0.35rem 0.85rem;
+            padding: 0.36rem 0.9rem;
             border-radius: 999px;
-            background: rgba(99, 102, 241, 0.12);
-            border: 1px solid rgba(129, 140, 248, 0.28);
-            color: var(--primary-glow);
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f8fafc;
             font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 1.15rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.1rem;
         }
 
         .step-dot {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 999px;
-            background: var(--emerald);
-            box-shadow: 0 0 8px var(--emerald);
+            background: var(--primary-deep);
+            box-shadow: 0 0 10px var(--primary-deep);
         }
 
         .hero-heading {
             font-size: clamp(1.55rem, 2.8vw, 2.1rem);
             font-weight: 800;
-            line-height: 1.2;
+            line-height: 1.22;
             letter-spacing: -0.02em;
             margin-bottom: 0.5rem;
+            color: #ffffff;
         }
 
         .hero-desc {
@@ -201,7 +238,7 @@
             display: block;
             font-size: 0.78rem;
             font-weight: 700;
-            color: #cbd5e1;
+            color: #e2e8f0;
             margin-bottom: 0.45rem;
             letter-spacing: 0.02em;
         }
@@ -215,15 +252,15 @@
         .input-icon {
             position: absolute;
             inset-inline-start: 1rem;
-            color: #64748b;
+            color: #94a3b8;
             font-size: 0.95rem;
             pointer-events: none;
         }
 
         .text-field {
             width: 100%;
-            background: rgba(255, 255, 255, 0.035);
-            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.26);
+            border: 1.5px solid rgba(255, 255, 255, 0.16);
             border-radius: 16px;
             padding: 0.9rem 1rem 0.9rem 2.75rem;
             color: #ffffff;
@@ -239,17 +276,17 @@
         }
 
         .text-field::placeholder {
-            color: #475569;
+            color: rgba(203, 213, 225, 0.52);
         }
 
         .text-field:focus {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--primary-glow);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            background: rgba(0, 0, 0, 0.36);
+            border-color: var(--primary-deep);
+            box-shadow: 0 0 0 4px rgba({{ $accentRgb }}, 0.25);
         }
 
         .error-msg {
-            color: #f87171;
+            color: #fca5a5;
             font-size: 0.75rem;
             font-weight: 600;
             margin-top: 0.35rem;
@@ -259,23 +296,23 @@
             display: flex;
             align-items: stretch;
             direction: ltr;
-            background: rgba(255, 255, 255, 0.035);
-            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            background: rgba(0, 0, 0, 0.26);
+            border: 1.5px solid rgba(255, 255, 255, 0.16);
             border-radius: 16px;
             overflow: hidden;
             transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
 
         .phone-combo:focus-within {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--primary-glow);
-            box-shadow: 0 0 0 4px rgba(116, 62, 226, 0.18);
+            background: rgba(0, 0, 0, 0.36);
+            border-color: var(--primary-deep);
+            box-shadow: 0 0 0 4px rgba({{ $accentRgb }}, 0.25);
         }
 
         .country-select {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.07);
             border: none;
-            border-right: 1px solid rgba(255, 255, 255, 0.12);
+            border-right: 1px solid rgba(255, 255, 255, 0.14);
             color: #ffffff;
             font-family: inherit;
             font-size: 0.88rem;
@@ -287,7 +324,7 @@
         }
 
         .country-select option {
-            background: #071033;
+            background: #0f172a;
             color: #ffffff;
         }
 
@@ -306,24 +343,24 @@
         }
 
         .phone-digits-input::placeholder {
-            color: #64748b;
+            color: rgba(203, 213, 225, 0.52);
         }
 
         .cta-btn {
             width: 100%;
             margin-top: 0.5rem;
             padding: 1rem 1.4rem;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 16px;
-            background: linear-gradient(135deg, #743EE2 0%, #6145E8 50%, #3B42D5 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, {{ $cardBg }} 0%, {{ $cardAccent }} 100%);
+            color: {{ $cardText }};
             font-family: inherit;
-            font-size: 0.96rem;
+            font-size: 0.98rem;
             font-weight: 800;
             letter-spacing: 0.01em;
             cursor: pointer;
-            box-shadow: 0 14px 30px -8px rgba(116, 62, 226, 0.6);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: 0 14px 30px -8px rgba({{ $accentRgb }}, 0.55);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -332,24 +369,21 @@
 
         .cta-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 18px 36px -8px rgba(116, 62, 226, 0.78);
+            filter: brightness(1.06);
+            box-shadow: 0 18px 36px -8px rgba({{ $accentRgb }}, 0.72);
         }
 
         .trust-strip {
             margin-top: 1.25rem;
             padding-top: 1.1rem;
-            border-top: 1px solid var(--border-subtle);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 1.25rem;
-            flex-wrap: wrap;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-muted);
+            gap: 0.65rem;
         }
 
-        /* Right Column: Live Pass Preview */
+        /* Live Pass Preview */
         .preview-col {
             display: flex;
             flex-direction: column;
@@ -364,12 +398,12 @@
             border-radius: 26px;
             overflow: hidden;
             box-shadow: 0 28px 60px -12px rgba(0, 0, 0, 0.65);
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         .pass-top {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
-            color: var(--card-text);
+            background: linear-gradient(135deg, {{ $cardBg }} 0%, {{ $cardAccent }} 100%);
+            color: {{ $cardText }};
             padding: 1.4rem 1.4rem 1.25rem;
             display: flex;
             align-items: center;
@@ -385,44 +419,49 @@
         }
 
         .pass-avatar {
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             border-radius: 14px;
             background: rgba(255, 255, 255, 0.18);
             border: 1.5px solid rgba(255, 255, 255, 0.35);
+            color: {{ $cardText }};
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            font-size: 1.15rem;
+            padding: 8px;
             flex-shrink: 0;
             overflow: hidden;
+        }
+
+        .pass-avatar.has-logo {
+            background: #ffffff;
+            padding: 2px;
         }
 
         .pass-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 11px;
         }
 
         .pass-shop-name {
-            font-size: 1.05rem;
+            font-size: 0.98rem;
             font-weight: 800;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            line-height: 1.2;
+            word-break: break-word;
         }
 
         .pass-member-live {
             font-size: 0.78rem;
-            color: rgba(255, 255, 255, 0.82);
+            opacity: 0.86;
             margin-top: 0.15rem;
         }
 
         .pass-tag {
-            background: rgba(245, 208, 97, 0.2);
-            border: 1px solid rgba(245, 208, 97, 0.45);
-            color: #fde68a;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            color: {{ $cardText }};
             padding: 0.3rem 0.7rem;
             border-radius: 999px;
             font-size: 0.68rem;
@@ -457,9 +496,9 @@
         }
 
         .reward-count {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 800;
-            color: #4f46e5;
+            color: {{ $cardBg }};
         }
 
         .reward-prize-line {
@@ -485,9 +524,9 @@
         }
 
         .stamp-circle.welcome-bonus {
-            background: linear-gradient(135deg, var(--primary), var(--primary-deep));
-            color: var(--card-text);
-            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.24);
+            background: linear-gradient(135deg, {{ $cardBg }}, {{ $cardAccent }});
+            color: {{ $cardText }};
+            box-shadow: 0 4px 12px rgba({{ $bgRgb }}, 0.32);
         }
 
         .stamp-circle.slot {
@@ -537,6 +576,19 @@
             flex-shrink: 0;
         }
 
+        .page-powered-footer {
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: rgba(248, 250, 252, 0.72);
+            text-decoration: none;
+            direction: ltr;
+        }
+
         /* Owner QR Modal */
         .qr-modal-backdrop {
             display: none;
@@ -555,11 +607,11 @@
         }
 
         .qr-modal-box {
-            background: var(--surface-elevated);
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 24px;
             padding: 2rem;
-            max-width: 380px;
+            max-width: 390px;
             width: 100%;
             text-align: center;
         }
@@ -574,23 +626,23 @@
     </style>
 </head>
 <body>
-@php
-    $isAr = app()->getLocale() === 'ar';
-    $requiredStamps = max(1, (int) ($campaign->required_purchases_count ?? 8));
-    $rewardName = $campaign->reward_name ?? ($isAr ? 'مكافأة مجانية' : 'Free Signature Reward');
-    $campaignName = $campaign->name ?? ($isAr ? 'نادي الولاء VIP' : 'VIP Loyalty Club');
-@endphp
 
 <div class="page-wrap">
-    {{-- Top Navigation --}}
+    {{-- Shop-Branded Navigation Header --}}
     <header class="nav-bar">
-        <a href="{{ route($isAr ? 'home.ar' : 'home.en') }}" class="brand-link">
-            <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty">
-            <div>
-                <span class="brand-title">ThreeDigits</span>
-                <span class="brand-sub">LOYALTY</span>
+        <div class="shop-brand-header">
+            <div class="shop-header-crest {{ $shop->logo_url ? 'has-logo' : '' }}">
+                @if($shop->logo_url)
+                    <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}">
+                @else
+                    <x-poster.category-art :category="$category" mode="icon" />
+                @endif
             </div>
-        </a>
+            <div>
+                <div class="shop-header-title">{{ $shop->name }}</div>
+                <span class="shop-header-cat">{{ $categorySubtitle }}</span>
+            </div>
+        </div>
 
         <div class="nav-actions">
             <button type="button" class="pill-btn" onclick="toggleQrModal()">
@@ -604,7 +656,7 @@
 
     {{-- Main Split Content --}}
     <main class="split-grid">
-        {{-- Left: Minimal 3-Field Sign-Up Form --}}
+        {{-- Sign-Up Form Tinted to Shop Brand --}}
         <div class="form-card">
             <div class="step-badge">
                 <span class="step-dot"></span>
@@ -616,8 +668,8 @@
             </h1>
             <p class="hero-desc">
                 {{ $isAr
-                    ? 'أدخل بياناتك البسيطة بالأسفل لإصدار بطاقتك الرقمية فوراً وإضافتها إلى iPhone أو Android.'
-                    : 'Enter your basic details below to unlock your digital pass and save it straight to your iPhone or Android.' }}
+                    ? 'أدخل بياناتك البسيطة بالأسفل لإصدار بطاقتك الرقمية فوراً وحفظها على هاتفك.'
+                    : 'Enter your basic details below to unlock your digital stamp card and save it to your phone.' }}
             </p>
 
             <form method="POST" action="{{ route('shop.join.store', $shop->slug ?: $shop->id) }}">
@@ -704,22 +756,22 @@
                             oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateLivePass();"
                         >
                     </div>
-                    <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 0.35rem;">
+                    <div style="font-size: 0.74rem; color: rgba(203, 213, 225, 0.75); margin-top: 0.35rem;">
                         {{ $isAr ? 'أدخل أرقام الجوال فقط بدون صفر في البداية (الافتراضي سوريا 963+).' : 'Enter digits only without a leading zero (Syria +963 selected by default).' }}
                     </div>
                     @error('phone') <div class="error-msg">{{ $message }}</div> @enderror
                 </div>
 
-                <p style="font-size: 0.78rem; color: #94a3b8; line-height: 1.6; margin: 0.25rem 0 0.85rem;">
+                <p style="font-size: 0.78rem; color: rgba(203, 213, 225, 0.8); line-height: 1.6; margin: 0.25rem 0 0.85rem;">
                     @if($isAr)
                         قبل إصدار بطاقتك، يمكنك مراجعة
-                        <a href="{{ route('legal.privacy.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">سياسة الخصوصية</a>
-                        و<a href="{{ route('legal.terms.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">شروط الاستخدام</a>.
+                        <a href="{{ route('legal.privacy.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #ffffff; font-weight: 700; text-decoration: underline;">سياسة الخصوصية</a>
+                        و<a href="{{ route('legal.terms.ar') }}" target="_blank" rel="noopener noreferrer" style="color: #ffffff; font-weight: 700; text-decoration: underline;">شروط الاستخدام</a>.
                     @else
                         Before creating your pass, review our
-                        <a href="{{ route('legal.privacy.en') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">Privacy Policy</a>
+                        <a href="{{ route('legal.privacy.en') }}" target="_blank" rel="noopener noreferrer" style="color: #ffffff; font-weight: 700; text-decoration: underline;">Privacy Policy</a>
                         and
-                        <a href="{{ route('legal.terms.en') }}" target="_blank" rel="noopener noreferrer" style="color: #c4b5fd; font-weight: 700; text-decoration: underline;">Terms of Service</a>.
+                        <a href="{{ route('legal.terms.en') }}" target="_blank" rel="noopener noreferrer" style="color: #ffffff; font-weight: 700; text-decoration: underline;">Terms of Service</a>.
                     @endif
                 </p>
 
@@ -730,26 +782,27 @@
             </form>
 
             <div class="trust-strip">
-                <span> {{ $isAr ? 'يدعم iPhone' : 'iPhone Pass' }}</span>
-                <span>🤖 {{ $isAr ? 'يدعم Android' : 'Android Pass' }}</span>
-                <span>⚡ {{ $isAr ? 'بدون تحميل تطبيق' : 'No App Download' }}</span>
+                <x-poster.wallet-badges :compact="true" />
+                <div style="font-size: 0.74rem; color: rgba(226, 232, 240, 0.78); font-weight: 600;">
+                    ⚡ {{ $isAr ? 'تفتح فوراً في المتصفح بدون تنزيل تطبيق' : 'Opens right in your browser — no app download needed' }}
+                </div>
             </div>
         </div>
 
-        {{-- Right: Live Interactive Passbook Preview --}}
+        {{-- Live Interactive Passbook Preview --}}
         <div class="preview-col">
             <div class="pass-preview">
-                <div class="pass-top" style="background: linear-gradient(135deg, {{ $cardBg }} 0%, {{ $cardAccent }} 100%); color: {{ $cardText }};">
+                <div class="pass-top">
                     <div class="pass-shop">
-                        <div class="pass-avatar">
+                        <div class="pass-avatar {{ $shop->logo_url ? 'has-logo' : '' }}">
                             @if($shop->logo_url)
                                 <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}">
                             @else
-                                {{ mb_substr($shop->name, 0, 1) }}
+                                <x-poster.category-art :category="$category" mode="icon" />
                             @endif
                         </div>
                         <div style="min-width: 0;">
-                            <div class="pass-shop-name">{{ $shop->name }}</div>
+                            <div class="pass-shop-name" dir="auto">{{ $shop->name }}</div>
                             <div class="pass-member-live" id="live-member-line">
                                 {{ $isAr ? 'اسم العضو يظهر هنا' : 'Your Name Appears Here' }}
                             </div>
@@ -785,8 +838,8 @@
                                 {{ $isAr ? 'معاينة حية لبطاقتك' : 'Live Pass Preview' }}
                             </strong>
                             {{ $isAr
-                                ? 'فور التسجيل، ستحصل على رمز QR خاص بك وتصلك رسالة ترحيبية على بريدك.'
-                                : 'Once registered, you get your personal QR code and an instant welcome email.' }}
+                                ? 'فور التسجيل، ستحصل على رمز QR خاص بك ويمكنك إضافتها إلى محفظة هاتفك.'
+                                : 'Once registered, you get your personal QR code and one-tap wallet save.' }}
                         </div>
                         <div class="mini-qr">
                             {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(68)->margin(0)->generate($joinUrl) !!}
@@ -794,9 +847,9 @@
                     </div>
 
                     <div style="margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: #64748b; font-weight: 700;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: #64748b; font-weight: 700;" dir="ltr">
                             <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 18px; width: auto; display: block;">
-                            <span>ThreeDigits Loyalty</span>
+                            <span>Powered by ThreeDigits Loyalty</span>
                         </div>
                         @if($shop->logo_url)
                             <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}" style="height: 20px; width: 20px; border-radius: 5px; object-fit: cover; border: 1px solid #e2e8f0;">
@@ -806,63 +859,73 @@
             </div>
         </div>
     </main>
+
+    <a href="{{ route($isAr ? 'home.ar' : 'home.en') }}" class="page-powered-footer">
+        <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 22px; width: auto; display: block;">
+        <span>Powered by ThreeDigits Loyalty</span>
+    </a>
 </div>
 
-{{-- Store QR Poster Modal (For Shop Owner Display) --}}
+{{-- Store QR Poster Modal --}}
 <div id="qr-modal" class="qr-modal-backdrop" onclick="if(event.target === this) toggleQrModal()">
     <div class="qr-modal-box">
-        <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(1, 10, 41, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 999px; padding: 0.3rem 0.8rem; font-size: 0.68rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem;">
-            <img src="{{ asset('images/logo-icon.png') }}" alt="ThreeDigits Loyalty" style="height: 15px; width: auto; display: block;">
-            <span>ThreeDigits Loyalty</span>
-        </div>
         @if($shop->logo_url)
-            <div style="width: 56px; height: 56px; margin: 0 auto 0.6rem; border-radius: 16px; background: #ffffff; padding: 3px; overflow: hidden; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);">
+            <div style="width: 56px; height: 56px; margin: 0 auto 0.65rem; border-radius: 16px; background: #ffffff; padding: 3px; overflow: hidden; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);">
                 <img src="{{ $shop->logo_url }}" alt="{{ $shop->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block;">
             </div>
+        @else
+            <div style="width: 52px; height: 52px; margin: 0 auto 0.65rem; border-radius: 15px; background: linear-gradient(135deg, {{ $cardBg }}, {{ $cardAccent }}); color: {{ $cardText }}; padding: 8px;">
+                <x-poster.category-art :category="$category" mode="icon" />
+            </div>
         @endif
-        <div style="font-size: 0.85rem; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em;">
+
+        <div style="font-size: 0.9rem; font-weight: 800; color: #ffffff;">
             {{ $shop->name }}
         </div>
-        <h3 style="font-size: 1.2rem; font-weight: 800; margin-top: 0.35rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin-top: 0.25rem; color: #f8fafc;">
             {{ $isAr ? 'امسح الرمز للانضمام لبرنامج الولاء' : 'Scan to Join Our Loyalty Club' }}
         </h3>
         <div class="qr-white-box">
             {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(200)->margin(1)->generate($joinUrl) !!}
         </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-            {{ $joinUrl }}
-        </p>
-        <button type="button" class="pill-btn" onclick="toggleQrModal()">
-            {{ $isAr ? 'إغلاق' : 'Close' }}
-        </button>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 0.25rem;">
+            <a href="{{ route('shop.join.poster', ['shop' => $shop->slug ?: $shop->id, 'print' => 1]) }}" target="_blank" class="pill-btn" style="background: linear-gradient(135deg, {{ $cardBg }}, {{ $cardAccent }}); color: {{ $cardText }}; border: none;">
+                🖨️ {{ $isAr ? 'فتح البوستر للطباعة' : 'Open Printable Poster' }}
+            </a>
+            <button type="button" class="pill-btn" onclick="toggleQrModal()">
+                {{ $isAr ? 'إغلاق' : 'Close' }}
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
     function updateLivePass() {
         const nameInput = document.getElementById('name');
-        const codeSelect = document.getElementById('country_code');
         const phoneInput = document.getElementById('phone');
+        const codeSelect = document.getElementById('country_code');
         const target = document.getElementById('live-member-line');
-        const fallback = @json($isAr ? 'اسم العضو يظهر هنا' : 'Your Name Appears Here');
+        if (!target) return;
 
-        const nameVal = nameInput.value.trim();
-        const digitsVal = phoneInput.value.replace(/[^0-9]/g, '').replace(/^0+/, '');
-        const fullPhone = digitsVal ? ((codeSelect ? codeSelect.value : '+963') + ' ' + digitsVal) : '';
+        const nameVal = nameInput ? nameInput.value.trim() : '';
+        const digitsVal = phoneInput ? phoneInput.value.replace(/^0+/, '').trim() : '';
+        const codeVal = codeSelect ? codeSelect.value : '+963';
+        const phoneVal = digitsVal ? (codeVal + ' ' + digitsVal) : '';
 
-        if (nameVal && fullPhone) {
-            target.textContent = nameVal + ' · ' + fullPhone;
+        if (nameVal && phoneVal) {
+            target.textContent = nameVal + ' · ' + phoneVal;
         } else if (nameVal) {
             target.textContent = nameVal;
-        } else if (fullPhone) {
-            target.textContent = fullPhone;
+        } else if (phoneVal) {
+            target.textContent = phoneVal;
         } else {
-            target.textContent = fallback;
+            target.textContent = '{{ $isAr ? "اسم العضو يظهر هنا" : "Your Name Appears Here" }}';
         }
     }
 
     function toggleQrModal() {
-        document.getElementById('qr-modal').classList.toggle('open');
+        const modal = document.getElementById('qr-modal');
+        if (modal) modal.classList.toggle('open');
     }
 </script>
 </body>

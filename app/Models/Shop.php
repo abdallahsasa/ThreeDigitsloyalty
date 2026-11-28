@@ -156,19 +156,51 @@ class Shop extends Model
         });
     }
 
+    public function defaultCategoryPalette(): array
+    {
+        return match ($this->resolvedCategory()) {
+            'cafe' => ['bg' => '#2C1B18', 'accent' => '#8E3B20', 'text' => '#FFFFFF'],
+            'restaurant' => ['bg' => '#3B1812', 'accent' => '#B45309', 'text' => '#FFFFFF'],
+            'bakery' => ['bg' => '#3D2314', 'accent' => '#C26A27', 'text' => '#FFFFFF'],
+            'salon' => ['bg' => '#4A102A', 'accent' => '#9D174D', 'text' => '#FFFFFF'],
+            'fitness' => ['bg' => '#0F172A', 'accent' => '#2563EB', 'text' => '#FFFFFF'],
+            'wellness' => ['bg' => '#064E3B', 'accent' => '#059669', 'text' => '#FFFFFF'],
+            'auto' => ['bg' => '#0F172A', 'accent' => '#0284C7', 'text' => '#FFFFFF'],
+            'retail' => ['bg' => '#2E1065', 'accent' => '#7C3AED', 'text' => '#FFFFFF'],
+            default => ['bg' => '#743EE2', 'accent' => '#3B42D5', 'text' => '#FFFFFF'],
+        };
+    }
+
     public function resolvedCardBgColor(): string
     {
-        return self::sanitizeHexColor($this->card_bg_color, '#743EE2');
+        return self::sanitizeHexColor($this->card_bg_color, $this->defaultCategoryPalette()['bg']);
     }
 
     public function resolvedCardAccentColor(): string
     {
-        return self::sanitizeHexColor($this->card_accent_color, '#3B42D5');
+        return self::sanitizeHexColor($this->card_accent_color, $this->defaultCategoryPalette()['accent']);
     }
 
     public function resolvedCardTextColor(): string
     {
-        return self::sanitizeHexColor($this->card_text_color, '#FFFFFF');
+        return self::sanitizeHexColor($this->card_text_color, $this->defaultCategoryPalette()['text']);
+    }
+
+    public static function hexToRgbString(string $hex): string
+    {
+        $clean = ltrim(self::sanitizeHexColor($hex, '#2C1B18'), '#');
+
+        return hexdec(substr($clean, 0, 2)) . ', ' . hexdec(substr($clean, 2, 2)) . ', ' . hexdec(substr($clean, 4, 2));
+    }
+
+    public static function darkenedHex(string $hex, float $factor = 0.22): string
+    {
+        $clean = ltrim(self::sanitizeHexColor($hex, '#2C1B18'), '#');
+        $r = max(4, min(255, (int) round(hexdec(substr($clean, 0, 2)) * $factor)));
+        $g = max(6, min(255, (int) round(hexdec(substr($clean, 2, 2)) * $factor)));
+        $b = max(10, min(255, (int) round(hexdec(substr($clean, 4, 2)) * $factor)));
+
+        return sprintf('#%02X%02X%02X', $r, $g, $b);
     }
 
     public static function sanitizeHexColor(?string $color, string $fallback): string

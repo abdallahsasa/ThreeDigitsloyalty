@@ -775,5 +775,14 @@ class LoyaltyPlatformTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Restored Customer')
             ->assertSee('+966550001122');
+
+        // A shop without explicit custom colors (e.g. GreenLeaf Pharmacy) automatically gets its category palette & icon on /join/{shop}
+        $pharmacy = Shop::create(['name' => 'GreenLeaf Pharmacy', 'status' => 'active']);
+        $this->get(route('shop.join', $pharmacy->slug))
+            ->assertStatus(200)
+            ->assertSee('#064E3B')
+            ->assertSee('#059669')
+            ->assertSee('WELLNESS & CARE')
+            ->assertSee('data-category-icon="wellness"', false);
     }
 }

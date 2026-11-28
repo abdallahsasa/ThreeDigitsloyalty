@@ -2,6 +2,10 @@
     $cardBg = $card->shop->resolvedCardBgColor();
     $cardAccent = $card->shop->resolvedCardAccentColor();
     $cardText = $card->shop->resolvedCardTextColor();
+    $category = $card->shop->resolvedCategory();
+    $bgRgb = \App\Models\Shop::hexToRgbString($cardBg);
+    $accentRgb = \App\Models\Shop::hexToRgbString($cardAccent);
+    $deepBgHex = \App\Models\Shop::darkenedHex($cardBg, 0.24);
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
@@ -12,21 +16,16 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="{{ $card->shop->name }}">
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ $card->shop->logo_url ?: asset('images/logo-icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ $card->shop->logo_url ?: asset('images/logo-icon.png') }}">
     <link rel="manifest" href="{{ route('loyalty-card.manifest', $card->token) }}">
     <title>{{ $card->shop->name }} — {{ app()->getLocale() === 'ar' ? 'بطاقة الولاء' : 'Loyalty Pass' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-@php
-    $cardBg = $card->shop->resolvedCardBgColor();
-    $cardAccent = $card->shop->resolvedCardAccentColor();
-    $cardText = $card->shop->resolvedCardTextColor();
-@endphp
     <style>
         :root {
-            --bg-page: #010A29;
+            --bg-page: {{ $deepBgHex }};
             --surface-card: #ffffff;
             --surface-muted: #f8fafc;
             --text-primary: #010A29;
@@ -35,7 +34,7 @@
             --card-accent: {{ $cardAccent }};
             --card-text: {{ $cardText }};
             --accent: {{ $cardBg }};
-            --accent-soft: #f3effe;
+            --accent-soft: rgba({{ $bgRgb }}, 0.08);
             --success: #10b981;
             --success-soft: #ecfdf5;
             --border: #e2e8f0;
@@ -50,8 +49,8 @@
 
         body {
             background:
-                radial-gradient(circle at 15% 15%, rgba(116, 62, 226, 0.34), transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(59, 66, 213, 0.28), transparent 45%),
+                radial-gradient(circle at 15% 15%, rgba({{ $bgRgb }}, 0.52), transparent 46%),
+                radial-gradient(circle at 85% 85%, rgba({{ $accentRgb }}, 0.36), transparent 46%),
                 var(--bg-page);
             color: var(--text-primary);
             min-height: 100vh;
@@ -504,9 +503,11 @@
         <div class="pass-header">
             <div class="shop-identity">
                 @if($card->shop?->logo_url)
-                    <img src="{{ $card->shop->logo_url }}" alt="{{ $card->shop->name }}" class="shop-avatar">
+                    <img src="{{ $card->shop->logo_url }}" alt="{{ $card->shop->name }}" class="shop-avatar" style="background: #ffffff; padding: 2px;">
                 @else
-                    <div class="shop-avatar">{{ mb_substr($card->shop?->name ?? 'T', 0, 1) }}</div>
+                    <div class="shop-avatar" style="padding: 8px; color: {{ $cardText }};">
+                        <x-poster.category-art :category="$category" mode="icon" />
+                    </div>
                 @endif
                 <div style="min-width: 0;">
                     <div class="shop-name">{{ $card->shop?->name }}</div>
@@ -558,7 +559,7 @@
             {{-- Prominent Wallet CTA Panel right above QR --}}
             <div class="wallet-panel">
                 <div class="wallet-panel-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#743EE2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ $cardBg }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="2" y="5" width="20" height="14" rx="3"></rect>
                         <line x1="2" y1="10" x2="22" y2="10"></line>
                     </svg>
