@@ -26,7 +26,7 @@ class ShopForm
                     ->maxSize(2048)
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->getUploadedFileNameForStorageUsing(
-                        fn (\Illuminate\Http\UploadedFile $file): string => 'shop-' . time() . '-' . \Illuminate\Support\Str::random(10) . '.' . $file->extension()
+                        fn(\Illuminate\Http\UploadedFile $file): string => 'shop-' . time() . '-' . \Illuminate\Support\Str::random(10) . '.' . $file->extension()
                     ),
                 ColorPicker::make('card_bg_color')
                     ->label('Card Primary Color')
